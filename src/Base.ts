@@ -1,5 +1,5 @@
-import { ref, onMounted, onUnmounted } from 'vue'
-import d3 from 'd3'
+import { ref, Ref, onMounted, onUnmounted } from 'vue'
+import * as d3 from 'd3'
 
 
 // This is necessary until TypeScript 4.6 extends the crypto interface
@@ -9,12 +9,12 @@ declare global {
   }
 }
 export type SelectionType = d3.Selection<SVGGElement, unknown, HTMLElement, null>
+export type ElementRef = Ref<HTMLElement | undefined>
 
 export interface IBase {
   id: string
-  height: number
-  width: number
-  container: HTMLElement
+  height: Ref<number>
+  width: Ref<number>
   svg: any
   padding: {
     top: number,
@@ -41,18 +41,21 @@ const _uid = () => `_${crypto.randomUUID()}`
 
 
 export class Base implements IBase {
+  private container: ElementRef
+  private resizeObserver: ResizeObserver | undefined
+
   public id: string = _uid()
 
-  public height: number = 0
-  public width: number = 0
+  public height = ref<number>(0)
+  public width = ref<number>(0)
 
-  public container = ref<HTMLElement>() as unknown as HTMLElement
   public svg: SelectionType = null as unknown as d3.Selection<
     SVGGElement,
     unknown,
     HTMLElement,
     null
   >
+
 
   public padding = {
     top: 0,
@@ -62,21 +65,30 @@ export class Base implements IBase {
     right: 0
   }
 
-  constructor(options?: IBaseOptions) {
+  constructor(container: ElementRef, options?: IBaseOptions) {
+    if (!container) {
+      throw new Error('Error initializing chart; must pass valid reference to element.')
+    }
+
+    this.container = container
+
     if (options?.onResize) {
       this.onResize = options.onResize
     }
   }
 
   public initializeChart(): void {
-    if (this.container) {
-      window.addEventListener('resize', this._onResize)
+    if (this.container.value) {
+      this.resizeObserver = new ResizeObserver(this._onResize.bind(this))
+      this.resizeObserver.observe(this.container.value)
       this._onResize()
     }
   }
 
   public teardown(): void {
-    window.removeEventListener('resize', this._onResize)
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect()
+    }
   }
 
   public get paddingY(): number {
@@ -89,13 +101,15 @@ export class Base implements IBase {
 
   public onResize(): void { }
   private _onResize(): void {
-    this.height = this.container.offsetHeight
-    this.width = this.container.offsetWidth
+    if (!this.container.value) return
+
+    this.height.value = this.container.value.offsetHeight
+    this.width.value = this.container.value.offsetWidth
 
     if (this.svg) {
       this.svg.attr(
         'viewbox',
-        `0, 0, ${this.width - this.paddingX}, ${this.height - this.paddingY}`,
+        `0, 0, ${this.width.value - this.paddingX}, ${this.height.value - this.paddingY}`,
       )
     }
 
@@ -103,8 +117,8 @@ export class Base implements IBase {
   }
 }
 
-const useBaseChart = (): Base => {
-  const base = new Base()
+const useBaseChart = (container: ElementRef, options?: IBaseOptions): Base => {
+  const base = new Base(container, options)
 
   onMounted(() => {
     requestAnimationFrame(() => {
