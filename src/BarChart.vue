@@ -78,14 +78,12 @@ const maxValue = computed(() => {
   return Math.max(...values)
 })
 
-
-
 const calculateItemPosition = (item: BarChartItem): CSSProperties => {
-  const height = yScale(item.value)
-  const top = height - padding.bottom - height
+  const itemHeight = yScale(item.value)
+  const top = height.value - itemHeight
   const left = xScale(item.intervalStart) + padding.left
   return {
-    height: `${height}px`,
+    height: `${itemHeight}px`,
     left: `${left}px`,
     top: `${top}px`,
     width: `${barWidth.value}px`,

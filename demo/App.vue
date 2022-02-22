@@ -51,7 +51,7 @@ import { computed, ref } from 'vue'
 
 const start = ref(new Date())
 const tab = ref('chart')
-const data = computed(() => generateData({ intervalStart: start.value }))
+const data = computed(() => generateData({ intervalStart: start.value, buckets: 50 }))
 
 </script>
 
