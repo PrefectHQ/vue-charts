@@ -1,4 +1,5 @@
-import { BarChartItem } from '@/types'
+import { BarChartItem, DivergingBarChartItem } from '@/types'
+import { fruits } from './fruits'
 
 // This is necessary until TypeScript 4.6 extends the crypto interface
 declare global {
@@ -7,22 +8,22 @@ declare global {
   }
 }
 
-export type BarChartData = BarChartItem<{ color: string }>
+export type DemoBarChartItem = BarChartItem<{ color: string }>
 
-export type DataOptions = {
+export type BarChartDataOptions = {
   buckets?: number,
   intervalStart?: Date,
   intervalEnd?: Date
 }
 
-type DataPayload = {
+type BarChartData = {
   intervalStart: Date,
   intervalEnd: Date,
-  items: BarChartData[]
+  items: DemoBarChartItem[]
 }
 
-const generateData = (options?: DataOptions): DataPayload => {
-  const items: BarChartData[] = []
+const generateBarChartData = (options?: BarChartDataOptions): BarChartData => {
+  const items: DemoBarChartItem[] = []
   const { buckets = 30, intervalStart = new Date(), intervalEnd = new Date() } = options ?? {}
 
   if (!options?.intervalEnd) {
@@ -36,7 +37,7 @@ const generateData = (options?: DataOptions): DataPayload => {
     const _intervalStart = new Date(currentTime)
     const _intervalEnd = new Date(_intervalStart.getTime() + millisecondsInterval)
 
-    const target: BarChartData = {
+    const target: DemoBarChartItem = {
       intervalStart: _intervalStart,
       intervalEnd: _intervalEnd,
       value: Math.floor(Math.random() * 100),
@@ -45,7 +46,7 @@ const generateData = (options?: DataOptions): DataPayload => {
       }
     }
 
-    const proxy = new Proxy<BarChartData>(target, {})
+    const proxy = new Proxy<DemoBarChartItem>(target, {})
     items.push(proxy)
 
     currentTime = _intervalEnd.getTime()
@@ -55,5 +56,60 @@ const generateData = (options?: DataOptions): DataPayload => {
   return { intervalStart, intervalEnd, items }
 }
 
-export default generateData
-export { generateData }
+export type DivergingBarChartDataOptions = {
+  buckets?: number,
+  keys?: number,
+  intervalStart?: Date,
+  intervalEnd?: Date
+}
+
+type DivergingBarChartData = {
+  intervalStart: Date,
+  intervalEnd: Date,
+  intervalSeconds: number,
+  keys: string[],
+  data: DivergingBarChartItem[]
+}
+
+const generateSentimentData = (options?: DivergingBarChartDataOptions): DivergingBarChartData => {
+  const data: DivergingBarChartItem[] = []
+  const { buckets = 30, keys = 10, intervalStart = new Date(), intervalEnd = new Date() } = options ?? {}
+
+  if (!options?.intervalEnd) {
+    intervalEnd.setHours(intervalEnd.getHours() + 1)
+  }
+
+  const keyFruits = []
+  for (let i = 0; i < keys; ++i) {
+    keyFruits.push(fruits[Math.floor(Math.random() * fruits.length)])
+  }
+
+  const millisecondsInterval = (intervalEnd.getTime() - intervalStart.getTime()) / buckets
+  let currentTime = intervalStart.getTime()
+  // Create items
+  while (data.length < buckets) {
+    const _intervalStart = new Date(currentTime)
+    const _intervalEnd = new Date(_intervalStart.getTime() + millisecondsInterval)
+
+    const target: DivergingBarChartItem = {
+      intervalStart: _intervalStart,
+      intervalEnd: _intervalEnd,
+      data: {}
+    }
+
+    for (let i = 0; i < keyFruits.length; ++i) {
+      const key = keyFruits[i]
+      target.data[key] = Math.floor(Math.random() * 3000)
+    }
+
+    const proxy = new Proxy<DivergingBarChartItem>(target, {})
+    data.push(proxy)
+
+    currentTime = _intervalEnd.getTime()
+  }
+
+
+  return { intervalStart, intervalEnd, intervalSeconds: millisecondsInterval / 1000, data, keys: keyFruits }
+}
+
+export { generateBarChartData, generateSentimentData }

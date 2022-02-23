@@ -1,21 +1,21 @@
 <template>
-  <main class="bar-chart">
+  <main class="bar-chart-view">
     <m-tabs v-model="tab">
       <m-tab href="chart">Chart</m-tab>
       <m-tab href="data">Data</m-tab>
     </m-tabs>
 
-    <div v-if="tab == 'chart'" class="bar-chart__chart">
+    <div v-if="tab == 'chart'" class="bar-chart-view__chart">
       <BarChart
         :items="data.items"
         :interval-start="data.intervalStart"
         :interval-end="data.intervalEnd"
       >
         <template #default="{ item }">
-          <m-popover class="bar-chart__bar">
+          <m-popover class="bar-chart-view__bar">
             <template #trigger="{ toggle, open, close }">
               <div
-                class="bar-chart__bar"
+                class="bar-chart-view__bar"
                 :style="{ 'background-color': item.data?.color }"
                 tabindex="0"
                 @focusin="open"
@@ -40,7 +40,7 @@
       </BarChart>
     </div>
 
-    <div v-if="tab == 'data'" class="bar-chart__data">
+    <div v-if="tab == 'data'" class="bar-chart-view__data">
       <m-data-table :columns="columns" :rows="data.items">
         <template #column-color="{ row }">{{ row.data?.color }}</template>
         <template #column-start="{ row }">{{ row.intervalStart.toLocaleTimeString() }}</template>
@@ -52,12 +52,12 @@
 
 <script lang="ts" setup>
 import BarChart from '@/BarChart.vue'
-import { generateData, BarChartData } from '../data';
+import { generateBarChartData } from '../data';
 import { computed, ref } from 'vue'
 
 const start = ref(new Date())
 const tab = ref('chart')
-const data = computed(() => generateData({ intervalStart: start.value, buckets: 50 }))
+const data = computed(() => generateBarChartData({ intervalStart: start.value, buckets: 50 }))
 
 const columns = [
   { label: 'Start', value: 'start' },
@@ -69,7 +69,7 @@ const columns = [
 </script>
 
 <style lang="scss">
-.bar-chart {
+.bar-chart-view {
   padding: 24px;
 
   &__chart {

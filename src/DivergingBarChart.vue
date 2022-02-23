@@ -1,27 +1,36 @@
 <template>
   <div ref="container" class="diverging-bar-chart">
-    <!-- <template v-if="_items.length"> -->
-    <svg :id="id" ref="chart" class="diverging-bar-chart__svg">
-      <g class="diverging-bar-chart__axis-group" />
-    </svg>
+    <template v-if="props.items.length">
+      <svg :id="id" ref="chart" class="diverging-bar-chart__svg">
+        <g class="diverging-bar-chart__axis-group" />
+      </svg>
+      <!-- <div class="diverging-bar-chart__median" :style="medianPosition" /> -->
 
-    <!-- <div class="diverging-bar-chart__median" :style="medianPosition" /> -->
-
-    <div class="diverging-bar-chart__bucket-container">
-      <!-- <template v-for="item in itemsWithValue" :key="item.intervalStart">
+      <div class="diverging-bar-chart__series-container">
+        <!-- <template v-for="item in props.items" :key="item.intervalStart">
           <div :style="calculateItemPosition(item)" class="bar-chart__item">
             <slot v-if="slots.default" :item="item" />
             <div v-else class="bar-chart__bucket" tabindex="0" />
           </div>
-      </template>-->
-    </div>
-    <!-- </template> -->
+        </template>-->
+        <template v-for="[key, series] in seriesMap" :key="key">
+          <div class="diverging-bar-chart__series" :style="calculateSeriesPosition(series.data)">
+            <template v-for="seriesPoint in series.series" :key="seriesPoint.key">
+              <div
+                class="diverging-bar-chart__series-point"
+                :style="calculateSeriesPointPosition(seriesPoint)"
+              />
+            </template>
+          </div>
+        </template>
+      </div>
+    </template>
 
-    <!-- <template v-else> -->
-    <slot name="empty">
-      <div class="bar-chart__empty">--</div>
-    </slot>
-    <!-- </template> -->
+    <template v-else>
+      <slot name="empty">
+        <div class="diverging-bar-chart__empty">--</div>
+      </slot>
+    </template>
   </div>
 </template>
 
@@ -29,7 +38,7 @@
 import * as d3 from 'd3'
 import { useBaseChart } from './Base'
 import { computed, ref, onMounted, onBeforeUpdate, useSlots } from 'vue'
-import { DivergingBarChartItem, DivergingBarChartSeries, GroupSelection, TransitionSelection, itemValueAccesor } from './types'
+import { DivergingBarChartItem, DivergingBarChartData, DivergingBarChartSeriesPoint, DivergingBarChartSeries, DivergingBarChartStack, GroupSelection, TransitionSelection } from './types'
 import { Series } from 'd3-shape'
 import { formatLabel } from '@/utils/formatLabel'
 import { stringAccessor } from '@/utils/stringAccesor'
@@ -39,11 +48,10 @@ const props = defineProps<{
   intervalEnd: Date,
   intervalSeconds: number,
   items: DivergingBarChartItem<any>[],
-  staticMedian: boolean,
-  showAxis: boolean,
+  staticMedian?: boolean,
+  showAxis?: boolean,
   positiveSentimentKeys: string[],
   negativeSentimentKeys: string[],
-  itemValue: itemValueAccesor,
 }>()
 
 
@@ -54,13 +62,8 @@ const sentimentMap: Map<string, 1 | -1> = new Map([...positiveSentimentMap, ...n
 
 
 const container = ref<HTMLElement>()
-
-const { id, padding, paddingX, paddingY, svg, height, width } = useBaseChart(container, { onResize: handleResize })
-
-
-
-const xScale = d3.scaleTime()
-const yScale = d3.scaleLinear()
+const xScale = ref(d3.scaleTime())
+const yScale = ref(d3.scaleLinear())
 
 const xAxisGroup: GroupSelection | undefined = d3.select('.diverging-bar-chart__axis-group')
 
@@ -68,6 +71,7 @@ const handleResize = (): void => {
   updateScales()
 }
 
+const { id, padding, paddingX, paddingY, svg, height, width } = useBaseChart(container, { onResize: handleResize })
 
 const xAxis = (
   g: GroupSelection,
@@ -78,7 +82,7 @@ const xAxis = (
   .duration(150)
   .call(
     d3
-      .axisTop(xScale)
+      .axisTop(xScale.value)
       .tickPadding(0)
       .tickFormat(formatLabel)
       .tickSizeInner(0)
@@ -87,28 +91,50 @@ const xAxis = (
   .call((g) => g.select('.domain').remove())
 
 
-const getItemValue = (item: DivergingBarChartItem): number => {
-  if (props.itemValue instanceof Function) {
-    return props.itemValue(item)
-  } else if (typeof props.itemValue === 'string') {
-    return stringAccessor(item, props.itemValue)
-  } else {
-    return props.itemValue
+const series = computed<DivergingBarChartSeries[]>(() => {
+  const cleanedItems = props.items.map((item) => item.data)
+
+  const stack = d3
+    .stack()
+    .keys([...props.positiveSentimentKeys, ...props.negativeSentimentKeys])
+    .value((value, key) => {
+      const sentimentValue = sentimentMap.get(key)
+      return value[key] * (sentimentValue ?? 1)
+    })
+    .order(d3.stackOrderNone)
+    .offset(d3.stackOffsetDiverging)
+
+  return stack(cleanedItems)
+})
+
+const seriesMap = computed<Map<Date, {
+  data: DivergingBarChartItem;
+  series: DivergingBarChartSeriesPoint[];
+}>>(() => {
+  const itemsMap = props.items.map<[Date, { data: DivergingBarChartItem, series: DivergingBarChartSeriesPoint[] }]>((item, i) => {
+    return [item.intervalStart, { data: item, series: series.value.map(s => s[i]) }]
+  })
+
+  return new Map(itemsMap)
+})
+
+const calculateSeriesPosition = (item: DivergingBarChartItem) => {
+  const start = xScale.value(item.intervalStart)
+  const end = xScale.value(item.intervalEnd)
+  return {
+    left: `${start}px`,
+    width: `${end - start}px`
   }
 }
 
+const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
+  const start = yScale.value(point[0])
+  const end = yScale.value(point[1])
 
-// 
-const series = () => {
-  return d3
-    .stack<DivergingBarChartSeries>()
-    .keys([...props.positiveSentimentKeys, ...props.negativeSentimentKeys])
-    .value((series: DivergingBarChartSeries, key: string) => {
-      const itemValue = getItemValue(series[0].data)
-      const sentimentValue = sentimentMap.get(key)
-      return itemValue * (sentimentValue ?? 1)
-    })
-    .offset(d3.stackOffsetDiverging)([])
+  return {
+    height: `${end - start}px`,
+    top: `${start}px`
+  }
 }
 
 const updateScales = (): void => {
@@ -116,10 +142,16 @@ const updateScales = (): void => {
   const end = props.intervalEnd
 
   xScale
-    .domain([start, end])
-    .range([padding.left, width.value - padding.right])
+    .value = d3.scaleTime()
+      .domain([start, end])
+      .range([padding.left, width.value - padding.right])
 
-  const flattened = series.flat(2)
+  console.log('start, end')
+  console.log(start, end)
+  console.log('left, right')
+  console.log(padding.left, width.value - padding.right)
+
+  const flattened = series.value.flat(2)
   let min = Math.min(...flattened)
   let max = Math.max(...flattened)
 
@@ -132,9 +164,9 @@ const updateScales = (): void => {
     const startMin = Math.abs(min) > Math.abs(max)
     const startEqual = Math.abs(min) === Math.abs(max)
 
-    yScale
-      // This can be used to keep a consistent middle line
-      // otherwise the chart median will move with the data
+    // This can be used to keep a consistent middle line
+    // otherwise the chart median will move with the data
+    yScale.value = d3.scaleLinear()
       .domain([
         startMin || startEqual ? min : 0,
         startMin || startEqual ? 0 : max,
@@ -142,28 +174,36 @@ const updateScales = (): void => {
       .range([0, height.value - paddingY])
   } else {
 
-    yScale.domain([min, max]).range([0, height.value - paddingY])
+    yScale.value = d3.scaleLinear().domain([min, max]).range([0, height.value - paddingY])
   }
 
   if (props.showAxis && xAxisGroup) {
     xAxisGroup.call(xAxis)
   }
 }
+
+onMounted(() => {
+  updateScales()
+})
+
+onBeforeUpdate(() => {
+  updateScales()
+})
 </script>
 
 <style lang="scss">
-.bar-chart {
+.diverging-bar-chart {
   height: 100%;
   position: relative;
   width: 100%;
 }
 
-.bar-chart__svg {
+.diverging-bar-chart__svg {
   height: 100%;
   width: 100%;
 }
 
-.bar-chart__median {
+.diverging-bar-chart__median {
   bottom: 0;
   height: 1px;
   left: 0;
@@ -172,7 +212,7 @@ const updateScales = (): void => {
   width: 100%;
 }
 
-.bar-chart__bucket-container {
+.diverging-bar-chart__series-container {
   height: 100%;
   left: 0;
   overflow: hidden;
@@ -181,12 +221,21 @@ const updateScales = (): void => {
   width: 100%;
 }
 
-.bar-chart__item {
+.diverging-bar-chart__series {
   position: absolute;
-  transform: translateX(50%);
+  height: 100%;
 }
 
-.bar-chart__bucket {
+.diverging-bar-chart__series-point {
+  background-color: #465968;
+  border-radius: 999px;
+  transform-origin: bottom;
+  transition: all 150ms;
+  width: 10px;
+  z-index: 1;
+}
+
+.diverging-bar-chart__item {
   background-color: #465968;
   border-radius: 999px;
   height: inherit;
@@ -201,7 +250,7 @@ const updateScales = (): void => {
   }
 }
 
-.bar-chart__empty {
+.diverging-bar-chart__empty {
   left: 50%;
   position: absolute;
   top: 50%;
