@@ -1,16 +1,27 @@
 <template>
   <main class="diverging-bar-chart-view">
+    <div class="mb-2 d-flex align-center justify-start">
+      <div>
+        <m-select v-model="skew" :options="skewOptions" />
+        <m-slider v-model="multiplier" :min="0" :max="10" label="Skew Multiplier" />
+      </div>
+
+      <div>
+        <div>
+          <m-slider v-model="buckets" :min="1" :max="100" label="Buckets" />
+        </div>
+        <div>
+          <m-slider v-model="keys" :min="1" :max="30" label="Keys" />
+        </div>
+      </div>
+
+      <m-checkbox v-model="staticMedian">Static median</m-checkbox>
+    </div>
+
     <m-tabs v-model="tab">
       <m-tab href="chart">Chart</m-tab>
       <m-tab href="data">Data</m-tab>
     </m-tabs>
-
-    <div>
-      <h3>Positive Keys:</h3>
-      {{ data.positiveSentimentKeys }}
-      <h3>Negative Keys:</h3>
-      {{ data.negativeSentimentKeys }}
-    </div>
 
     <div v-if="tab == 'chart'" class="diverging-bar-chart-view__chart">
       <DivergingBarChart
@@ -20,7 +31,7 @@
         :interval-seconds="data.intervalSeconds"
         :positive-sentiment-keys="data.positiveSentimentKeys"
         :negative-sentiment-keys="data.negativeSentimentKeys"
-        static-median
+        :static-median="staticMedian"
       >
         <template #default="point">
           <m-popover v-if="point.data !== 0" class="diverging-bar-chart-view__bar-container">
@@ -48,6 +59,13 @@
     </div>
 
     <div v-if="tab == 'data'" class="diverging-bar-chart-view__data">
+      <div class="my-2">
+        <h3>Positive Keys:</h3>
+        {{ data.positiveSentimentKeys }}
+        <h3>Negative Keys:</h3>
+        {{ data.negativeSentimentKeys }}
+      </div>
+
       <m-data-table :columns="columns" :rows="data.data">
         <template #column-start="{ row }">{{ row.intervalStart.toLocaleTimeString() }}</template>
         <template #column-end="{ row }">{{ row.intervalEnd.toLocaleTimeString() }}</template>
@@ -68,16 +86,39 @@ import { computed, ref } from 'vue'
 
 const start = ref(new Date())
 const tab = ref('chart')
-//  skew: 'positive', skewMultiplier: 3
-const data = computed(() => generateSentimentData({ intervalStart: start.value, buckets: 1, keys: 3 }))
+
+const skew = ref('none')
+const skewOptions = [
+  { label: 'None', value: 'none', icon: 'subtract-fill' },
+  { label: 'Positive', value: 'positive', icon: 'arrow-up-s-fill' },
+  { label: 'Negative', value: 'negative', icon: 'arrow-down-s-fill' }
+]
+
+const staticMedian = ref(false)
+
+const multiplier = ref("2")
+
+const buckets = ref("10")
+
+const keys = ref("8")
+
+const data = computed(() => generateSentimentData({
+  intervalStart: start.value,
+  buckets: parseInt(buckets.value),
+  keys: parseInt(keys.value),
+  skew: skew.value == 'none' ? undefined : skew.value as 'positive' | 'negative',
+  skewMultiplier: parseInt(multiplier.value)
+}))
 
 const getColumnKey = (key: string) => `column-${key.replaceAll(' ', '-').toLowerCase()}`
 
-const columns = [
-  { label: 'Start', value: 'start' },
-  { label: 'End', value: 'end' },
-  ...data.value.keys.map(key => { return { label: key, value: key } })
-]
+const columns = computed(() => {
+  return [
+    { label: 'Start', value: 'start' },
+    { label: 'End', value: 'end' },
+    ...data.value.keys.map(key => { return { label: key, value: key } })
+  ]
+})
 
 </script>
 
@@ -92,6 +133,7 @@ const columns = [
     min-height: 200px;
     max-width: calc(100vw - 48px);
     min-width: 400px;
+    margin: 24px 0;
     overflow: auto;
     resize: both;
   }

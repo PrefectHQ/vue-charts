@@ -58,9 +58,13 @@ const props = defineProps<{
 
 
 type sentimentDirection = 1 | -1
-const positiveSentimentMap = new Map<string, sentimentDirection>(props.positiveSentimentKeys.map(sen => [sen, -1]))
-const negativeSentimentMap = new Map<string, sentimentDirection>(props.negativeSentimentKeys.map(sen => [sen, 1]))
-const sentimentMap: Map<string, 1 | -1> = new Map([...positiveSentimentMap, ...negativeSentimentMap])
+
+const sentimentMap = computed<Map<string, 1 | -1>>(() => {
+  const positive = new Map<string, sentimentDirection>(props.positiveSentimentKeys.map(sen => [sen, -1]))
+  const negative = new Map<string, sentimentDirection>(props.negativeSentimentKeys.map(sen => [sen, 1]))
+
+  return new Map([...positive, ...negative])
+})
 
 
 const container = ref<HTMLElement>()
@@ -100,7 +104,7 @@ const series = computed<DivergingBarChartSeries[]>(() => {
     .stack()
     .keys([...props.positiveSentimentKeys, ...props.negativeSentimentKeys])
     .value((value, key) => {
-      const sentimentValue = sentimentMap.get(key)
+      const sentimentValue = sentimentMap.value.get(key)
       return value[key] * (sentimentValue ?? 1)
     })
     .order(d3.stackOrderNone)
@@ -189,7 +193,7 @@ const updateScales = (): void => {
     // otherwise the chart median will move with the data
     scale.domain([-extremity, extremity])
   } else {
-    scale.domain([min, med, med, max])
+    scale.domain([min, max])
   }
 
   yScale.value = scale
@@ -210,6 +214,7 @@ onBeforeUpdate(() => {
 
 <style lang="scss">
 .diverging-bar-chart {
+  box-sizing: border-box;
   height: 100%;
   position: relative;
   width: 100%;
