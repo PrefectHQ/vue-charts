@@ -166,18 +166,19 @@ const updateScales = (): void => {
     max = 1
   }
 
+  let scale = d3.scaleLinear().range([padding.top, height.value - paddingY])
+
   if (props.staticMedian) {
     const extremity = Math.max(Math.abs(min), Math.abs(max))
 
     // This can be used to keep a consistent middle line
     // otherwise the chart median will move with the data
-    yScale.value = d3.scaleLinear()
-      .domain([-extremity, extremity])
-      .range([0, height.value])
-
+    scale.domain([-extremity, extremity])
   } else {
-    yScale.value = d3.scaleLinear().domain([min, max]).range([0, height.value - paddingY])
+    scale.domain([min, max])
   }
+
+  yScale.value = scale
 
   if (props.showAxis && xAxisGroup) {
     xAxisGroup.call(xAxis)
