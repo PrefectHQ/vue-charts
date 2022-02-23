@@ -14,8 +14,9 @@
     "nav"
     "main";
   grid-template-columns: 1fr;
-  grid-template-rows: 84px 1fr;
+  grid-template-rows: 48px 1fr;
   min-height: 100vh;
+  width: 100vw;
 
   &__nav {
     grid-area: "nav";
@@ -32,22 +33,6 @@
 
   &__main {
     grid-area: "main";
-  }
-
-  &__bar-chart {
-    background-color: #f7f8fa;
-    height: 400px;
-    max-height: 100vh;
-    min-height: 200px;
-    max-width: 100vw;
-    min-width: 400px;
-    overflow: auto;
-    resize: both;
-  }
-
-  &__bar {
-    border-radius: 9999px;
-    height: 100%;
     width: 100%;
   }
 }

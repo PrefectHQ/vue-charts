@@ -1,7 +1,5 @@
 <template>
-  <main class="bar-chart__main">
-    <h2>Bar Chart</h2>
-
+  <main class="bar-chart">
     <m-tabs v-model="tab">
       <m-tab href="chart">Chart</m-tab>
       <m-tab href="data">Data</m-tab>
@@ -72,12 +70,14 @@ const columns = [
 
 <style lang="scss">
 .bar-chart {
+  padding: 24px;
+
   &__chart {
     background-color: #f7f8fa;
     height: 400px;
     max-height: 100vh;
     min-height: 200px;
-    max-width: 100vw;
+    max-width: calc(100vw - 48px);
     min-width: 400px;
     overflow: auto;
     resize: both;
