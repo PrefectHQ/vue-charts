@@ -128,11 +128,19 @@ const calculateSeriesPosition = (item: DivergingBarChartItem) => {
 }
 
 const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
-  const start = yScale.value(point[0])
+  const offset = padding.middle / 2
+  let start = yScale.value(point[0])
   const end = yScale.value(point[1])
+  const height = end - start
+
+  if (point[0] < 0) {
+    start -= offset
+  } else {
+    start += offset
+  }
 
   return {
-    height: `${end - start}px`,
+    height: `${height}px`,
     top: `${start}px`
   }
 }
@@ -166,7 +174,13 @@ const updateScales = (): void => {
     max = 1
   }
 
-  let scale = d3.scaleLinear().range([padding.top, height.value - paddingY])
+  const med = (max + min) / 2
+
+  let scale = d3.scaleLinear()
+    .range([
+      padding.top,
+      height.value - paddingY
+    ])
 
   if (props.staticMedian) {
     const extremity = Math.max(Math.abs(min), Math.abs(max))
@@ -175,7 +189,7 @@ const updateScales = (): void => {
     // otherwise the chart median will move with the data
     scale.domain([-extremity, extremity])
   } else {
-    scale.domain([min, max])
+    scale.domain([min, med, med, max])
   }
 
   yScale.value = scale

@@ -59,7 +59,7 @@ export class Base implements IBase {
   public padding = {
     top: 0,
     bottom: 0,
-    middle: 0,
+    middle: 24,
     left: 0,
     right: 0
   }

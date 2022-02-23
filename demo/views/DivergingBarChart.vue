@@ -69,7 +69,7 @@ import { computed, ref } from 'vue'
 const start = ref(new Date())
 const tab = ref('chart')
 //  skew: 'positive', skewMultiplier: 3
-const data = computed(() => generateSentimentData({ intervalStart: start.value, buckets: 30, keys: 10 }))
+const data = computed(() => generateSentimentData({ intervalStart: start.value, buckets: 1, keys: 3 }))
 
 const getColumnKey = (key: string) => `column-${key.replaceAll(' ', '-').toLowerCase()}`
 
