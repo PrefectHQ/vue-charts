@@ -59,6 +59,8 @@ const generateBarChartData = (options?: BarChartDataOptions): BarChartData => {
 export type DivergingBarChartDataOptions = {
   buckets?: number,
   keys?: number,
+  skew?: 'positive' | 'negative' | undefined,
+  skewMultiplier?: number,
   intervalStart?: Date,
   intervalEnd?: Date
 }
@@ -68,12 +70,14 @@ type DivergingBarChartData = {
   intervalEnd: Date,
   intervalSeconds: number,
   keys: string[],
+  positiveSentimentKeys: string[],
+  negativeSentimentKeys: string[],
   data: DivergingBarChartItem[]
 }
 
 const generateSentimentData = (options?: DivergingBarChartDataOptions): DivergingBarChartData => {
   const data: DivergingBarChartItem[] = []
-  const { buckets = 30, keys = 10, intervalStart = new Date(), intervalEnd = new Date() } = options ?? {}
+  const { buckets = 30, keys = 10, intervalStart = new Date(), intervalEnd = new Date(), skew, skewMultiplier = 2 } = options ?? {}
 
   if (!options?.intervalEnd) {
     intervalEnd.setHours(intervalEnd.getHours() + 1)
@@ -86,6 +90,9 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
       keyFruits.push(fruit)
     }
   }
+
+  const positiveSentimentKeys = keyFruits.slice(0, keyFruits.length / 2)
+  const negativeSentimentKeys = keyFruits.slice(keyFruits.length / 2)
 
   const millisecondsInterval = (intervalEnd.getTime() - intervalStart.getTime()) / buckets
   let currentTime = intervalStart.getTime()
@@ -102,7 +109,17 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
 
     for (let i = 0; i < keyFruits.length; ++i) {
       const key = keyFruits[i]
-      target.data[key] = Math.floor(Math.random() * 3000)
+      let multiplier = 10
+
+      if (skew == 'positive' && positiveSentimentKeys.includes(key)) {
+        multiplier = multiplier * skewMultiplier
+      }
+
+      if (skew == 'negative' && negativeSentimentKeys.includes(key)) {
+        multiplier = multiplier * skewMultiplier
+      }
+
+      target.data[key] = Math.floor(Math.random() * multiplier)
     }
 
     const proxy = new Proxy<DivergingBarChartItem>(target, {})
@@ -112,7 +129,9 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
   }
 
 
-  return { intervalStart, intervalEnd, intervalSeconds: millisecondsInterval / 1000, data, keys: keyFruits }
+  return {
+    intervalStart, intervalEnd, intervalSeconds: millisecondsInterval / 1000, data, keys: keyFruits, positiveSentimentKeys, negativeSentimentKeys
+  }
 }
 
 export { generateBarChartData, generateSentimentData }

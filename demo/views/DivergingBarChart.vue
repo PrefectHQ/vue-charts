@@ -7,9 +7,9 @@
 
     <div>
       <h3>Positive Keys:</h3>
-      {{ positiveSentimentKeys }}
+      {{ data.positiveSentimentKeys }}
       <h3>Negative Keys:</h3>
-      {{ negativeSentimentKeys }}
+      {{ data.negativeSentimentKeys }}
     </div>
 
     <div v-if="tab == 'chart'" class="diverging-bar-chart-view__chart">
@@ -18,8 +18,8 @@
         :interval-start="data.intervalStart"
         :interval-end="data.intervalEnd"
         :interval-seconds="data.intervalSeconds"
-        :positive-sentiment-keys="positiveSentimentKeys"
-        :negative-sentiment-keys="negativeSentimentKeys"
+        :positive-sentiment-keys="data.positiveSentimentKeys"
+        :negative-sentiment-keys="data.negativeSentimentKeys"
       >
         <template #default="point">
           <m-popover class="diverging-bar-chart-view__bar-container">
@@ -67,17 +67,9 @@ import { computed, ref } from 'vue'
 
 const start = ref(new Date())
 const tab = ref('chart')
-const data = computed(() => generateSentimentData({ intervalStart: start.value, buckets: 30 }))
+const data = computed(() => generateSentimentData({ intervalStart: start.value, buckets: 30, skew: 'positive', skewMultiplier: 3 }))
 
 const getColumnKey = (key: string) => `column-${key.replaceAll(' ', '-').toLowerCase()}`
-
-const positiveSentimentKeys = computed(() => {
-  return data.value.keys.slice(0, data.value.keys.length / 2)
-})
-
-const negativeSentimentKeys = computed(() => {
-  return data.value.keys.slice(data.value.keys.length / 2)
-})
 
 const columns = [
   { label: 'Start', value: 'start' },

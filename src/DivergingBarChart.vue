@@ -4,7 +4,8 @@
       <svg :id="id" ref="chart" class="diverging-bar-chart__svg">
         <g class="diverging-bar-chart__axis-group" />
       </svg>
-      <!-- <div class="diverging-bar-chart__median" :style="medianPosition" /> -->
+
+      <div class="diverging-bar-chart__median" :style="medianPosition" />
 
       <div class="diverging-bar-chart__series-container">
         <template v-for="[key, series] in seriesMap" :key="key">
@@ -127,7 +128,6 @@ const calculateSeriesPosition = (item: DivergingBarChartItem) => {
 }
 
 const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
-
   const start = yScale.value(point[0])
   const end = yScale.value(point[1])
   let top
@@ -143,6 +143,17 @@ const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
     top: `${top}px`
   }
 }
+
+const median = computed(() => {
+  return yScale.value(0)
+})
+
+const medianPosition = computed(() => {
+  const top = median.value > 0 ? median.value : height.value / 2
+  return {
+    top: `${top}px`
+  }
+})
 
 const updateScales = (): void => {
   const start = props.intervalStart
@@ -206,12 +217,14 @@ onBeforeUpdate(() => {
 }
 
 .diverging-bar-chart__median {
-  bottom: 0;
+  background-color: red;
   height: 1px;
   left: 0;
   position: absolute;
+  pointer-events: none;
   transition: top 150ms;
   width: 100%;
+  z-index: 2;
 }
 
 .diverging-bar-chart__series-container {
