@@ -1,6 +1,6 @@
 <template>
   <div ref="container" class="bar-chart">
-    <template v-if="itemsWithValue.length">
+    <template v-if="_items.length">
       <svg :id="id" ref="chart" class="bar-chart__svg">
         <!-- -->
       </svg>
@@ -8,7 +8,7 @@
       <div class="bar-chart__median" />
 
       <div class="bar-chart__bucket-container">
-        <template v-for="item in itemsWithValue" :key="item.intervalStart">
+        <template v-for="item in _items" :key="item.intervalStart">
           <div :style="calculateItemPosition(item)" class="bar-chart__item">
             <slot v-if="slots.default" :item="item" />
             <div v-else class="bar-chart__bucket" tabindex="0" />
@@ -70,7 +70,7 @@ const barWidth = computed<number>(() => {
   )
 })
 
-const itemsWithValue = computed(() => {
+const _items = computed(() => {
   return props.items.filter((item) => item.value)
 })
 
