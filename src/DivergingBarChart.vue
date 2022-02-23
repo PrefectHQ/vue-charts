@@ -18,8 +18,14 @@
             <template v-for="seriesPoint in series.series" :key="seriesPoint.key">
               <div
                 class="diverging-bar-chart__series-point"
-                :style="calculateSeriesPointPosition(seriesPoint)"
-              />
+                :style="calculateSeriesPointPosition(seriesPoint.value)"
+              >
+                <slot
+                  name="series-point"
+                  :data="seriesPoint.value.data[seriesPoint.key]"
+                  :key="seriesPoint.key"
+                />
+              </div>
             </template>
           </div>
         </template>
@@ -39,9 +45,7 @@ import * as d3 from 'd3'
 import { useBaseChart } from './Base'
 import { computed, ref, onMounted, onBeforeUpdate, useSlots } from 'vue'
 import { DivergingBarChartItem, DivergingBarChartData, DivergingBarChartSeriesPoint, DivergingBarChartSeries, DivergingBarChartStack, GroupSelection, TransitionSelection } from './types'
-import { Series } from 'd3-shape'
 import { formatLabel } from '@/utils/formatLabel'
-import { stringAccessor } from '@/utils/stringAccesor'
 
 const props = defineProps<{
   intervalStart: Date,
@@ -56,8 +60,8 @@ const props = defineProps<{
 
 
 type sentimentDirection = 1 | -1
-const positiveSentimentMap = new Map<string, sentimentDirection>(props.positiveSentimentKeys.map(sen => [sen, 1]))
-const negativeSentimentMap = new Map<string, sentimentDirection>(props.negativeSentimentKeys.map(sen => [sen, -1]))
+const positiveSentimentMap = new Map<string, sentimentDirection>(props.positiveSentimentKeys.map(sen => [sen, -1]))
+const negativeSentimentMap = new Map<string, sentimentDirection>(props.negativeSentimentKeys.map(sen => [sen, 1]))
 const sentimentMap: Map<string, 1 | -1> = new Map([...positiveSentimentMap, ...negativeSentimentMap])
 
 
@@ -107,12 +111,10 @@ const series = computed<DivergingBarChartSeries[]>(() => {
   return stack(cleanedItems)
 })
 
-const seriesMap = computed<Map<Date, {
-  data: DivergingBarChartItem;
-  series: DivergingBarChartSeriesPoint[];
-}>>(() => {
-  const itemsMap = props.items.map<[Date, { data: DivergingBarChartItem, series: DivergingBarChartSeriesPoint[] }]>((item, i) => {
-    return [item.intervalStart, { data: item, series: series.value.map(s => s[i]) }]
+const seriesMap = computed<Map<Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }>>(() => {
+  const itemsMap = props.items.map<[Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }]>((item, i) => {
+    const seriesMap = series.value.map(s => { return { key: s.key, value: s[i] } })
+    return [item.intervalStart, { data: item, series: seriesMap }]
   })
 
   return new Map(itemsMap)
@@ -128,12 +130,20 @@ const calculateSeriesPosition = (item: DivergingBarChartItem) => {
 }
 
 const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
+
   const start = yScale.value(point[0])
   const end = yScale.value(point[1])
+  let top
+
+  if (Math.sign(point[0]) > 0) {
+    top = start
+  } else {
+    top = start
+  }
 
   return {
     height: `${end - start}px`,
-    top: `${start}px`
+    top: `${top}px`
   }
 }
 
@@ -145,11 +155,6 @@ const updateScales = (): void => {
     .value = d3.scaleTime()
       .domain([start, end])
       .range([padding.left, width.value - padding.right])
-
-  console.log('start, end')
-  console.log(start, end)
-  console.log('left, right')
-  console.log(padding.left, width.value - padding.right)
 
   const flattened = series.value.flat(2)
   let min = Math.min(...flattened)
@@ -227,11 +232,12 @@ onBeforeUpdate(() => {
 }
 
 .diverging-bar-chart__series-point {
-  background-color: #465968;
-  border-radius: 999px;
+  margin-left: auto;
+  margin-right: auto;
+  position: absolute;
   transform-origin: bottom;
   transition: all 150ms;
-  width: 10px;
+  width: 100%;
   z-index: 1;
 }
 
@@ -242,6 +248,7 @@ onBeforeUpdate(() => {
   transform-origin: bottom;
   transition: all 150ms;
   width: inherit;
+
   z-index: 1;
 
   &:hover,

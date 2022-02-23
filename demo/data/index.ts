@@ -79,9 +79,12 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
     intervalEnd.setHours(intervalEnd.getHours() + 1)
   }
 
-  const keyFruits = []
+  const keyFruits: string[] = []
   for (let i = 0; i < keys; ++i) {
-    keyFruits.push(fruits[Math.floor(Math.random() * fruits.length)])
+    const fruit = fruits[Math.floor(Math.random() * fruits.length)]
+    if (!keyFruits.includes(fruit)) {
+      keyFruits.push(fruit)
+    }
   }
 
   const millisecondsInterval = (intervalEnd.getTime() - intervalStart.getTime()) / buckets

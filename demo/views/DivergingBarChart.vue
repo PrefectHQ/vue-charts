@@ -5,6 +5,13 @@
       <m-tab href="data">Data</m-tab>
     </m-tabs>
 
+    <div>
+      <h3>Positive Keys:</h3>
+      {{ positiveSentimentKeys }}
+      <h3>Negative Keys:</h3>
+      {{ negativeSentimentKeys }}
+    </div>
+
     <div v-if="tab == 'chart'" class="diverging-bar-chart-view__chart">
       <DivergingBarChart
         :items="data.data"
@@ -13,7 +20,28 @@
         :interval-seconds="data.intervalSeconds"
         :positive-sentiment-keys="positiveSentimentKeys"
         :negative-sentiment-keys="negativeSentimentKeys"
-      />
+      >
+        <template #series-point="point">
+          <m-popover class="diverging-bar-chart-view__bar">
+            <template #trigger="{ toggle, open, close }">
+              <div
+                class="diverging-bar-chart-view__bar"
+                tabindex="0"
+                @focusin="open"
+                @focusout="close"
+                @mouseenter="open"
+                @mouseleave="close"
+              />
+            </template>
+
+            <template #header>
+              <strong>{{ point.key }}</strong>
+            </template>
+
+            <div>{{ point.data }}</div>
+          </m-popover>
+        </template>
+      </DivergingBarChart>
     </div>
 
     <div v-if="tab == 'data'" class="diverging-bar-chart-view__data">
@@ -76,6 +104,7 @@ const columns = [
     border-radius: 9999px;
     height: 100%;
     width: 100%;
+    background-color: #6680ee;
   }
 }
 </style>
