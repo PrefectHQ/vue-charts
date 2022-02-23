@@ -21,17 +21,19 @@
         :positive-sentiment-keys="positiveSentimentKeys"
         :negative-sentiment-keys="negativeSentimentKeys"
       >
-        <template #series-point="point">
-          <m-popover class="diverging-bar-chart-view__bar">
+        <template #default="point">
+          <m-popover class="diverging-bar-chart-view__bar-container">
             <template #trigger="{ toggle, open, close }">
               <div
-                class="diverging-bar-chart-view__bar"
+                class="diverging-bar-chart-view__bar-container"
                 tabindex="0"
                 @focusin="open"
                 @focusout="close"
                 @mouseenter="open"
                 @mouseleave="close"
-              />
+              >
+                <div class="diverging-bar-chart-view__bar" />
+              </div>
             </template>
 
             <template #header>
@@ -91,7 +93,7 @@ const columns = [
 
   &__chart {
     background-color: #f7f8fa;
-    height: 400px;
+    height: 800px;
     max-height: 100vh;
     min-height: 200px;
     max-width: calc(100vw - 48px);
@@ -103,8 +105,23 @@ const columns = [
   &__bar {
     border-radius: 9999px;
     height: 100%;
-    width: 100%;
+    width: 35%;
+    margin: auto;
     background-color: #6680ee;
+  }
+
+  &__bar-container {
+    height: 100%;
+    width: 100%;
+
+    &:focus,
+    &:hover {
+      outline: none;
+
+      .diverging-bar-chart-view__bar {
+        background-color: #0035b0;
+      }
+    }
   }
 }
 </style>

@@ -7,12 +7,6 @@
       <!-- <div class="diverging-bar-chart__median" :style="medianPosition" /> -->
 
       <div class="diverging-bar-chart__series-container">
-        <!-- <template v-for="item in props.items" :key="item.intervalStart">
-          <div :style="calculateItemPosition(item)" class="bar-chart__item">
-            <slot v-if="slots.default" :item="item" />
-            <div v-else class="bar-chart__bucket" tabindex="0" />
-          </div>
-        </template>-->
         <template v-for="[key, series] in seriesMap" :key="key">
           <div class="diverging-bar-chart__series" :style="calculateSeriesPosition(series.data)">
             <template v-for="seriesPoint in series.series" :key="seriesPoint.key">
@@ -21,10 +15,11 @@
                 :style="calculateSeriesPointPosition(seriesPoint.value)"
               >
                 <slot
-                  name="series-point"
+                  v-if="slots.default"
                   :data="seriesPoint.value.data[seriesPoint.key]"
                   :key="seriesPoint.key"
                 />
+                <div v-else class="diverging-bar-chart__series-bar" />
               </div>
             </template>
           </div>
@@ -46,6 +41,8 @@ import { useBaseChart } from './Base'
 import { computed, ref, onMounted, onBeforeUpdate, useSlots } from 'vue'
 import { DivergingBarChartItem, DivergingBarChartData, DivergingBarChartSeriesPoint, DivergingBarChartSeries, DivergingBarChartStack, GroupSelection, TransitionSelection } from './types'
 import { formatLabel } from '@/utils/formatLabel'
+
+const slots = useSlots()
 
 const props = defineProps<{
   intervalStart: Date,
@@ -235,21 +232,16 @@ onBeforeUpdate(() => {
   margin-left: auto;
   margin-right: auto;
   position: absolute;
-  transform-origin: bottom;
-  transition: all 150ms;
   width: 100%;
   z-index: 1;
 }
 
-.diverging-bar-chart__item {
+.diverging-bar-chart__series-bar {
   background-color: #465968;
   border-radius: 999px;
   height: inherit;
-  transform-origin: bottom;
   transition: all 150ms;
   width: inherit;
-
-  z-index: 1;
 
   &:hover,
   &:focus {
