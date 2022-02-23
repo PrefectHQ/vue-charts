@@ -7,6 +7,8 @@ declare global {
   }
 }
 
+export type BarChartData = BarChartItem<{ color: string }>
+
 export type DataOptions = {
   buckets?: number,
   intervalStart?: Date,
@@ -16,11 +18,11 @@ export type DataOptions = {
 type DataPayload = {
   intervalStart: Date,
   intervalEnd: Date,
-  items: BarChartItem[]
+  items: BarChartData[]
 }
 
 const generateData = (options?: DataOptions): DataPayload => {
-  const items: BarChartItem[] = []
+  const items: BarChartData[] = []
   const { buckets = 30, intervalStart = new Date(), intervalEnd = new Date() } = options ?? {}
 
   if (!options?.intervalEnd) {
@@ -34,12 +36,16 @@ const generateData = (options?: DataOptions): DataPayload => {
     const _intervalStart = new Date(currentTime)
     const _intervalEnd = new Date(_intervalStart.getTime() + millisecondsInterval)
 
-    const target: BarChartItem = {
+    const target: BarChartData = {
       intervalStart: _intervalStart,
       intervalEnd: _intervalEnd,
-      value: Math.floor(Math.random() * 100)
+      value: Math.floor(Math.random() * 100),
+      data: {
+        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
+      }
     }
-    const proxy = new Proxy(target, {})
+
+    const proxy = new Proxy<BarChartData>(target, {})
     items.push(proxy)
 
     currentTime = _intervalEnd.getTime()

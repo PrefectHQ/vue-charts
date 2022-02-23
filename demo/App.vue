@@ -14,31 +14,19 @@
           :items="data.items"
           :interval-start="data.intervalStart"
           :interval-end="data.intervalEnd"
-        />
+        >
+          <template #default="{ item }">
+            <div class="app__bar" :style="{ 'background-color': item.data?.color }" />
+          </template>
+        </BarChart>
       </div>
 
       <div v-if="tab == 'data'" class="app_bar-chart-data">
-        Start: {{ data.intervalStart.toLocaleTimeString() }}
-        <br />
-        End: {{ data.intervalEnd.toLocaleTimeString() }}
-        <br />
-
-        <div style="max-width: 300px;">
-          <div class="d-flex justify-space-around">
-            <span>Start</span>
-            <span class="mx-auto">End</span>
-            <span class="ml-auto">Value</span>
-          </div>
-          <div
-            v-for="item in data.items"
-            :key="item.intervalStart.toString()"
-            class="d-flex justify-space-between"
-          >
-            <span>{{ item.intervalStart.toLocaleTimeString() }}</span>
-            <span class="mx-auto">{{ item.intervalEnd.toLocaleTimeString() }}</span>
-            <span class="ml-auto">{{ item.value }}</span>
-          </div>
-        </div>
+        <m-data-table :columns="columns" :rows="data.items">
+          <template #column-color="{ row }">{{ row.data?.color }}</template>
+          <template #column-start="{ row }">{{ row.intervalStart.toLocaleTimeString() }}</template>
+          <template #column-end="{ row }">{{ row.intervalEnd.toLocaleTimeString() }}</template>
+        </m-data-table>
       </div>
     </main>
   </div>
@@ -46,12 +34,19 @@
 
 <script lang="ts" setup>
 import BarChart from '@/BarChart.vue'
-import generateData from './data';
+import { generateData, BarChartData } from './data';
 import { computed, ref } from 'vue'
 
 const start = ref(new Date())
 const tab = ref('chart')
 const data = computed(() => generateData({ intervalStart: start.value, buckets: 50 }))
+
+const columns = [
+  { label: 'Start', value: 'start' },
+  { label: 'End', value: 'end' },
+  { label: 'Color', value: 'color' },
+  { label: 'Value', value: 'value' }
+]
 
 </script>
 
@@ -88,9 +83,15 @@ const data = computed(() => generateData({ intervalStart: start.value, buckets: 
     max-height: 100vh;
     min-height: 200px;
     max-width: 100vw;
-    min-width: 200px;
+    min-width: 400px;
     overflow: auto;
     resize: both;
+  }
+
+  &__bar {
+    border-radius: 9999px;
+    height: 100%;
+    width: 100%;
   }
 }
 </style>

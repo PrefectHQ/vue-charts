@@ -10,9 +10,8 @@
       <div class="bar-chart__bucket-container">
         <template v-for="item in itemsWithValue" :key="item.intervalStart">
           <div :style="calculateItemPosition(item)" class="bar-chart__item">
-            <div class="bar-chart__bucket">
-              <slot :item="item" />
-            </div>
+            <slot v-if="slots.default" :item="item" />
+            <div v-else class="bar-chart__bucket" tabindex="0" />
           </div>
         </template>
       </div>
@@ -30,13 +29,15 @@
 import * as d3 from 'd3'
 import { useBaseChart } from './Base'
 import { BarChartItem } from './types'
-import { computed, ref, onMounted, onBeforeUpdate } from 'vue'
+import { computed, ref, onMounted, onBeforeUpdate, useSlots } from 'vue'
 import { CSSProperties } from '@vue/runtime-dom'
+
+const slots = useSlots()
 
 const props = defineProps<{
   intervalStart: Date,
   intervalEnd: Date,
-  items: BarChartItem[]
+  items: BarChartItem<any>[]
 }>()
 
 const container = ref<HTMLElement>()
@@ -69,7 +70,7 @@ const barWidth = computed<number>(() => {
   )
 })
 
-const itemsWithValue = computed<BarChartItem[]>(() => {
+const itemsWithValue = computed(() => {
   return props.items.filter((item) => item.value)
 })
 
