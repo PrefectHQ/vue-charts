@@ -20,9 +20,10 @@
         :interval-seconds="data.intervalSeconds"
         :positive-sentiment-keys="data.positiveSentimentKeys"
         :negative-sentiment-keys="data.negativeSentimentKeys"
+        static-median
       >
         <template #default="point">
-          <m-popover class="diverging-bar-chart-view__bar-container">
+          <m-popover v-if="point.data !== 0" class="diverging-bar-chart-view__bar-container">
             <template #trigger="{ toggle, open, close }">
               <div
                 class="diverging-bar-chart-view__bar-container"
@@ -67,7 +68,8 @@ import { computed, ref } from 'vue'
 
 const start = ref(new Date())
 const tab = ref('chart')
-const data = computed(() => generateSentimentData({ intervalStart: start.value, buckets: 30, skew: 'positive', skewMultiplier: 3 }))
+//  skew: 'positive', skewMultiplier: 3
+const data = computed(() => generateSentimentData({ intervalStart: start.value, buckets: 30, keys: 10 }))
 
 const getColumnKey = (key: string) => `column-${key.replaceAll(' ', '-').toLowerCase()}`
 
@@ -95,16 +97,30 @@ const columns = [
   }
 
   &__bar {
-    border-radius: 9999px;
     height: 100%;
     width: 35%;
+    max-width: 50px;
     margin: auto;
     background-color: #6680ee;
+    // border-top-left-radius: inherit;
+    // border-top-right-radius: inherit;
+    // border-bottom-left-radius: inherit;
+    // border-bottom-right-radius: inherit;
   }
 
   &__bar-container {
     height: 100%;
     width: 100%;
+
+    // &:first-of-type {
+    //   border-top-left-radius: 9999px;
+    //   border-top-right-radius: 9999px;
+    // }
+
+    // &:last-of-type {
+    //   border-bottom-left-radius: 9999px;
+    //   border-bottom-right-radius: 9999px;
+    // }
 
     &:focus,
     &:hover {
