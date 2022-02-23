@@ -7,6 +7,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/BarChart.vue'),
   },
   {
+    path: '/diverging-bar-chart',
+    name: 'DivergingBarChart',
+    component: () => import('../views/DivergingBarChart.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart'
   }

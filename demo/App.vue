@@ -1,6 +1,9 @@
 <template>
   <div class="app">
-    <nav class="app__nav">NAV</nav>
+    <nav class="app__nav">
+      <router-link to="/bar-chart">Bar Chart</router-link>
+      <router-link to="/diverging-bar-chart">Diverging Bar Chart</router-link>
+    </nav>
     <main class="app__main">
       <router-view />
     </main>
