@@ -1,4 +1,5 @@
 import { createApp } from 'vue'
+import router from './router'
 
 // Add global miter styles
 import '@prefecthq/miter-design/dist/style.css'
@@ -8,6 +9,7 @@ import MiterDesign from '@prefecthq/miter-design'
 
 const app = createApp(App)
 app.use(MiterDesign)
+app.use(router)
 
 app.config.performance = true
 

@@ -16,7 +16,30 @@
           :interval-end="data.intervalEnd"
         >
           <template #default="{ item }">
-            <div class="app__bar" :style="{ 'background-color': item.data?.color }" />
+            <m-popover class="app__bar">
+              <template #trigger="{ toggle, open, close }">
+                <div
+                  class="app__bar"
+                  :style="{ 'background-color': item.data?.color }"
+                  tabindex="0"
+                  @focusin="open"
+                  @focusout="close"
+                  @mouseenter="open"
+                  @mouseleave="close"
+                />
+              </template>
+
+              <div>
+                <strong>Start</strong>
+                : {{ item.intervalStart.toLocaleTimeString() }}
+                <br />
+                <strong>End</strong>
+                : {{ item.intervalEnd.toLocaleTimeString() }}
+                <br />
+                <strong>Value</strong>
+                : {{ item.value }}
+              </div>
+            </m-popover>
           </template>
         </BarChart>
       </div>
