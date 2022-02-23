@@ -2,76 +2,10 @@
   <div class="app">
     <nav class="app__nav">NAV</nav>
     <main class="app__main">
-      <h2>Bar Chart</h2>
-
-      <m-tabs v-model="tab">
-        <m-tab href="chart">Chart</m-tab>
-        <m-tab href="data">Data</m-tab>
-      </m-tabs>
-
-      <div v-if="tab == 'chart'" class="app__bar-chart">
-        <BarChart
-          :items="data.items"
-          :interval-start="data.intervalStart"
-          :interval-end="data.intervalEnd"
-        >
-          <template #default="{ item }">
-            <m-popover class="app__bar">
-              <template #trigger="{ toggle, open, close }">
-                <div
-                  class="app__bar"
-                  :style="{ 'background-color': item.data?.color }"
-                  tabindex="0"
-                  @focusin="open"
-                  @focusout="close"
-                  @mouseenter="open"
-                  @mouseleave="close"
-                />
-              </template>
-
-              <div>
-                <strong>Start</strong>
-                : {{ item.intervalStart.toLocaleTimeString() }}
-                <br />
-                <strong>End</strong>
-                : {{ item.intervalEnd.toLocaleTimeString() }}
-                <br />
-                <strong>Value</strong>
-                : {{ item.value }}
-              </div>
-            </m-popover>
-          </template>
-        </BarChart>
-      </div>
-
-      <div v-if="tab == 'data'" class="app_bar-chart-data">
-        <m-data-table :columns="columns" :rows="data.items">
-          <template #column-color="{ row }">{{ row.data?.color }}</template>
-          <template #column-start="{ row }">{{ row.intervalStart.toLocaleTimeString() }}</template>
-          <template #column-end="{ row }">{{ row.intervalEnd.toLocaleTimeString() }}</template>
-        </m-data-table>
-      </div>
+      <router-view />
     </main>
   </div>
 </template>
-
-<script lang="ts" setup>
-import BarChart from '@/BarChart.vue'
-import { generateData, BarChartData } from './data';
-import { computed, ref } from 'vue'
-
-const start = ref(new Date())
-const tab = ref('chart')
-const data = computed(() => generateData({ intervalStart: start.value, buckets: 50 }))
-
-const columns = [
-  { label: 'Start', value: 'start' },
-  { label: 'End', value: 'end' },
-  { label: 'Color', value: 'color' },
-  { label: 'Value', value: 'value' }
-]
-
-</script>
 
 <style lang="scss">
 .app {
