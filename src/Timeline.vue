@@ -164,26 +164,25 @@ const updateGrid = (): void => {
   if (!gridGroup) return
 
 
-
-  // gridGroup.selectAll('.grid-line.grid-x')
-  //   .data(Array.from({ length: this.numberRows }))
-  //   .join(
-  //     (selection: any) => selection
-  //       .append('line')
-  //       .attr('id', (d: any, i: number) => `grid-line-x-${i}`)
-  //       .attr('class', 'grid-line grid-x')
-  //       .attr('stroke', 'var(--blue-20)')
-  //       .attr('x1', 0)
-  //       .attr('x2', this.chartWidth)
-  //       .attr('y1', (d: any, i: number) => i * this.intervalHeight)
-  //       .attr('y2', (d: any, i: number) => i * this.intervalHeight),
-  //     (selection: any) => selection
-  //       .attr('x1', 0)
-  //       .attr('x2', this.chartWidth)
-  //       .attr('y1', (d: any, i: number) => i * this.intervalHeight)
-  //       .attr('y2', (d: any, i: number) => i * this.intervalHeight),
-  //     (selection: any) => selection.remove(),
-  //   )
+  gridGroup.selectAll('.grid-line.grid-x')
+    .data(Array.from({ length: totalIntervals.value }))
+    .join(
+      (selection: any) => selection
+        .append('line')
+        .attr('id', (d: any, i: number) => `grid-line-x-${i}`)
+        .attr('class', 'grid-line grid-x')
+        .attr('stroke', 'var(--blue-20)')
+        .attr('x1', 0)
+        .attr('x2', chartWidth.value)
+        .attr('y1', (d: any, i: number) => i * intervalHeight)
+        .attr('y2', (d: any, i: number) => i * intervalHeight),
+      (selection: any) => selection
+        .attr('x1', 0)
+        .attr('x2', chartWidth.value)
+        .attr('y1', (d: any, i: number) => i * intervalHeight)
+        .attr('y2', (d: any, i: number) => i * intervalHeight),
+      (selection: any) => selection.remove(),
+    )
 
   gridGroup.selectAll('.grid-line.grid-y')
     .data(xScale.value.ticks(interval.value))
