@@ -61,7 +61,7 @@ const updateScales = (): void => {
     .range([0, height.value - paddingY])
 }
 
-const { id, padding, paddingX, paddingY, svg, height, width } = useBaseChart(container, { onResize: handleResize })
+const { id, padding, paddingX, paddingY, height, width } = useBaseChart(container, { onResize: handleResize })
 
 
 const barWidth = computed<number>(() => {
