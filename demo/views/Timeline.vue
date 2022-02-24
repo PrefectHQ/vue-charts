@@ -5,11 +5,12 @@
       <m-tab href="data">Data</m-tab>
     </m-tabs>
 
-    <div id="teleport-target"></div>
-
-    <div v-if="tab == 'chart'" class="timeline-view__chart">
+    <div v-if="tab == 'chart'" class="timeline-view__chart mt-2">
+      <!-- axis-teleport-target="#teleport-target"  -->
       <Timeline :items="data.data" axis-teleport-target="#teleport-target" axis-class="caption" />
     </div>
+
+    <div id="teleport-target"></div>
 
     <div v-if="tab == 'data'" class="timeline-view__data">
       <m-data-table :columns="columns" :rows="data.data">
