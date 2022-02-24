@@ -12,7 +12,7 @@
         :interval-end="data.intervalEnd"
       >
         <template #default="{ item }">
-          <m-popover class="bar-chart-view__bar">
+          <m-popover class="bar-chart-view__bar" :placement="['top', 'right', 'bottom', 'left']">
             <template #trigger="{ toggle, open, close }">
               <div
                 class="bar-chart-view__bar"

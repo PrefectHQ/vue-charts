@@ -39,7 +39,11 @@
         :chart-padding="{ middle: medianPadding, top: 48, bottom: 48 }"
       >
         <template #default="point">
-          <m-popover v-if="point.data !== 0" class="diverging-bar-chart-view__bar-container">
+          <m-popover
+            v-if="point.data !== 0"
+            class="diverging-bar-chart-view__bar-container"
+            :placement="['top', 'right', 'bottom', 'left']"
+          >
             <template #trigger="{ toggle, open, close }">
               <div
                 class="diverging-bar-chart-view__bar-container"
