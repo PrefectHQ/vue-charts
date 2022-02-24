@@ -2,13 +2,14 @@
   <div ref="timeline" class="timeline" @scroll="handleTimelineScroll">
     <main ref="container" class="timeline__viewport">
       <teleport
-        v-if="isMounted"
+        v-if="isMounted && !hideAxis"
         :is="axisTeleportTarget ? 'Teleport' : 'template'"
         :to="axisTeleportTarget"
         class="timeline__svg-container"
       >
         <nav ref="axis" class="timeline__nav" @scroll="handleAxisScroll">
-          <svg :id="id + '__mini'" class="timeline__svg-mini">
+          <!-- We don't need this yet but is a good PoC -->
+          <svg v-if="false" :id="id + '__mini'" class="timeline__svg-mini">
             <g class="timeline__axis-group" />
           </svg>
 
@@ -69,8 +70,6 @@ const handleResize = (): void => {
 
   const svgMini = d3.select(`#${id}__mini`)
   xMiniAxisGroup = svgMini.select('.timeline__axis-group')
-
-  console.log(xAxisGroup, xMiniAxisGroup)
   updateScales()
 }
 
@@ -109,11 +108,8 @@ const xAxis = (scale: d3.ScaleTime<number, number, never>, ticks: number) => (
       .tickPadding(0)
       .ticks(ticks)
       .tickFormat(formatLabel)
-    // .tickSizeInner(0)
-    // .tickSizeOuter(0),
   )
   .call((g) => g.select('.domain').remove())
-// .call((g) => g.selectAll('.tick').style('opacity', 1))
 
 const updateScales = (): void => {
 
@@ -128,11 +124,14 @@ const updateScales = (): void => {
       .domain([_start.value, _end.value])
       .range([baseChart.padding.left, timeline.value.offsetWidth - baseChart.padding.right])
 
-  if (!props.hideAxis && xAxisGroup && xMiniAxisGroup) {
-    xAxisGroup.call(xAxis(xScale.value, baseChart.width.value / 200))
-    xMiniAxisGroup.call(xAxis(xMiniScale.value, Math.round(timeline.value.offsetWidth / 200)))
-  } else if (xAxisGroup) {
-    xAxisGroup.selectAll('.tick').style('opacity', 0)
+  if (!props.hideAxis) {
+    if (xAxisGroup) {
+      xAxisGroup.call(xAxis(xScale.value, baseChart.width.value / 200))
+    }
+
+    if (xMiniAxisGroup) {
+      xMiniAxisGroup.call(xAxis(xMiniScale.value, Math.round(timeline.value.offsetWidth / 200)))
+    }
   }
 
 }

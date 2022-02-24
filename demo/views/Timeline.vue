@@ -44,6 +44,8 @@ const columns = [
   width: inherit;
 
   &__chart {
+    border-radius: 8px;
+    border: 2px solid #465968;
     background-color: #f7f8fa;
     height: 400px;
     max-height: 100vh;
