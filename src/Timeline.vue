@@ -13,11 +13,7 @@
             <g class="timeline__axis-group" />
           </svg>
 
-          <svg
-            :id="id + '__axis'"
-            class="timeline__axis"
-            :style="{ width: `${baseChart.width.value}px` }"
-          >
+          <svg :id="id + '__axis'" class="timeline__axis">
             <g class="timeline__axis-group" />
           </svg>
         </nav>
@@ -147,7 +143,7 @@ const updateScales = (): void => {
   xMiniScale
     .value = d3.scaleTime()
       .domain([_start.value, _end.value])
-  // .range([baseChart.padding.left, timeline.value.offsetWidth - baseChart.padding.right])
+      .range([baseChart.padding.left, timeline.value.offsetWidth - baseChart.padding.right])
 
   if (!props.hideAxis) {
     if (xAxisGroup) {
@@ -228,11 +224,11 @@ const updateDimensions = () => {
 }
 
 const handleAxisScroll = () => {
-  timeline.value.scroll({ left: axis.value.scrollLeft })
+  timeline.value?.scroll({ left: axis.value.scrollLeft })
 }
 
 const handleTimelineScroll = () => {
-  axis.value.scroll({ left: timeline.value.scrollLeft })
+  axis.value?.scroll({ left: timeline.value.scrollLeft })
 }
 
 const updateAll = () => {
