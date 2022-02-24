@@ -10,6 +10,8 @@
         :items="data.items"
         :interval-start="data.intervalStart"
         :interval-end="data.intervalEnd"
+        :chart-padding="{ bottom: 20 }"
+        :axis-padding="10"
       >
         <template #default="{ item }">
           <m-popover class="bar-chart-view__bar" :placement="['top', 'right', 'bottom', 'left']">
@@ -36,6 +38,10 @@
               : {{ item.value }}
             </div>
           </m-popover>
+        </template>
+
+        <template #axis>
+          <div class="bar-chart-view__axis" />
         </template>
       </BarChart>
     </div>
@@ -86,6 +92,12 @@ const columns = [
   &__bar {
     border-radius: 9999px;
     height: 100%;
+    width: 100%;
+  }
+
+  &__axis {
+    height: 2px;
+    background-color: #ebeef7;
     width: 100%;
   }
 }

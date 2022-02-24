@@ -159,10 +159,6 @@ const columns = computed(() => {
     max-width: 50px;
     margin: auto;
     background-color: #6680ee;
-    // border-top-left-radius: inherit;
-    // border-top-right-radius: inherit;
-    // border-bottom-left-radius: inherit;
-    // border-bottom-right-radius: inherit;
   }
 
   &__median {
@@ -174,16 +170,6 @@ const columns = computed(() => {
   &__bar-container {
     height: 100%;
     width: 100%;
-
-    // &:first-of-type {
-    //   border-top-left-radius: 9999px;
-    //   border-top-right-radius: 9999px;
-    // }
-
-    // &:last-of-type {
-    //   border-bottom-left-radius: 9999px;
-    //   border-bottom-right-radius: 9999px;
-    // }
 
     &:focus,
     &:hover {
