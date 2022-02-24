@@ -239,8 +239,9 @@ const updateScales = (): void => {
 }
 
 onMounted(() => {
+  const svg = d3.select(`#${id}`)
+  xAxisGroup = svg.select('.diverging-bar-chart__axis-group')
   updateScales()
-  xAxisGroup = d3.select('.diverging-bar-chart__axis-group')
 })
 
 onBeforeUpdate(() => {

@@ -20,3 +20,9 @@ export type DivergingBarChartData = DivergingBarChartItem['data']
 export type DivergingBarChartSeries = d3.Series<DivergingBarChartData, string>
 export type DivergingBarChartStack = d3.Stack<any, DivergingBarChartSeries, string>
 export type DivergingBarChartSeriesPoint = d3.SeriesPoint<DivergingBarChartData>
+
+export type TimelineChartItem<T = unknown> = {
+  start: Date,
+  end?: Date,
+  data?: T
+}

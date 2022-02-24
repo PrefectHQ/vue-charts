@@ -5,7 +5,11 @@
       <m-tab href="data">Data</m-tab>
     </m-tabs>
 
-    <div v-if="tab == 'chart'" class="timeline-view__chart">Chart</div>
+    <div id="teleport-target"></div>
+
+    <div v-if="tab == 'chart'" class="timeline-view__chart">
+      <Timeline :items="data.data" axis-teleport-target="#teleport-target" axis-class="caption" />
+    </div>
 
     <div v-if="tab == 'data'" class="timeline-view__data">
       <m-data-table :columns="columns" :rows="data.data">
@@ -19,7 +23,7 @@
 
 <script lang="ts" setup>
 import Timeline from '@/Timeline.vue'
-import { generateTimelineData } from '../data';
+import { generateTimelineData } from '../data'
 import { computed, ref } from 'vue'
 
 const start = ref(new Date())
@@ -37,6 +41,7 @@ const columns = [
 <style lang="scss">
 .timeline-view {
   padding: 24px;
+  width: inherit;
 
   &__chart {
     background-color: #f7f8fa;
@@ -48,5 +53,9 @@ const columns = [
     overflow: auto;
     resize: both;
   }
+}
+
+#teleport-target {
+  max-width: 100%;
 }
 </style>

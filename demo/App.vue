@@ -37,7 +37,7 @@
 
   &__main {
     grid-area: "main";
-    width: 100%;
+    width: inherit;
   }
 }
 </style>
