@@ -15,7 +15,6 @@ export interface IBase {
   id: string
   height: Ref<number>
   width: Ref<number>
-  svg: any
   padding: {
     top: number,
     bottom: number,
@@ -55,13 +54,6 @@ export class Base implements IBase {
 
   public height = ref<number>(0)
   public width = ref<number>(0)
-
-  public svg: SelectionType = null as unknown as d3.Selection<
-    SVGGElement,
-    unknown,
-    HTMLElement,
-    null
-  >
 
   public padding = {
     top: 0,
@@ -115,13 +107,6 @@ export class Base implements IBase {
 
     this.height.value = this.container.value.offsetHeight
     this.width.value = this.container.value.offsetWidth
-
-    if (this.svg) {
-      this.svg.attr(
-        'viewbox',
-        `0, 0, ${this.width.value - this.paddingX}, ${this.height.value - this.paddingY}`,
-      )
-    }
 
     this.onResize()
   }

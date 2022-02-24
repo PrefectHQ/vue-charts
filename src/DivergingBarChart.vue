@@ -43,7 +43,7 @@
 import * as d3 from 'd3'
 import { useBaseChart } from './Base'
 import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch } from 'vue'
-import { DivergingBarChartItem, DivergingBarChartData, DivergingBarChartSeriesPoint, DivergingBarChartSeries, DivergingBarChartStack, GroupSelection, TransitionSelection } from './types'
+import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
 import { formatLabel } from '@/utils/formatLabel'
 
 const slots = useSlots()
@@ -81,14 +81,15 @@ const container = ref<HTMLElement>()
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLinear())
 
-const xAxisGroup: GroupSelection | undefined = d3.select('.diverging-bar-chart__axis-group')
 
 const handleResize = (): void => {
   updateScales()
 }
 
 const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
-const { id, svg } = baseChart
+const { id } = baseChart
+
+let xAxisGroup: GroupSelection | undefined
 
 watch(() => props.chartPadding, (val) => {
   baseChart.padding = { ...baseChart.padding, ...val }
@@ -222,6 +223,7 @@ const updateScales = (): void => {
 
 onMounted(() => {
   updateScales()
+  xAxisGroup = d3.select('.diverging-bar-chart__axis-group')
 })
 
 onBeforeUpdate(() => {

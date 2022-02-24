@@ -20,6 +20,7 @@
 
         <m-checkbox v-model="staticMedian">Static median</m-checkbox>
       </div>
+      <m-checkbox v-model="showAxis">Show Axis</m-checkbox>
     </div>
 
     <m-tabs v-model="tab">
@@ -36,6 +37,7 @@
         :positive-sentiment-keys="data.positiveSentimentKeys"
         :negative-sentiment-keys="data.negativeSentimentKeys"
         :static-median="staticMedian"
+        :show-axis="showAxis"
         :chart-padding="{ middle: medianPadding, top: 48, bottom: 48 }"
       >
         <template #default="point">
@@ -108,6 +110,7 @@ const skewOptions = [
 ]
 
 const staticMedian = ref(false)
+const showAxis = ref(false)
 const multiplier = ref("2")
 const buckets = ref("10")
 const keys = ref("8")
