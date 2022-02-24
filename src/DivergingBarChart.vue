@@ -159,7 +159,7 @@ const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
     end += offset
   }
 
-  const height = (end - start)
+  const height = Math.ceil(end - start)
 
   return {
     height: `${height}px`,
