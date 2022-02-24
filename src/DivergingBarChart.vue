@@ -45,7 +45,6 @@ import { useBaseChart } from './Base'
 import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch } from 'vue'
 import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
 import { formatLabel } from '@/utils/formatLabel'
-import { getD3IntervalMethod, secondsToInterval } from '@/utils/time'
 
 const slots = useSlots()
 
