@@ -37,6 +37,7 @@
         :positive-sentiment-keys="data.positiveSentimentKeys"
         :negative-sentiment-keys="data.negativeSentimentKeys"
         :static-median="staticMedian"
+        axis-class="caption"
         :show-axis="showAxis"
         :chart-padding="{ middle: medianPadding, top: 48, bottom: 48 }"
       >

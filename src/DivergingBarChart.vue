@@ -55,6 +55,7 @@ const props = defineProps<{
   items: DivergingBarChartItem<any>[],
   staticMedian?: boolean,
   showAxis?: boolean,
+  axisClass?: string,
   positiveSentimentKeys: string[],
   negativeSentimentKeys: string[],
   chartPadding?: {
@@ -98,10 +99,12 @@ watch(() => props.chartPadding, (val) => {
 const xAxis = (
   g: GroupSelection,
 ): GroupSelection | TransitionSelection => g
-  .attr('transform', `translate(0, ${baseChart.height.value})`)
-  .attr('class', 'caption')
-  .transition()
-  .duration(150)
+  .attr('class', () => {
+    const existingClasses = g.attr('class')?.split(' ') ?? []
+    const propClasses = props.axisClass?.split(' ') ?? []
+    const classes = [...existingClasses, ...propClasses.filter(pc => !existingClasses.includes(pc))]
+    return classes.join(' ')
+  })
   .call(
     d3
       .axisTop(xScale.value)
@@ -111,6 +114,7 @@ const xAxis = (
       .tickSizeOuter(0),
   )
   .call((g) => g.select('.domain').remove())
+  .call((g) => g.selectAll('.tick').style('opacity', 1))
 
 
 const series = computed<DivergingBarChartSeries[]>(() => {
@@ -182,6 +186,17 @@ const medianPosition = computed(() => {
 const updateScales = (): void => {
   const start = props.intervalStart
   const end = props.intervalEnd
+  let axisHeight = 0
+
+  if (props.showAxis && xAxisGroup) {
+    xAxisGroup.call(xAxis)
+
+    axisHeight = xAxisGroup.node()?.getBBox().height ?? 0
+    xAxisGroup.attr('transform', `translate(0, ${baseChart.height.value - axisHeight / 2})`)
+  } else if (xAxisGroup) {
+    xAxisGroup.selectAll('.tick').style('opacity', 0)
+  }
+
 
   xScale
     .value = d3.scaleTime()
@@ -200,7 +215,7 @@ const updateScales = (): void => {
   let scale = d3.scaleLinear()
     .range([
       baseChart.padding.top + baseChart.padding.middle / 2,
-      baseChart.height.value - baseChart.padding.bottom - baseChart.padding.middle / 2
+      baseChart.height.value - baseChart.padding.bottom - baseChart.padding.middle / 2 - axisHeight
     ])
 
 
@@ -218,6 +233,8 @@ const updateScales = (): void => {
 
   if (props.showAxis && xAxisGroup) {
     xAxisGroup.call(xAxis)
+  } else if (xAxisGroup) {
+    xAxisGroup.selectAll('.tick').style('opacity', 0)
   }
 }
 
@@ -256,7 +273,7 @@ onBeforeUpdate(() => {
   pointer-events: none;
   transition: all 150ms;
   width: 100%;
-  z-index: 2;
+  z-index: 0;
 }
 
 .diverging-bar-chart__series-container {
@@ -266,6 +283,7 @@ onBeforeUpdate(() => {
   position: absolute;
   top: 0;
   width: 100%;
+  z-index: 0;
 }
 
 .diverging-bar-chart__series {
