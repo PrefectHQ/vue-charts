@@ -8,6 +8,10 @@
         class="timeline__svg-container"
       >
         <nav ref="axis" class="timeline__nav" @scroll="handleAxisScroll">
+          <svg :id="id + '__mini'" class="timeline__svg-mini">
+            <g class="timeline__axis-group" />
+          </svg>
+
           <svg :id="id" class="timeline__svg" :style="{ width: `${baseChart.width.value}px` }">
             <g class="timeline__axis-group" />
           </svg>
@@ -62,6 +66,11 @@ const isMounted = ref(false)
 const handleResize = (): void => {
   const svg = d3.select(`#${id}`)
   xAxisGroup = svg.select('.timeline__axis-group')
+
+  const svgMini = d3.select(`#${id}__mini`)
+  xMiniAxisGroup = svgMini.select('.timeline__axis-group')
+
+  console.log(xAxisGroup, xMiniAxisGroup)
   updateScales()
 }
 
@@ -69,9 +78,11 @@ const baseChart = useBaseChart(container, { onResize: handleResize })
 const { id } = baseChart
 
 const xScale = ref(d3.scaleTime())
+const xMiniScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLinear())
 
 let xAxisGroup: GroupSelection | undefined
+let xMiniAxisGroup: GroupSelection | undefined
 
 const _start = computed(() => {
   return props.start ?? new Date()
@@ -83,7 +94,7 @@ const _end = computed(() => {
   return props.end ?? end
 })
 
-const xAxis = (
+const xAxis = (scale: d3.ScaleTime<number, number, never>, ticks: number) => (
   g: GroupSelection,
 ): GroupSelection | TransitionSelection => g
   .attr('class', () => {
@@ -94,9 +105,9 @@ const xAxis = (
   })
   .call(
     d3
-      .axisBottom(xScale.value)
+      .axisBottom(scale)
       .tickPadding(0)
-      .ticks(baseChart.width.value / 200)
+      .ticks(ticks)
       .tickFormat(formatLabel)
     // .tickSizeInner(0)
     // .tickSizeOuter(0),
@@ -112,8 +123,14 @@ const updateScales = (): void => {
       .domain([_start.value, _end.value])
       .range([baseChart.padding.left, baseChart.width.value - baseChart.padding.right])
 
-  if (!props.hideAxis && xAxisGroup) {
-    xAxisGroup.call(xAxis)
+  xMiniScale
+    .value = d3.scaleTime()
+      .domain([_start.value, _end.value])
+      .range([baseChart.padding.left, timeline.value.offsetWidth - baseChart.padding.right])
+
+  if (!props.hideAxis && xAxisGroup && xMiniAxisGroup) {
+    xAxisGroup.call(xAxis(xScale.value, baseChart.width.value / 200))
+    xMiniAxisGroup.call(xAxis(xMiniScale.value, Math.round(timeline.value.offsetWidth / 200)))
   } else if (xAxisGroup) {
     xAxisGroup.selectAll('.tick').style('opacity', 0)
   }
@@ -169,8 +186,16 @@ onBeforeUpdate(() => {
   }
 }
 
+.timeline__svg-mini {
+  height: 24px;
+  width: 100%;
+  position: sticky;
+  left: 0;
+  top: 0;
+}
+
 .timeline__svg {
-  height: 64px;
+  height: 24px;
 }
 
 .timeline__viewport {
