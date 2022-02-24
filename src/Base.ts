@@ -33,7 +33,14 @@ export interface IBase {
 }
 
 export interface IBaseOptions {
-  onResize?: () => void
+  onResize?: () => void,
+  padding?: {
+    top?: number,
+    bottom?: number,
+    middle?: number,
+    left?: number,
+    right?: number,
+  }
 }
 
 // Starting these with an underscore allows us to use UUIDs as HTMLElement ids
@@ -59,7 +66,7 @@ export class Base implements IBase {
   public padding = {
     top: 0,
     bottom: 0,
-    middle: 24,
+    middle: 0,
     left: 0,
     right: 0
   }
@@ -73,6 +80,10 @@ export class Base implements IBase {
 
     if (options?.onResize) {
       this.onResize = options.onResize
+    }
+
+    if (options?.padding) {
+      this.padding = { ...this.padding, ...options.padding }
     }
   }
 

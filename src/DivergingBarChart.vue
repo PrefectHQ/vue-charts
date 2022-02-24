@@ -39,7 +39,7 @@
 <script lang="ts" setup>
 import * as d3 from 'd3'
 import { useBaseChart } from './Base'
-import { computed, ref, onMounted, onBeforeUpdate, useSlots } from 'vue'
+import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch } from 'vue'
 import { DivergingBarChartItem, DivergingBarChartData, DivergingBarChartSeriesPoint, DivergingBarChartSeries, DivergingBarChartStack, GroupSelection, TransitionSelection } from './types'
 import { formatLabel } from '@/utils/formatLabel'
 
@@ -54,6 +54,13 @@ const props = defineProps<{
   showAxis?: boolean,
   positiveSentimentKeys: string[],
   negativeSentimentKeys: string[],
+  chartPadding?: {
+    top?: number,
+    bottom?: number,
+    middle?: number,
+    left?: number,
+    right?: number
+  }
 }>()
 
 
@@ -77,12 +84,17 @@ const handleResize = (): void => {
   updateScales()
 }
 
-const { id, padding, paddingX, paddingY, svg, height, width } = useBaseChart(container, { onResize: handleResize })
+const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
+const { id, svg } = baseChart
+
+watch(() => props.chartPadding, (val) => {
+  baseChart.padding = { ...baseChart.padding, ...val }
+})
 
 const xAxis = (
   g: GroupSelection,
 ): GroupSelection | TransitionSelection => g
-  .attr('transform', `translate(0, ${height.value})`)
+  .attr('transform', `translate(0, ${baseChart.height.value})`)
   .attr('class', 'caption')
   .transition()
   .duration(150)
@@ -132,16 +144,19 @@ const calculateSeriesPosition = (item: DivergingBarChartItem) => {
 }
 
 const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
-  const offset = padding.middle / 2
+  const offset = baseChart.padding.middle / 2
   let start = yScale.value(point[0])
-  const end = yScale.value(point[1])
-  const height = end - start
+  let end = yScale.value(point[1])
 
   if (point[0] < 0) {
     start -= offset
+    end -= offset
   } else {
     start += offset
+    end += offset
   }
+
+  const height = (end - start)
 
   return {
     height: `${height}px`,
@@ -154,7 +169,7 @@ const median = computed(() => {
 })
 
 const medianPosition = computed(() => {
-  const top = median.value > 0 ? median.value : height.value / 2
+  const top = median.value > 0 ? median.value : baseChart.height.value / 2
   return {
     top: `${top}px`
   }
@@ -167,7 +182,7 @@ const updateScales = (): void => {
   xScale
     .value = d3.scaleTime()
       .domain([start, end])
-      .range([padding.left, width.value - padding.right])
+      .range([baseChart.padding.left, baseChart.width.value - baseChart.padding.right])
 
   const flattened = series.value.flat(2)
   let min = Math.min(...flattened)
@@ -178,13 +193,12 @@ const updateScales = (): void => {
     max = 1
   }
 
-  const med = (max + min) / 2
-
   let scale = d3.scaleLinear()
     .range([
-      padding.top,
-      height.value - paddingY
+      baseChart.padding.top + baseChart.padding.middle / 2,
+      baseChart.height.value - baseChart.padding.bottom - baseChart.padding.middle / 2
     ])
+
 
   if (props.staticMedian) {
     const extremity = Math.max(Math.abs(min), Math.abs(max))

@@ -1,12 +1,12 @@
 <template>
   <main class="diverging-bar-chart-view">
     <div class="mb-2 d-flex align-center justify-start">
-      <div>
+      <div class="mr-2">
         <m-select v-model="skew" :options="skewOptions" />
         <m-slider v-model="multiplier" :min="0" :max="10" label="Skew Multiplier" />
       </div>
 
-      <div>
+      <div class="mr-2">
         <div>
           <m-slider v-model="buckets" :min="1" :max="100" label="Buckets" />
         </div>
@@ -15,7 +15,11 @@
         </div>
       </div>
 
-      <m-checkbox v-model="staticMedian">Static median</m-checkbox>
+      <div class="mr-2">
+        <m-number-input v-model="medianPadding" :min="0" :max="128" :step="4">Median Padding</m-number-input>
+
+        <m-checkbox v-model="staticMedian">Static median</m-checkbox>
+      </div>
     </div>
 
     <m-tabs v-model="tab">
@@ -32,6 +36,7 @@
         :positive-sentiment-keys="data.positiveSentimentKeys"
         :negative-sentiment-keys="data.negativeSentimentKeys"
         :static-median="staticMedian"
+        :chart-padding="{ middle: medianPadding, top: 48, bottom: 48 }"
       >
         <template #default="point">
           <m-popover v-if="point.data !== 0" class="diverging-bar-chart-view__bar-container">
@@ -95,12 +100,10 @@ const skewOptions = [
 ]
 
 const staticMedian = ref(false)
-
 const multiplier = ref("2")
-
 const buckets = ref("10")
-
 const keys = ref("8")
+const medianPadding = ref(128)
 
 const data = computed(() => generateSentimentData({
   intervalStart: start.value,
