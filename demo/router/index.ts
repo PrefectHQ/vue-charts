@@ -12,6 +12,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/DivergingBarChart.vue'),
   },
   {
+    path: '/timeline',
+    name: 'Timeline',
+    component: () => import('../views/Timeline.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart'
   }

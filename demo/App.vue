@@ -3,6 +3,7 @@
     <nav class="app__nav">
       <router-link to="/bar-chart">Bar Chart</router-link>
       <router-link to="/diverging-bar-chart">Diverging Bar Chart</router-link>
+      <router-link to="/timeline">Timeline</router-link>
     </nav>
     <main class="app__main">
       <router-view />

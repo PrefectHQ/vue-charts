@@ -134,4 +134,52 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
   }
 }
 
-export { generateBarChartData, generateSentimentData }
+export type TimelineDataOptions = {
+  start?: Date,
+  end?: Date,
+  items?: number
+}
+
+type TimelineData = {
+  start: Date,
+  end: Date,
+  data: any[]
+}
+
+const randomDate = (start: Date, end: Date): Date => {
+  const startTime = start.getTime()
+  const endTime = end.getTime()
+  const date = new Date(startTime + Math.random() * (endTime - startTime))
+  return date
+}
+
+const generateTimelineData = (options?: TimelineDataOptions): TimelineData => {
+  const data: any[] = []
+  const { items = 30, start = new Date(), end = new Date() } = options ?? {}
+
+  if (!options?.start) {
+    end.setHours(end.getHours() + 1)
+  }
+
+  // Create items
+  while (data.length < items) {
+    const _start = randomDate(start, end)
+    const _end = randomDate(_start, end)
+
+    const target = {
+      start: _start,
+      end: _end,
+      data: {
+        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
+      }
+    }
+
+    const proxy = new Proxy(target, {})
+    data.push(proxy)
+  }
+
+
+  return { start, end, data }
+}
+
+export { generateBarChartData, generateSentimentData, generateTimelineData }
