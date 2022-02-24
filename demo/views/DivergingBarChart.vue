@@ -60,6 +60,10 @@
             <div>{{ point.data }}</div>
           </m-popover>
         </template>
+
+        <template #median>
+          <div class="diverging-bar-chart-view__median" />
+        </template>
       </DivergingBarChart>
     </div>
 
@@ -103,7 +107,7 @@ const staticMedian = ref(false)
 const multiplier = ref("2")
 const buckets = ref("10")
 const keys = ref("8")
-const medianPadding = ref(128)
+const medianPadding = ref(24)
 
 const data = computed(() => generateSentimentData({
   intervalStart: start.value,
@@ -151,6 +155,12 @@ const columns = computed(() => {
     // border-top-right-radius: inherit;
     // border-bottom-left-radius: inherit;
     // border-bottom-right-radius: inherit;
+  }
+
+  &__median {
+    height: 4px;
+    background-color: #ebeef7;
+    width: 100%;
   }
 
   &__bar-container {

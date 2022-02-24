@@ -5,7 +5,10 @@
         <g class="diverging-bar-chart__axis-group" />
       </svg>
 
-      <div class="diverging-bar-chart__median" :style="medianPosition" />
+      <div class="diverging-bar-chart__median-container" :style="medianPosition">
+        <slot v-if="slots.median" name="median" />
+        <div v-else class="diverging-bar-chart__median" />
+      </div>
 
       <div class="diverging-bar-chart__series-container">
         <template v-for="[key, series] in seriesMap" :key="key">
@@ -243,9 +246,13 @@ onBeforeUpdate(() => {
   background-color: red;
   height: 1px;
   left: 0;
+}
+
+.diverging-bar-chart__median-container {
+  left: 0;
   position: absolute;
   pointer-events: none;
-  transition: top 150ms;
+  transition: all 150ms;
   width: 100%;
   z-index: 2;
 }
