@@ -6,20 +6,41 @@
     </m-tabs>
 
     <div v-if="tab == 'chart'" class="timeline-view__chart mt-2">
-      <!-- axis-teleport-target="#teleport-target"  -->
       <Timeline
         :items="data.data"
         :start="data.start"
         :end="data.end"
+        axis-teleport-target="#teleport-target"
         axis-class="caption"
         grid-line-class="timeline-view__grid-line"
       >
         <template #default="{ node }">
-          <div
-            class="timeline-view__node"
-            :style="{ 'background-color': node.data.color }"
-            tabindex="0"
-          />
+          <m-popover class="timeline-view__node" :placement="['top', 'bottom', 'right', 'left']">
+            <template #trigger="{ toggle, open, close }">
+              <div
+                class="timeline-view__node"
+                :style="{ 'background-color': node.data.color }"
+                tabindex="0"
+                @focusin="open"
+                @focusout="close"
+                @mouseenter="open"
+                @mouseleave="close"
+              />
+            </template>
+
+            <template #header>
+              <strong>{{ node.id }}</strong>
+            </template>
+
+            <div>
+              <strong>Start:</strong>
+              {{ node.start?.toLocaleTimeString() }}
+            </div>
+            <div>
+              <strong>End:</strong>
+              {{ node.end?.toLocaleTimeString() }}
+            </div>
+          </m-popover>
         </template>
       </Timeline>
     </div>
@@ -80,7 +101,7 @@ const columns = [
 }
 
 .timeline-view__grid-line {
-  stroke: #f6a609;
+  stroke: #d2d9df;
   stroke-opacity: 0.5;
 }
 
