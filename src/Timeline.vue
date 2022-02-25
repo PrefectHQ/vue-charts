@@ -201,7 +201,6 @@ const updateScales = (): void => {
 }
 
 const updateAxis = (): void => {
-  console.log(props.hideAxis, xAxisGroup)
   if (!props.hideAxis) {
     if (xAxisGroup) {
       xAxisGroup.call(xAxis(xScale.value, interval.value))
