@@ -215,7 +215,7 @@ const updateGrid = (): void => {
   if (!gridGroup) return
 
 
-  gridGroup.selectAll('.timeline__grid-line.grid--x')
+  gridGroup.selectAll('.timeline__grid-line.timeline__grid-line--x')
     .data(Array.from({ length: intervals.value }))
     .join(
       (selection: any) => selection

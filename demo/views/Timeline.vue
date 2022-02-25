@@ -81,6 +81,7 @@ const columns = [
 
 .timeline-view__grid-line {
   stroke: #f6a609;
+  stroke-opacity: 0.5;
 }
 
 #teleport-target {
