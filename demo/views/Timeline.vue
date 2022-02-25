@@ -7,7 +7,7 @@
 
     <div v-if="tab == 'chart'" class="timeline-view__chart mt-2">
       <!-- axis-teleport-target="#teleport-target"  -->
-      <Timeline :items="data.data" axis-class="caption">
+      <Timeline :items="data.data" :start="data.start" :end="data.end" axis-class="caption">
         <template #default="{ node }">
           <div class="timeline-view__node" :style="{ 'background-color': node.data.color }" />
         </template>

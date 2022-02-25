@@ -51,8 +51,8 @@ const props = defineProps<{
   axisTeleportTarget?: string,
   hideAxis?: boolean,
   axisClass?: string,
-  cellWidth?: number,
-  cellHeight?: number,
+  intervalHeight?: number,
+  intervalWidth?: number,
   minIntervalSeconds?: number,
   chartPadding?: {
     top?: number,
@@ -95,29 +95,29 @@ const _end = computed(() => {
   return props.end ?? end
 })
 
-const intervalWidth = 150
-const intervalHeight = 50
+const intervalWidth = ref(props.intervalWidth ?? 150)
+const intervalHeight = ref(props.intervalHeight ?? 50)
 
 const interval = computed<d3.TimeInterval>(() => {
   return d3.timeMinute.every(1)!
 })
 
 const chartWidth = computed(() => {
-  return intervals.value * intervalWidth
+  return intervals.value * intervalWidth.value
 })
 
 const chartHeight = computed(() => {
   // Adding 1 to this ensures we always have an extra row, which is nice visually
-  return (rows.value.length + 1) * intervalHeight
+  return (rows.value.length + 1) * intervalHeight.value
 })
 
 const calculateNodeStyle = (item: TimelineChartItem) => {
   const left = xScale.value(item.start)
   const right = xScale.value(item.end || _end.value)
-  const top = rowMap.value.get(item.id)! * intervalHeight
+  const top = rowMap.value.get(item.id)! * intervalHeight.value
 
   return {
-    height: `${intervalHeight}px`,
+    height: `${intervalHeight.value}px`,
     left: `${left}px`,
     top: `${top}px`,
     width: `${right - left}px`
@@ -226,13 +226,13 @@ const updateGrid = (): void => {
         .attr('stroke', 'var(--blue-20)')
         .attr('x1', 0)
         .attr('x2', chartWidth.value)
-        .attr('y1', (d: any, i: number) => i * intervalHeight)
-        .attr('y2', (d: any, i: number) => i * intervalHeight),
+        .attr('y1', (d: any, i: number) => i * intervalHeight.value)
+        .attr('y2', (d: any, i: number) => i * intervalHeight.value),
       (selection: any) => selection
         .attr('x1', 0)
         .attr('x2', chartWidth.value)
-        .attr('y1', (d: any, i: number) => i * intervalHeight)
-        .attr('y2', (d: any, i: number) => i * intervalHeight),
+        .attr('y1', (d: any, i: number) => i * intervalHeight.value)
+        .attr('y2', (d: any, i: number) => i * intervalHeight.value),
       (selection: any) => selection.remove(),
     )
 
@@ -367,6 +367,7 @@ onBeforeUpdate(() => {
   display: flex;
   align-items: center;
   position: absolute;
+  overflow: hidden;
   z-index: 1;
 }
 
