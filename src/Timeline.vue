@@ -42,8 +42,6 @@ import * as d3 from 'd3'
 import { Teleport } from 'vue';
 import useBaseChart from './Base'
 
-const slots = useSlots()
-
 const props = defineProps<{
   start?: Date,
   end?: Date,
@@ -51,6 +49,7 @@ const props = defineProps<{
   axisTeleportTarget?: string,
   hideAxis?: boolean,
   axisClass?: string,
+  gridLineClass?: string,
   intervalHeight?: number,
   intervalWidth?: number,
   minIntervalSeconds?: number,
@@ -216,14 +215,13 @@ const updateGrid = (): void => {
   if (!gridGroup) return
 
 
-  gridGroup.selectAll('.grid-line.grid-x')
+  gridGroup.selectAll('.timeline__grid-line.grid--x')
     .data(Array.from({ length: intervals.value }))
     .join(
       (selection: any) => selection
         .append('line')
-        .attr('id', (d: any, i: number) => `grid-line-x-${i}`)
-        .attr('class', 'grid-line grid-x')
-        .attr('stroke', 'var(--blue-20)')
+        .attr('id', (d: any, i: number) => `timeline__grid-line-x-${i}`)
+        .attr('class', `timeline__grid-line timeline__grid-line--x ${props.gridLineClass}`)
         .attr('x1', 0)
         .attr('x2', chartWidth.value)
         .attr('y1', (d: any, i: number) => i * intervalHeight.value)
@@ -236,14 +234,13 @@ const updateGrid = (): void => {
       (selection: any) => selection.remove(),
     )
 
-  gridGroup.selectAll('.grid-line.grid-y')
+  gridGroup.selectAll('.timeline__grid-line.timeline__grid-line--y')
     .data(xScale.value.ticks(interval.value))
     .join(
       (selection: any) => selection
         .append('line')
         .attr('id', (d: any, i: number) => `x-${i}`)
-        .attr('class', 'grid-line grid-y')
-        .attr('stroke', 'var(--blue-20)')
+        .attr('class', `timeline__grid-line timeline__grid-line--y ${props.gridLineClass}`)
         .attr('x1', (d: any, i: number) => xScale.value(d))
         .attr('x2', (d: any, i: number) => xScale.value(d))
         .attr('y1', 0)
@@ -352,6 +349,10 @@ onBeforeUpdate(() => {
   z-index: 0;
 }
 
+.timeline__grid-line {
+  stroke: #ebeef7;
+}
+
 .timeline__viewport {
   position: relative;
   min-width: 100%;
@@ -367,7 +368,6 @@ onBeforeUpdate(() => {
   display: flex;
   align-items: center;
   position: absolute;
-  overflow: hidden;
   z-index: 1;
 }
 
