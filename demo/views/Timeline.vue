@@ -3,7 +3,8 @@
     <div class="mb-2 d-flex align-center justify-start">
       <m-checkbox v-model="live">Live</m-checkbox>
       <m-checkbox v-model="hideAxis">Hide Axis</m-checkbox>
-      <m-button class="ml-4" @click="newStart">Restart</m-button>
+      <m-button class="ml-4" @click="reset">Restart</m-button>
+      <m-button class="ml-4" @click="generateFull">Generate Full Dataset</m-button>
     </div>
 
     <m-tabs v-model="tab">
@@ -20,6 +21,8 @@
         axis-teleport-target="#teleport-target"
         axis-class="caption"
         grid-line-class="timeline-view__grid-line"
+        :node-min-width="28"
+        :chart-padding="{ left: 28, right: 28 }"
       >
         <template #default="{ node }">
           <m-popover class="timeline-view__node" :placement="['top', 'bottom', 'right', 'left']">
@@ -66,17 +69,24 @@
 
 <script lang="ts" setup>
 import Timeline from '@/Timeline.vue'
-import { generateTimelineData } from '../data'
-import { computed, ref } from 'vue'
+import { generateRandomTimelineData, generateInitialTimelineData, updateTimelineData, TimelineData } from '../data'
+import { computed, ref, watch } from 'vue'
 
-const start = ref(new Date())
+let liveInterval: NodeJS.Timeout
+
 const live = ref(false)
 const hideAxis = ref(false)
 const tab = ref('chart')
-const data = computed(() => generateTimelineData({ start: start.value }))
+const data = ref<TimelineData>(generateInitialTimelineData())
 
-const newStart = () => {
-  start.value = new Date()
+const reset = () => {
+  stopLiveInterval()
+
+  data.value = generateInitialTimelineData()
+
+  if (live.value) {
+    startLiveInterval()
+  }
 }
 
 const columns = [
@@ -84,6 +94,35 @@ const columns = [
   { label: 'End', value: 'end' },
   { label: 'Color', value: 'color' }
 ]
+
+const generateFull = () => {
+  stopLiveInterval()
+  live.value = false
+
+  data.value = generateRandomTimelineData()
+}
+
+const startLiveInterval = () => {
+  if (liveInterval) clearInterval(liveInterval)
+  data.value = updateTimelineData(data.value, false, 0.9)
+
+  liveInterval = setInterval(() => {
+    data.value = updateTimelineData(data.value, false, 0.9)
+  }, 3000)
+}
+
+const stopLiveInterval = () => {
+  clearInterval(liveInterval)
+  data.value = updateTimelineData(data.value, true)
+}
+
+watch(() => live.value, (oldVal, newVal) => {
+  if (live.value) {
+    startLiveInterval()
+  } else {
+    stopLiveInterval()
+  }
+})
 
 </script>
 
@@ -107,7 +146,7 @@ const columns = [
 
   &__node {
     background-color: #6680ee;
-    border-radius: 999px;
+    border-radius: 14px;
     height: 28px;
     width: 100%;
   }

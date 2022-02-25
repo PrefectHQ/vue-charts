@@ -1,5 +1,7 @@
 import * as d3 from 'd3'
 
+type TimeInterval = 'years' | 'days' | 'hours' | 'minutes' | 'seconds'
+
 const _y = 31536000, // Seconds in a year
   _d = 86400, // Seconds in a day
   _h = 3600, // Seconds in an hour
@@ -16,7 +18,7 @@ const aggregateSeconds = (s: number): Record<string, number> => {
   return { years, days, hours, minutes, seconds }
 }
 
-const getLargestInterval = (s: number): string => {
+const getLargestInterval = (s: number): TimeInterval => {
   const _t = aggregateSeconds(s)
 
   if (_t.years > 0) {
@@ -56,7 +58,7 @@ const secondsToInterval = (s: number): number => {
   }
 }
 
-const getD3IntervalMethod = (start: Date, end: Date) => {
+const getD3IntervalMethod = (start: Date, end: Date): d3.CountableTimeInterval => {
   const timeStart = start.getTime() / 1000 // time in seconds
   const timeEnd = end.getTime() / 1000 // time in seconds
 
@@ -77,4 +79,51 @@ const getD3IntervalMethod = (start: Date, end: Date) => {
   }
 }
 
-export { getD3IntervalMethod, getLargestInterval, secondsToInterval, aggregateSeconds }
+const getNextLowestInterval = (interval: TimeInterval): TimeInterval => {
+  switch (interval) {
+    case 'years':
+      return 'days'
+    case 'days':
+      return 'hours'
+    case 'hours':
+      return 'minutes'
+    case 'minutes':
+      return 'seconds'
+    case 'seconds':
+    default:
+      return 'seconds'
+  }
+}
+
+
+const getD3MinIntervalMethod = (start: Date, end: Date, min: number = 5): d3.CountableTimeInterval => {
+  const timeStart = start.getTime() / 1000 // time in seconds
+  const timeEnd = end.getTime() / 1000 // time in seconds
+
+  const _s = aggregateSeconds(timeEnd - timeStart)
+  const _t = getLargestInterval(timeEnd - timeStart)
+
+  let _temp = _t
+  if (_s[_t] < min) {
+    _temp = getNextLowestInterval(_t)
+  }
+
+  switch (_temp) {
+    case 'years':
+      return d3.timeYear
+    case 'days':
+      return d3.timeDay
+    case 'hours':
+      return d3.timeHour
+    case 'minutes':
+      return d3.timeMinute
+    case 'seconds':
+    default:
+      return d3.timeSecond
+  }
+}
+
+export {
+  getD3IntervalMethod, getNextLowestInterval,
+  getD3MinIntervalMethod, getLargestInterval, secondsToInterval, aggregateSeconds
+}

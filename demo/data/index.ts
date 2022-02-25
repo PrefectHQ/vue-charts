@@ -140,20 +140,20 @@ export type TimelineDataOptions = {
   items?: number
 }
 
-type TimelineData = {
+export type TimelineData = {
   start: Date,
-  end: Date,
+  end?: Date,
   data: TimelineChartItem[]
 }
 
-const randomDate = (start: Date, end: Date): Date => {
+const randomDate = (start: Date, end?: Date): Date => {
   const startTime = start.getTime()
-  const endTime = end.getTime()
+  const endTime = end?.getTime() ?? new Date().getTime()
   const date = new Date(startTime + Math.random() * (endTime - startTime))
   return date
 }
 
-const generateTimelineData = (options?: TimelineDataOptions): TimelineData => {
+const generateRandomTimelineData = (options?: TimelineDataOptions): TimelineData => {
   const data: TimelineChartItem[] = []
   const { items = 30, start = new Date(), end = new Date() } = options ?? {}
 
@@ -183,4 +183,53 @@ const generateTimelineData = (options?: TimelineDataOptions): TimelineData => {
   return { start, end, data }
 }
 
-export { generateBarChartData, generateSentimentData, generateTimelineData }
+const generateTimelineChartItem = (): TimelineChartItem => {
+  const _start = new Date()
+
+  const target = {
+    id: crypto.randomUUID(),
+    start: _start,
+    end: undefined,
+    data: {
+      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
+    }
+  }
+
+  const proxy = new Proxy<TimelineChartItem>(target, {})
+
+  return proxy
+}
+
+const generateInitialTimelineData = (): TimelineData => {
+  const start = new Date()
+  return { start, data: [] }
+}
+
+const updateTimelineData = (data: TimelineData, stop?: boolean, parallelChance: number = 0): TimelineData => {
+  if (stop) {
+    data.end = new Date()
+
+    data.data.forEach((item) => {
+      if (!item.end) item.end = data.end
+    })
+
+    return data
+  } else {
+    const _data: TimelineChartItem[] = [...data.data]
+
+    _data.filter(_d => !_d.end).forEach((_d) => {
+      if (Math.random() > parallelChance) {
+        _d.end = new Date()
+      }
+    })
+
+    const newItem = generateTimelineChartItem()
+
+    _data.push(newItem)
+
+    return { ...data, data: _data }
+  }
+
+}
+
+export { generateBarChartData, generateSentimentData, generateRandomTimelineData, generateInitialTimelineData, updateTimelineData }
