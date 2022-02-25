@@ -36,7 +36,7 @@
 
 <script lang="ts" setup>
 import { TimelineChartItem, GroupSelection, TransitionSelection } from './types'
-import { ref, computed, onMounted, onBeforeUpdate, useSlots } from 'vue'
+import { ref, computed, onMounted, onBeforeUpdate, useSlots, onUpdated, watch, nextTick, watchEffect } from 'vue'
 import { formatLabel } from '@/utils/formatLabel'
 import * as d3 from 'd3'
 import { Teleport } from 'vue';
@@ -69,7 +69,6 @@ const timeline = ref()
 const isMounted = ref(false)
 
 const handleResize = (): void => {
-  createGroupSelectors()
   updateAll()
 }
 
@@ -199,7 +198,10 @@ const updateScales = (): void => {
     .value = d3.scaleTime()
       .domain([_start.value, _end.value])
       .range([baseChart.padding.left, timeline.value.offsetWidth - baseChart.padding.right])
+}
 
+const updateAxis = (): void => {
+  console.log(props.hideAxis, xAxisGroup)
   if (!props.hideAxis) {
     if (xAxisGroup) {
       xAxisGroup.call(xAxis(xScale.value, interval.value))
@@ -213,7 +215,6 @@ const updateScales = (): void => {
 
 const updateGrid = (): void => {
   if (!gridGroup) return
-
 
   gridGroup.selectAll('.timeline__grid-line.timeline__grid-line--x')
     .data(Array.from({ length: intervals.value }))
@@ -285,19 +286,25 @@ const handleTimelineScroll = () => {
 }
 
 const updateAll = () => {
+  createGroupSelectors()
   updateScales()
+  updateAxis()
   updateDimensions()
   updateGrid()
 }
 
 onMounted(() => {
-  createGroupSelectors()
   updateAll()
   isMounted.value = true
 })
 
-onBeforeUpdate(() => {
-  updateAll()
+watchEffect(() => {
+  if (!props.hideAxis) {
+    // This ensures we can properly grab selectors after the dom has updated
+    nextTick(() => {
+      updateAll()
+    })
+  }
 })
 
 </script>

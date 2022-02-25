@@ -157,7 +157,7 @@ const generateTimelineData = (options?: TimelineDataOptions): TimelineData => {
   const data: TimelineChartItem[] = []
   const { items = 30, start = new Date(), end = new Date() } = options ?? {}
 
-  if (!options?.start) {
+  if (!options?.end) {
     end.setHours(end.getHours() + 1)
   }
 

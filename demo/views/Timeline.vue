@@ -1,5 +1,11 @@
 <template>
   <main class="timeline-view">
+    <div class="mb-2 d-flex align-center justify-start">
+      <m-checkbox v-model="live">Live</m-checkbox>
+      <m-checkbox v-model="hideAxis">Hide Axis</m-checkbox>
+      <m-button class="ml-4" @click="newStart">Restart</m-button>
+    </div>
+
     <m-tabs v-model="tab">
       <m-tab href="chart">Chart</m-tab>
       <m-tab href="data">Data</m-tab>
@@ -10,6 +16,7 @@
         :items="data.data"
         :start="data.start"
         :end="data.end"
+        :hide-axis="hideAxis"
         axis-teleport-target="#teleport-target"
         axis-class="caption"
         grid-line-class="timeline-view__grid-line"
@@ -63,8 +70,14 @@ import { generateTimelineData } from '../data'
 import { computed, ref } from 'vue'
 
 const start = ref(new Date())
+const live = ref(false)
+const hideAxis = ref(false)
 const tab = ref('chart')
-const data = computed(() => generateTimelineData())
+const data = computed(() => generateTimelineData({ start: start.value }))
+
+const newStart = () => {
+  start.value = new Date()
+}
 
 const columns = [
   { label: 'Start', value: 'start' },
