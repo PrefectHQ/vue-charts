@@ -3,7 +3,7 @@
     <div class="mb-2 d-flex align-center justify-start">
       <m-checkbox v-model="live">Live</m-checkbox>
       <m-checkbox v-model="hideAxis">Hide Axis</m-checkbox>
-      <m-button class="ml-4" @click="reset">Restart</m-button>
+      <m-button class="ml-4" @click="reset">Reset</m-button>
       <m-button class="ml-4" @click="generateFull">Generate Full Dataset</m-button>
     </div>
 
@@ -14,16 +14,17 @@
 
     <div v-if="tab == 'chart'" class="timeline-view__chart mt-2">
       <Timeline
-        :items="data.data"
-        :start="data.start"
-        :end="data.end"
+        :items="data?.data ?? []"
+        :start="data?.start"
+        :end="data?.end"
         :hide-axis="hideAxis"
-        axis-teleport-target="#teleport-target"
         axis-class="caption"
         grid-line-class="timeline-view__grid-line"
         :node-min-width="28"
         :chart-padding="{ left: 28, right: 28 }"
       >
+        <!-- axis-teleport-target="#teleport-target" -->
+
         <template #default="{ node }">
           <m-popover class="timeline-view__node" :placement="['top', 'bottom', 'right', 'left']">
             <template #trigger="{ toggle, open, close }">
@@ -58,7 +59,7 @@
     <div id="teleport-target"></div>
 
     <div v-if="tab == 'data'" class="timeline-view__data">
-      <m-data-table :columns="columns" :rows="data.data">
+      <m-data-table :columns="columns" :rows="data?.data ?? []">
         <template #column-color="{ row }">{{ row.data?.color }}</template>
         <template #column-start="{ row }">{{ row.start.toLocaleTimeString() }}</template>
         <template #column-end="{ row }">{{ row.end.toLocaleTimeString() }}</template>
@@ -70,7 +71,7 @@
 <script lang="ts" setup>
 import Timeline from '@/Timeline.vue'
 import { generateRandomTimelineData, generateInitialTimelineData, updateTimelineData, TimelineData } from '../data'
-import { computed, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 
 let liveInterval: NodeJS.Timeout
 
@@ -104,16 +105,16 @@ const generateFull = () => {
 
 const startLiveInterval = () => {
   if (liveInterval) clearInterval(liveInterval)
-  data.value = updateTimelineData(data.value, false, 0.9)
+  data.value = updateTimelineData(data.value ?? generateInitialTimelineData(), false, 0.9)
 
   liveInterval = setInterval(() => {
-    data.value = updateTimelineData(data.value, false, 0.9)
+    data.value = updateTimelineData(data.value ?? generateInitialTimelineData(), false, 0.9)
   }, 3000)
 }
 
 const stopLiveInterval = () => {
   clearInterval(liveInterval)
-  data.value = updateTimelineData(data.value, true)
+  data.value = updateTimelineData(data.value ?? generateInitialTimelineData(), true)
 }
 
 watch(() => live.value, (oldVal, newVal) => {
@@ -146,8 +147,8 @@ watch(() => live.value, (oldVal, newVal) => {
 
   &__node {
     background-color: #6680ee;
-    border-radius: 14px;
-    height: 28px;
+    border-radius: 9px;
+    height: 12px;
     width: 100%;
   }
 }

@@ -157,14 +157,27 @@ const generateRandomTimelineData = (options?: TimelineDataOptions): TimelineData
   const data: TimelineChartItem[] = []
   const { items = 30, start = new Date(), end = new Date() } = options ?? {}
 
-  if (!options?.end) {
-    end.setHours(end.getHours() + 1)
+  if (!options?.start) {
+    start.setMinutes(start.getMinutes() - 15)
   }
 
+  if (options?.start && !options?.end) {
+    end.setMinutes(end.getMinutes() + 15)
+  }
+
+  let i = 0
   // Create items
   while (data.length < items) {
-    const _start = randomDate(start, end)
-    const _end = randomDate(_start, end)
+    let _start
+    let _end
+
+    if (i == 0) {
+      _start = new Date(start)
+      _end = randomDate(_start, end)
+    } else {
+      _start = randomDate(start, end)
+      _end = randomDate(_start, end)
+    }
 
     const target = {
       id: crypto.randomUUID(),
@@ -177,6 +190,7 @@ const generateRandomTimelineData = (options?: TimelineDataOptions): TimelineData
 
     const proxy = new Proxy<TimelineChartItem>(target, {})
     data.push(proxy)
+    ++i
   }
 
 

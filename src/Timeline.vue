@@ -1,6 +1,6 @@
 <template>
-  <div ref="timeline" class="timeline" @scroll="handleTimelineScroll">
-    <main ref="container" class="timeline__viewport" :style="{ height: `${chartHeight}px` }">
+  <div ref="container" class="timeline" @scroll="handleTimelineScroll">
+    <main ref="chart" class="timeline__viewport" :style="{ height: `${chartHeight}px` }">
       <component
         v-if="isMounted && !hideAxis"
         :is="axisTeleportTarget ? Teleport : 'div'"
@@ -8,11 +8,6 @@
         class="timeline__axis-container"
       >
         <nav ref="axis" class="timeline__nav" @scroll="handleAxisScroll">
-          <!-- Hidden for now -->
-          <svg v-if="false" :id="id + '__axis-mini'" class="timeline__axis-mini">
-            <g class="timeline__axis-group" />
-          </svg>
-
           <svg :id="id + '__axis'" class="timeline__axis">
             <g class="timeline__axis-group" />
           </svg>
@@ -41,7 +36,7 @@ import { formatLabel } from '@/utils/formatLabel'
 import * as d3 from 'd3'
 import { Teleport } from 'vue';
 import useBaseChart from './Base'
-import { getD3MinIntervalMethod } from './utils/time';
+import { intervalSeconds, getSmallestInterval, getD3IntervalMethod, TimeIntervalRanking, TimeIntervalReverseRanking, TimeIntervalRankingValue, getNextHighestInterval } from './utils/time';
 import debounce from 'lodash.debounce'
 
 const props = defineProps<{
@@ -67,7 +62,7 @@ const props = defineProps<{
 
 const axis = ref()
 const container = ref()
-const timeline = ref()
+const chart = ref()
 
 const isMounted = ref(false)
 
@@ -75,47 +70,81 @@ const handleResize = (): void => {
   updateAll()
 }
 
-const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
+const baseChart = useBaseChart(chart, { onResize: handleResize, padding: props.chartPadding })
 const { id } = baseChart
 
 const xScale = ref(d3.scaleTime())
-const xMiniScale = ref(d3.scaleTime())
 
 let xAxisGroup: GroupSelection | undefined
-let xMiniAxisGroup: GroupSelection | undefined
 let gridGroup: GroupSelection | undefined
 
-const _start = computed(() => {
+const getStart = (): Date => {
   return props.start ?? new Date()
+}
+
+const getEnd = (): Date => {
+  const end = props.end
+  const dataEnd = maxEnd.value
+  const now = new Date()
+  const _end = new Date(Math.max(dataEnd?.getTime() ?? 0, now.getTime() + 30000))
+
+  switch (interval.value) {
+    case 'years':
+      _end.setMonth(_end.getMonth() + 1)
+    case 'days':
+      _end.setDate(_end.getDate() + 1)
+    case 'hours':
+      _end.setHours(_end.getHours() + 1)
+    case 'minutes':
+      _end.setMinutes(_end.getMinutes() + 1)
+    case 'seconds':
+    default:
+      _end.setSeconds(_end.getSeconds() + 30)
+  }
+
+  if (end && dataEnd && end >= dataEnd) return end
+  if (end && dataEnd && dataEnd > end) return dataEnd
+  return _end
+}
+
+const intervalWidth = ref(props.intervalWidth ?? 84)
+const intervalHeight = ref(props.intervalHeight ?? 32)
+
+const interval = computed(() => {
+  if (!props.items.length) return 'seconds'
+
+  const minIntervals = props.items.filter((item) => item.start && item.end).map((item) => {
+    const start = item.start.getTime() / 1000
+    const end = (item.end ?? props.end ?? new Date()).getTime() / 1000
+    return TimeIntervalRanking[getSmallestInterval(end - start)]
+  })
+
+  const minInterval = Math.min(...minIntervals) as TimeIntervalRankingValue
+  return TimeIntervalReverseRanking[minInterval]
 })
 
-const _end = computed(() => {
-  if (props.end && !maxEnd.value || props.end && maxEnd.value && props.end > maxEnd.value) return props.end
-
-  const end = new Date(_start.value)
-  end.setMinutes(end.getMinutes() + 1)
-
-  if (maxEnd.value && maxEnd.value > end) return maxEnd.value
-  return end
+const intervalMethod = computed<d3.TimeInterval>(() => {
+  return getD3IntervalMethod(interval.value).every(1)!
 })
 
-const intervalWidth = ref(props.intervalWidth ?? 150)
-const intervalHeight = ref(props.intervalHeight ?? 50)
+const intervals = computed<number>(() => {
+  const start = getStart().getTime() / 1000 // time in seconds
+  const end = getEnd().getTime() / 1000 // time in seconds
 
-const interval = computed<d3.TimeInterval>(() => {
-  return getD3MinIntervalMethod(_start.value, _end.value, Math.ceil(chartWidth.value / intervalWidth.value)).every(1)
+  const minIntervals = Math.ceil(container.value.offsetWidth / intervalWidth.value)
+  const trueIntervals = intervalSeconds(end - start)
+
+  return minIntervals > trueIntervals[interval.value] ? minIntervals : trueIntervals[interval.value]
 })
 
 const chartWidth = computed(() => {
-  const trueChartWidth = intervals.value * intervalWidth.value
-  if (trueChartWidth < timeline.value?.offsetWidth) return timeline.value?.offsetWidth
-  return trueChartWidth
+  return intervals.value * intervalWidth.value
 })
 
 const chartHeight = computed(() => {
   // Adding 1 to this ensures we always have an extra row, which is nice visually
   const trueChartHeight = (rows.value.length + 1) * intervalHeight.value
-  if (trueChartHeight < timeline.value?.offsetHeight) return timeline.value?.offsetHeight
+  if (trueChartHeight < container.value?.offsetHeight) return container.value?.offsetHeight
   return trueChartHeight
 })
 
@@ -132,10 +161,6 @@ const calculateNodeStyle = (item: TimelineChartItem) => {
     width: `${width}px`
   }
 }
-
-const intervals = computed<number>(() => {
-  return ((_end.value.getTime() - _start.value.getTime()) / 1000 / 60)
-})
 
 const rowMap = ref<Map<TimelineChartItem['id'], number>>(new Map())
 
@@ -190,7 +215,7 @@ const itemEnds = computed(() => {
 })
 
 const live = computed(() => {
-  return !props.end || props.items.some((item) => !item.end)
+  return props.items.length && (!props.end || props.items.some((item) => !item.end))
 })
 
 const minStart = computed(() => {
@@ -217,31 +242,27 @@ const xAxis = (scale: d3.ScaleTime<number, number, never>, ticks: number | d3.Ti
     d3
       .axisBottom(scale)
       .tickPadding(0)
-      .ticks(interval.value)
+      .ticks(ticks)
       .tickFormat(formatLabel)
   )
   .call((g) => g.select('.domain').remove())
 
 const updateScales = (): void => {
+  const start = getStart()
+  const end = getEnd()
+
   xScale
     .value = d3.scaleTime()
-      .domain([_start.value, _end.value])
+      .domain([start, end])
       .range([baseChart.padding.left, chartWidth.value - baseChart.padding.right])
+  // .clamp(true)
 
-  xMiniScale
-    .value = d3.scaleTime()
-      .domain([_start.value, _end.value])
-      .range([baseChart.padding.left, timeline.value.offsetWidth - baseChart.padding.right])
 }
 
 const updateAxis = (): void => {
   if (!props.hideAxis) {
     if (xAxisGroup) {
-      xAxisGroup.call(xAxis(xScale.value, interval.value))
-    }
-
-    if (xMiniAxisGroup) {
-      xMiniAxisGroup.call(xAxis(xMiniScale.value, Math.round(timeline.value.offsetWidth / 200)))
+      xAxisGroup.call(xAxis(xScale.value, intervalMethod.value))
     }
   }
 }
@@ -269,7 +290,7 @@ const updateGrid = (): void => {
     )
 
   gridGroup.selectAll('.timeline__grid-line.timeline__grid-line--y')
-    .data(xScale.value.ticks(interval.value))
+    .data(xScale.value.ticks(intervalMethod.value))
     .join(
       (selection: any) => selection
         .append('line')
@@ -297,9 +318,6 @@ const createGroupSelectors = () => {
   const axisSvg = d3.select(`#${id}__axis`)
   xAxisGroup = axisSvg.select('.timeline__axis-group')
 
-  const axisMiniSvg = d3.select(`#${id}__axis-mini`)
-  xMiniAxisGroup = axisMiniSvg.select('.timeline__axis-group')
-
   const gridSvg = d3.select(`#${id}__grid`)
   gridGroup = gridSvg.select('.timeline__grid-group')
 }
@@ -316,49 +334,27 @@ const updateDimensions = () => {
 }
 
 const handleAxisScroll = () => {
-  timeline.value?.scroll({ left: axis.value.scrollLeft })
+  container.value?.scroll({ left: axis.value.scrollLeft })
 }
 
 const handleTimelineScroll = () => {
-  axis.value?.scroll({ left: timeline.value.scrollLeft })
+  axis.value?.scroll({ left: container.value.scrollLeft })
 }
 
 const updateAll = debounce(() => {
-  createGroupSelectors()
-  updateScales()
-  updateAxis()
-  updateDimensions()
-  updateGrid()
+  requestAnimationFrame(() => {
+    createGroupSelectors()
+    updateDimensions()
+    updateScales()
+    updateAxis()
+    updateGrid()
+  })
 
-  // if (timeline.value?.scrollWidth - timeline.value?.clientWidth <= timeline.value?.scrollLeft + 1) {
-  //   timeline.value?.scroll({ left: timeline.value?.scrollWidth })
-  // }
 }, 60, { maxWait: 120 })
-
-let liveInterval: NodeJS.Timeout
-const startLiveInterval = () => {
-  clearInterval(liveInterval)
-
-  // liveInterval = setInterval(() => {
-  //   updateAll()
-  // }, 60)
-}
-
-const stopLiveInterval = () => {
-  clearInterval(liveInterval)
-}
 
 onMounted(() => {
   updateAll()
   isMounted.value = true
-
-  if (live.value && props.start && props.items.length > 0) {
-    startLiveInterval()
-  }
-})
-
-onBeforeUnmount(() => {
-  clearInterval(liveInterval)
 })
 
 watchEffect(() => {
@@ -374,14 +370,6 @@ watch(() => [props.end, props.items, props.start], () => {
   updateAll()
 })
 
-watch(() => live.value, (prev, curr) => {
-  stopLiveInterval()
-
-  if (live.value) {
-    startLiveInterval()
-  }
-})
-
 watch(() => props.chartPadding, (val) => {
   baseChart.padding = { ...baseChart.padding, ...val }
 })
@@ -395,7 +383,6 @@ watch(() => props.chartPadding, (val) => {
   overflow: auto;
   overscroll-behavior: contain;
   position: relative;
-  scroll-snap-type: x proximity;
 }
 
 .timeline__axis-container {
@@ -431,6 +418,12 @@ watch(() => props.chartPadding, (val) => {
   height: 24px;
 }
 
+.timeline__axis-group {
+  line {
+    opacity: 0;
+  }
+}
+
 .timeline__grid {
   position: absolute;
   z-index: 0;
@@ -441,9 +434,10 @@ watch(() => props.chartPadding, (val) => {
 }
 
 .timeline__viewport {
+  height: 100%;
   position: relative;
   min-width: 100%;
-  height: 100%;
+  scroll-snap-align: end;
   width: min-content;
 }
 
