@@ -1,4 +1,4 @@
-import { BarChartItem, DivergingBarChartItem } from '@/types'
+import { BarChartItem, DivergingBarChartItem, TimelineChartItem } from '@/types'
 import { fruits } from './fruits'
 
 // This is necessary until TypeScript 4.6 extends the crypto interface
@@ -143,7 +143,7 @@ export type TimelineDataOptions = {
 type TimelineData = {
   start: Date,
   end: Date,
-  data: any[]
+  data: TimelineChartItem[]
 }
 
 const randomDate = (start: Date, end: Date): Date => {
@@ -154,7 +154,7 @@ const randomDate = (start: Date, end: Date): Date => {
 }
 
 const generateTimelineData = (options?: TimelineDataOptions): TimelineData => {
-  const data: any[] = []
+  const data: TimelineChartItem[] = []
   const { items = 30, start = new Date(), end = new Date() } = options ?? {}
 
   if (!options?.start) {
@@ -167,6 +167,7 @@ const generateTimelineData = (options?: TimelineDataOptions): TimelineData => {
     const _end = randomDate(_start, end)
 
     const target = {
+      id: crypto.randomUUID(),
       start: _start,
       end: _end,
       data: {
@@ -174,7 +175,7 @@ const generateTimelineData = (options?: TimelineDataOptions): TimelineData => {
       }
     }
 
-    const proxy = new Proxy(target, {})
+    const proxy = new Proxy<TimelineChartItem>(target, {})
     data.push(proxy)
   }
 

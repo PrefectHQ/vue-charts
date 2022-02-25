@@ -23,6 +23,14 @@
         <g class="timeline__grid-group" />
       </svg>
 
+      <div class="timeline__node-container">
+        <div v-for="item in items" class="timeline__node" :style="calculateNodeStyle(item)">
+          <slot>
+            <div class="timeline__node-content" />
+          </slot>
+        </div>
+      </div>
+
       <!-- <div class="test-container">
         <div v-for="i in 200" :key="i" class="test-row">
           <span
@@ -38,11 +46,13 @@
 
 <script lang="ts" setup>
 import { TimelineChartItem, GroupSelection, TransitionSelection } from './types'
-import { ref, computed, onMounted, onBeforeUpdate } from 'vue'
+import { ref, computed, onMounted, onBeforeUpdate, useSlots } from 'vue'
 import { formatLabel } from '@/utils/formatLabel'
 import * as d3 from 'd3'
 import { Teleport } from 'vue';
 import useBaseChart from './Base'
+
+const slots = useSlots()
 
 const props = defineProps<{
   start?: Date,
@@ -102,18 +112,73 @@ const interval = computed<d3.TimeInterval>(() => {
   return d3.timeMinute.every(1)!
 })
 
-const totalIntervals = computed<number>(() => {
-  return ((_end.value.getTime() - _start.value.getTime()) / 1000 / 60)
-})
-
-const totalRows = 50
-
 const chartWidth = computed(() => {
-  return totalIntervals.value * intervalWidth
+  return intervals.value * intervalWidth
 })
 
 const chartHeight = computed(() => {
-  return totalRows * intervalHeight
+  return rows.value.length * intervalHeight
+})
+
+const calculateNodeStyle = (item: TimelineChartItem) => {
+  const left = xScale.value(item.start)
+  const right = xScale.value(item.end || _end.value)
+  const top = rowMap.value.get(item.id)! * intervalHeight
+
+  return {
+    left: `${left}px`,
+    top: `${top}px`,
+    width: `${right - left}px`
+  }
+}
+
+const intervals = computed<number>(() => {
+  return ((_end.value.getTime() - _start.value.getTime()) / 1000 / 60)
+})
+
+const rowMap = ref<Map<TimelineChartItem['id'], number>>(new Map())
+
+const rows = computed(() => {
+  const rows: [number, number][] = []
+
+  sortedItems.value.forEach((item) => {
+    const start = new Date(item.start)
+    const end = item.end ? new Date(item.end) : _end.value
+    const left = xScale.value(start)
+    const right = xScale.value(end)
+    const width = Math.max(16, right - left)
+
+    let row = 0
+
+    // eslint-disable-next-line
+    while (true) {
+      const curr = rows[row]
+      // If no row at this index, we create one instead and place this node on it
+      if (curr) {
+        const [, r] = curr
+        // If the left edge of this node is greater than the right boundary of the
+        // row, we can place it on this row
+        if (left > r) {
+          rows[row][1] = left + width
+          break
+        } else {
+          row++
+          continue
+        }
+      } else {
+        rows[row] = [left, left + width]
+        break
+      }
+    }
+
+    rowMap.value.set(item.id, row)
+  })
+
+  return rows
+})
+
+const sortedItems = computed(() => {
+  return props.items.sort((itemA, itemB) => new Date(itemA.start).getTime() - new Date(itemB.start).getTime())
 })
 
 const xAxis = (scale: d3.ScaleTime<number, number, never>, ticks: number | d3.TimeInterval) => (
@@ -161,7 +226,7 @@ const updateGrid = (): void => {
 
 
   gridGroup.selectAll('.grid-line.grid-x')
-    .data(Array.from({ length: totalIntervals.value }))
+    .data(Array.from({ length: intervals.value }))
     .join(
       (selection: any) => selection
         .append('line')
@@ -252,16 +317,18 @@ onBeforeUpdate(() => {
 <style lang="scss">
 .timeline {
   height: 100%;
+  min-width: inherit;
   overflow: auto;
   overscroll-behavior: contain;
+  // This padding is important to lock bottom scrollbar when the chart is scrolled to the bottom / right
+  padding-bottom: 16px;
+  padding-right: 16px;
   position: relative;
-  min-width: inherit;
 }
 
 .timeline__axis-container {
   position: sticky;
   display: block;
-  // height: 64px;
   top: 0;
   right: 0;
   width: 100%;
@@ -293,7 +360,7 @@ onBeforeUpdate(() => {
 
 .timeline__grid {
   position: absolute;
-  z-index: 2;
+  z-index: 0;
 }
 
 .timeline__viewport {
@@ -303,23 +370,16 @@ onBeforeUpdate(() => {
   width: min-content;
 }
 
-.test-container {
-  margin-top: 8px;
+.timeline__node-container {
+  left: 0;
+  position: absolute;
+  top: 0;
 }
 
-.test-row {
-  display: block;
-  white-space: nowrap;
-  margin: 0;
-  padding: 0;
-  z-index: -1;
-}
-
-.test-cell {
-  display: inline-block;
-  height: 100px;
-  width: 200px;
-  margin: 0;
-  padding: 0;
+.timeline__node {
+  height: 25px;
+  position: absolute;
+  background-color: red;
+  transform: translate(0, 50%);
 }
 </style>
