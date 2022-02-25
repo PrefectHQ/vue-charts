@@ -7,7 +7,11 @@
 
     <div v-if="tab == 'chart'" class="timeline-view__chart mt-2">
       <!-- axis-teleport-target="#teleport-target"  -->
-      <Timeline :items="data.data" axis-teleport-target="#teleport-target" axis-class="caption" />
+      <Timeline :items="data.data" axis-class="caption">
+        <template #default="{ node }">
+          <div class="timeline-view__node" :style="{ 'background-color': node.data.color }" />
+        </template>
+      </Timeline>
     </div>
 
     <div id="teleport-target"></div>
@@ -55,6 +59,12 @@ const columns = [
     min-width: 400px;
     overflow: auto;
     resize: both;
+  }
+
+  &__node {
+    border-radius: 999px;
+    height: 28px;
+    width: 100%;
   }
 }
 

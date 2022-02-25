@@ -25,21 +25,11 @@
 
       <div class="timeline__node-container">
         <div v-for="item in items" class="timeline__node" :style="calculateNodeStyle(item)">
-          <slot>
+          <slot :node="item">
             <div class="timeline__node-content" />
           </slot>
         </div>
       </div>
-
-      <!-- <div class="test-container">
-        <div v-for="i in 200" :key="i" class="test-row">
-          <span
-            v-for="j in 200"
-            :style="{ 'background-color': `#${Math.floor(Math.random() * 16777215).toString(16)}` }"
-            class="test-cell"
-          ></span>
-        </div>
-      </div>-->
     </main>
   </div>
 </template>
@@ -117,7 +107,8 @@ const chartWidth = computed(() => {
 })
 
 const chartHeight = computed(() => {
-  return rows.value.length * intervalHeight
+  // Adding 1 to this ensures we always have an extra row, which is nice visually
+  return (rows.value.length + 1) * intervalHeight
 })
 
 const calculateNodeStyle = (item: TimelineChartItem) => {
@@ -126,6 +117,7 @@ const calculateNodeStyle = (item: TimelineChartItem) => {
   const top = rowMap.value.get(item.id)! * intervalHeight
 
   return {
+    height: `${intervalHeight}px`,
     left: `${left}px`,
     top: `${top}px`,
     width: `${right - left}px`
@@ -150,7 +142,6 @@ const rows = computed(() => {
 
     let row = 0
 
-    // eslint-disable-next-line
     while (true) {
       const curr = rows[row]
       // If no row at this index, we create one instead and place this node on it
@@ -320,9 +311,6 @@ onBeforeUpdate(() => {
   min-width: inherit;
   overflow: auto;
   overscroll-behavior: contain;
-  // This padding is important to lock bottom scrollbar when the chart is scrolled to the bottom / right
-  padding-bottom: 16px;
-  padding-right: 16px;
   position: relative;
 }
 
@@ -332,6 +320,7 @@ onBeforeUpdate(() => {
   top: 0;
   right: 0;
   width: 100%;
+  z-index: 2;
 }
 
 .timeline__nav {
@@ -371,15 +360,17 @@ onBeforeUpdate(() => {
 }
 
 .timeline__node-container {
-  left: 0;
-  position: absolute;
-  top: 0;
+  position: relative;
 }
 
 .timeline__node {
-  height: 25px;
+  display: flex;
+  align-items: center;
   position: absolute;
+  z-index: 1;
+}
+
+.timeline__node-content {
   background-color: red;
-  transform: translate(0, 50%);
 }
 </style>
