@@ -8,8 +8,10 @@
     "moduleResolution": "node",
     "emitDeclarationOnly": true,
     "sourceMap": true,
-    "outDir": "dist",
+    "resolveJsonModule": true,
+    "outDir": "dist_types",
     "baseUrl": "./",
+    "skipLibCheck": true,
     "paths": {
       "@/*": [
         "src/*"
@@ -17,13 +19,15 @@
     },
     "lib": [
       "esnext",
-      "dom"
+      "dom",
+      "dom.iterable",
+      "scripthost"
     ]
   },
   "include": [
-    "src/**/*",
-    "./vite.config.ts",
-    "demo/**/*"
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "src/**/*.vue",
   ],
   "exclude": [
     "node_modules",
