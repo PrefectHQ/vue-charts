@@ -17,8 +17,17 @@ const config = defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'RADAR',
-      fileName: (format) => `vue-charts.${format}.js`,
     },
+    rollupOptions: {
+      // ensures vue isn't added to the bundle
+      external: ['vue'],
+      output: {
+        // Provide vue as a global variable to use in the UMD build
+        globals: {
+          vue: 'Vue'
+        }
+      },
+    }
   },
 })
 

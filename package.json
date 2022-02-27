@@ -9,12 +9,14 @@
     "lint:fix": "eslint src --ext .js,.ts,.vue --debug --fix",
     "validate:types": "tsc"
   },
-  "files": [
-    "dist"
-  ],
   "main": "./dist/vue-charts.umd.js",
   "module": "./dist/vue-charts.es.js",
-  "types": "./dist/index.d.ts",
+  "typings": "./dist_types/index.d.ts",
+  "files": [
+    "src",
+    "dist",
+    "dist_types"
+  ],
   "devDependencies": {
     "@babel/helper-compilation-targets": "^7.16.3",
     "@babel/runtime": "^7.16.3",
