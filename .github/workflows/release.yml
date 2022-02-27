@@ -17,8 +17,11 @@ jobs:
       - uses: actions/checkout@v1
 
       - name: Check Package Version
-        uses: EndBug/version-check@v1
+        uses: EndBug/version-check@v2.1.0
         id: check
+        with: 
+          diff-search: true
+          file-name: ./package.json
 
       - name: Cancel
         if: steps.check.outputs.changed == 'false'
