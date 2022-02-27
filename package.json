@@ -2,6 +2,11 @@
   "name": "@prefecthq/vue-charts",
   "version": "0.0.2",
   "private": false,
+  "keywords": [
+    "vue3",
+    "charts",
+    "d3"
+  ],
   "scripts": {
     "serve": "vite",
     "build": "vue-tsc --declaration --emitDeclarationOnly && vite build",
