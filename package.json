@@ -4,7 +4,8 @@
   "private": false,
   "scripts": {
     "serve": "vite",
-    "build": "vite build && tsc",
+    "build": "vue-tsc --declaration --emitDeclarationOnly && vite build",
+    "build:watch": "vue-tsc --declaration --emitDeclarationOnly && vite build --watch",
     "lint": "eslint src --ext .js,.ts,.vue --debug",
     "lint:fix": "eslint src --ext .js,.ts,.vue --debug --fix",
     "validate:types": "tsc"
