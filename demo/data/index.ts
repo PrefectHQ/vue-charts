@@ -107,7 +107,7 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
       data: {}
     }
 
-    for (let i = 0; i < keyFruits.length; ++i) {
+    for (let i = 0; i < Math.round(Math.random() * keyFruits.length); ++i) {
       const key = keyFruits[i]
       let multiplier = 10
 

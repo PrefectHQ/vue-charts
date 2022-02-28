@@ -69,7 +69,7 @@
 </template>
 
 <script lang="ts" setup>
-import Timeline from '@/Timeline.vue'
+import Timeline from '../../src/Timeline.vue'
 import { generateRandomTimelineData, generateInitialTimelineData, updateTimelineData, TimelineData } from '../data'
 import { ref, watch } from 'vue'
 

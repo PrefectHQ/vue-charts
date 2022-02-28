@@ -57,7 +57,7 @@
 </template>
 
 <script lang="ts" setup>
-import BarChart from '@/BarChart.vue'
+import BarChart from '../../src/BarChart.vue'
 import { generateBarChartData } from '../data';
 import { computed, ref } from 'vue'
 

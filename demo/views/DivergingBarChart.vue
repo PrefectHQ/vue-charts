@@ -43,7 +43,7 @@
       >
         <template #default="point">
           <m-popover
-            v-if="point.data !== 0"
+            v-if="point.value !== 0"
             class="diverging-bar-chart-view__bar-container"
             :placement="['top', 'right', 'bottom', 'left']"
           >
@@ -64,7 +64,7 @@
               <strong>{{ point.key }}</strong>
             </template>
 
-            <div>{{ point.data }}</div>
+            <div>{{ point.value }}</div>
           </m-popover>
         </template>
 
@@ -96,7 +96,7 @@
 </template>
 
 <script lang="ts" setup>
-import DivergingBarChart from '@/DivergingBarChart.vue'
+import DivergingBarChart from '../../src/DivergingBarChart.vue'
 import { generateSentimentData } from '../data';
 import { computed, ref } from 'vue'
 
@@ -125,7 +125,7 @@ const data = computed(() => generateSentimentData({
   skewMultiplier: parseInt(multiplier.value)
 }))
 
-const getColumnKey = (key: string) => `column-${key.replaceAll(' ', '-').toLowerCase()}`
+const getColumnKey = (key: string) => `column-${key.replace(' ', '-').toLowerCase()}`
 
 const columns = computed(() => {
   return [

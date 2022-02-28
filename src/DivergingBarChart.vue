@@ -20,8 +20,9 @@
               >
                 <slot
                   v-if="slots.default"
-                  :data="seriesPoint.value.data[seriesPoint.key]"
+                  :value="seriesPoint.value.data[seriesPoint.key]"
                   :key="seriesPoint.key"
+                  :series="series"
                 />
                 <div v-else class="diverging-bar-chart__series-bar" />
               </div>
@@ -119,13 +120,12 @@ const xAxis = (
 
 const series = computed<DivergingBarChartSeries[]>(() => {
   const cleanedItems = props.items.map((item) => item.data)
-
   const stack = d3
     .stack()
     .keys([...props.positiveSentimentKeys, ...props.negativeSentimentKeys])
     .value((value, key) => {
       const sentimentValue = sentimentMap.value.get(key)
-      return value[key] * (sentimentValue ?? 1)
+      return (value[key] * (sentimentValue ?? 1)) || 0
     })
     .order(d3.stackOrderNone)
     .offset(d3.stackOffsetDiverging)
