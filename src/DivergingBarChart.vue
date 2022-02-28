@@ -1,10 +1,10 @@
 <template>
   <div ref="container" class="diverging-bar-chart">
-    <template v-if="props.items.length">
-      <svg :id="id" ref="chart" class="diverging-bar-chart__svg">
-        <g class="diverging-bar-chart__axis-group" />
-      </svg>
+    <svg :id="id" ref="chart" class="diverging-bar-chart__svg">
+      <g class="diverging-bar-chart__axis-group" />
+    </svg>
 
+    <template v-if="props.items.length">
       <div class="diverging-bar-chart__median-container" :style="medianPosition">
         <slot v-if="slots.median" name="median" />
         <div v-else class="diverging-bar-chart__median" />
@@ -43,7 +43,7 @@
 <script lang="ts" setup>
 import * as d3 from 'd3'
 import { useBaseChart } from './Base'
-import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch } from 'vue'
+import { computed, ref, onMounted, useSlots, watchEffect } from 'vue'
 import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
 import { formatLabel } from '@/utils/formatLabel'
 
@@ -67,7 +67,6 @@ const props = defineProps<{
     right?: number
   }
 }>()
-
 
 type sentimentDirection = 1 | -1
 
@@ -93,8 +92,10 @@ const { id } = baseChart
 
 let xAxisGroup: GroupSelection | undefined
 
-watch(() => props.chartPadding, (val) => {
-  baseChart.padding = { ...baseChart.padding, ...val }
+const ticks = computed(() => {
+  if (!props.items.length) return 1
+  const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
+  return Math.max(ticks, 1)
 })
 
 const xAxis = (
@@ -110,6 +111,7 @@ const xAxis = (
     d3
       .axisTop(xScale.value)
       .tickPadding(0)
+      .ticks(ticks.value)
       .tickFormat(formatLabel)
       .tickSizeInner(0)
       .tickSizeOuter(0),
@@ -197,11 +199,10 @@ const updateScales = (): void => {
     xAxisGroup.selectAll('.tick').style('opacity', 0)
   }
 
-
   xScale
     .value = d3.scaleTime()
       .domain([start, end])
-      .range([baseChart.padding.left, baseChart.width.value - baseChart.padding.right])
+      .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX])
 
   const flattened = series.value.flat(2)
   let min = Math.min(...flattened)
@@ -244,7 +245,11 @@ onMounted(() => {
   updateScales()
 })
 
-onBeforeUpdate(() => {
+watchEffect(() => {
+  const svg = d3.select(`#${id}`)
+  xAxisGroup = svg.select('.diverging-bar-chart__axis-group')
+
+  baseChart.padding = { ...baseChart.padding, ...props.chartPadding }
   updateScales()
 })
 </script>
