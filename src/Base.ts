@@ -43,7 +43,7 @@ export interface IBaseOptions {
 }
 
 // Starting these with an underscore allows us to use UUIDs as HTMLElement ids
-const _uid = () => `_${crypto.randomUUID()}`
+const _uid = () => `_${crypto?.randomUUID?.() || (crypto?.getRandomValues?.(new Uint32Array(1))[0] || new Date().getTime()) * Math.pow(2, -32) * 16}`
 
 
 export class Base implements IBase {
