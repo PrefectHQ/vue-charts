@@ -6,7 +6,7 @@
       <m-button class="ml-4" @click="reset">Reset</m-button>
       <m-button class="ml-4" @click="generateFull">Generate Full Dataset</m-button>
 
-      <div>
+      <div class="ml-2">
         <div>
           Start:
           <strong>{{ data.start?.toLocaleString() }}</strong>
