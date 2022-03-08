@@ -5,6 +5,17 @@
       <m-checkbox v-model="hideAxis">Hide Axis</m-checkbox>
       <m-button class="ml-4" @click="reset">Reset</m-button>
       <m-button class="ml-4" @click="generateFull">Generate Full Dataset</m-button>
+
+      <div class="ml-2">
+        <div>
+          Start:
+          <strong>{{ data.start?.toLocaleString() }}</strong>
+        </div>
+        <div>
+          End:
+          <strong>{{ data.end?.toLocaleString() }}</strong>
+        </div>
+      </div>
     </div>
 
     <m-tabs v-model="tab">

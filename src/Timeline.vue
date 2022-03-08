@@ -102,8 +102,10 @@ const getEnd = (): Date => {
       _end.setSeconds(_end.getSeconds() + 30)
   }
 
-  if (end && dataEnd && end >= dataEnd) return end
-  if (end && dataEnd && dataEnd > end) return dataEnd
+
+  if (end && dataEnd) {
+    return new Date(Math.max(dataEnd.getTime(), end.getTime()))
+  }
   return _end
 }
 
@@ -119,7 +121,10 @@ const interval = computed(() => {
     return TimeIntervalRanking[getSmallestInterval(end - start)]
   })
 
+  if (minIntervals.length === 0) return 'seconds'
+
   const minInterval = Math.min(...minIntervals) as TimeIntervalRankingValue
+
   return TimeIntervalReverseRanking[minInterval]
 })
 
@@ -255,7 +260,7 @@ const updateScales = (): void => {
     .value = d3.scaleTime()
       .domain([start, end])
       .range([baseChart.padding.left, chartWidth.value - baseChart.padding.right])
-  // .clamp(true)
+      .clamp(true)
 
 }
 

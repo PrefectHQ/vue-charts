@@ -42,8 +42,16 @@ export interface IBaseOptions {
   }
 }
 
-// Starting these with an underscore allows us to use UUIDs as HTMLElement ids
-const _uid = () => `_${crypto?.randomUUID?.() || (crypto?.getRandomValues?.(new Uint32Array(1))[0] || new Date().getTime()) * Math.pow(2, -32) * 16}`
+if (crypto && !('randomUUID' in crypto)) {
+  crypto.randomUUID = () => (+[1e7] + -1e3 + -4e3 + -8e3 + -1e11)
+    .toString()
+    .replace(/[018]/g,
+      c => (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16)
+    )
+}
+
+// Starting these with "chart-" allows us to use UUIDs as HTMLElement ids
+const _uid = () => `chart-${crypto?.randomUUID()}`
 
 
 export class Base implements IBase {
