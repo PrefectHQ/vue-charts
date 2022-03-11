@@ -79,14 +79,14 @@ let xAxisGroup: GroupSelection | undefined
 let gridGroup: GroupSelection | undefined
 
 const getStart = (): Date => {
-  return props.start ?? new Date()
+  return props.start ? new Date(props.start) : new Date()
 }
 
 const getEnd = (): Date => {
   const end = props.end
   const dataEnd = maxEnd.value
-  const now = new Date()
-  const _end = new Date(Math.max(dataEnd?.getTime() ?? 0, now.getTime() + 30000))
+  const startAdjustedEnd = new Date(getStart())
+  const _end = new Date(Math.max(dataEnd?.getTime() ?? 0, startAdjustedEnd.getTime() + 30000))
 
   switch (interval.value) {
     case 'years':
@@ -102,7 +102,6 @@ const getEnd = (): Date => {
       _end.setSeconds(_end.getSeconds() + 30)
   }
 
-
   if (end && dataEnd) {
     return new Date(Math.max(dataEnd.getTime(), end.getTime()))
   }
@@ -113,17 +112,17 @@ const intervalWidth = ref(props.intervalWidth ?? 84)
 const intervalHeight = ref(props.intervalHeight ?? 32)
 
 const interval = computed(() => {
-  if (!props.items.length) return 'seconds'
-
   const minIntervals = props.items.filter((item) => item.start && item.end).map((item) => {
     const start = item.start.getTime() / 1000
     const end = (item.end ?? props.end ?? new Date()).getTime() / 1000
     return TimeIntervalRanking[getSmallestInterval(end - start)]
   })
 
+  minIntervals.push(TimeIntervalRanking[getSmallestInterval(getEnd().getTime() / 1000 - getStart().getTime() / 1000)])
+
   if (minIntervals.length === 0) return 'seconds'
 
-  const minInterval = Math.min(...minIntervals) as TimeIntervalRankingValue
+  const minInterval = Math.max(...minIntervals) as TimeIntervalRankingValue
 
   return TimeIntervalReverseRanking[minInterval]
 })
@@ -148,7 +147,7 @@ const chartWidth = computed(() => {
 
 const chartHeight = computed(() => {
   // Adding 1 to this ensures we always have an extra row, which is nice visually
-  const trueChartHeight = (rows.value.length + 1) * intervalHeight.value
+  const trueChartHeight = (rowMap.value.size + 1) * intervalHeight.value
   if (trueChartHeight < container.value?.offsetHeight) return container.value?.offsetHeight
   return trueChartHeight
 })
@@ -169,12 +168,13 @@ const calculateNodeStyle = (item: TimelineChartItem) => {
 
 const rowMap = ref<Map<TimelineChartItem['id'], number>>(new Map())
 
-const rows = computed(() => {
-  const rows: [number, number][] = []
+const updateRows = () => {
+  const _rows: [number, number][] = []
+  const _rowMap = new Map()
 
   sortedItems.value.forEach((item) => {
-    const start = new Date(item.start)
-    const end = item.end ? new Date(item.end) : new Date()
+    const start = item.start
+    const end = item.end ?? start
     const left = xScale.value(start)
     const right = xScale.value(end)
     const width = Math.max(props.nodeMinWidth ?? 32, right - left)
@@ -182,30 +182,30 @@ const rows = computed(() => {
     let row = 0
 
     while (true) {
-      const curr = rows[row]
+      const curr = _rows[row]
       // If no row at this index, we create one instead and place this node on it
       if (curr) {
         const [, r] = curr
         // If the left edge of this node is greater than the right boundary of the
         // row, we can place it on this row
         if (left > r) {
-          rows[row][1] = left + width
+          _rows[row][1] = left + width
           break
         } else {
           row++
           continue
         }
       } else {
-        rows[row] = [left, left + width]
+        _rows[row] = [left, left + width]
         break
       }
     }
 
-    rowMap.value.set(item.id, row)
+    _rowMap.set(item.id, row)
   })
 
-  return rows
-})
+  rowMap.value = _rowMap
+}
 
 const sortedItems = computed(() => {
   return props.items.sort((itemA, itemB) => new Date(itemA.start).getTime() - new Date(itemB.start).getTime())
@@ -353,6 +353,7 @@ const updateAll = debounce(() => {
     updateScales()
     updateAxis()
     updateGrid()
+    updateRows()
   })
 
 }, 60, { maxWait: 120 })
