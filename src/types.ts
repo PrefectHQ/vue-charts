@@ -27,3 +27,13 @@ export type TimelineChartItem<T = unknown> = {
   end?: Date,
   data?: T
 }
+
+export type ChartItem = {
+  id: string,
+  timestamp: Date,
+  duration: number,
+  color?: string
+}
+export type ChartProps = {
+  items: ChartItem[]
+}
