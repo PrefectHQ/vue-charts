@@ -32,7 +32,7 @@ export type ChartItem = {
   id: string,
   timestamp: Date,
   duration: number,
-  color?: string
+  state_type?: string
 }
 export type ChartProps = {
   items: ChartItem[]
