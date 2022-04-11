@@ -14,14 +14,11 @@ const now = new Date()
 const items: ChartItem[] = new Array(100).fill(null).map(getChartItem)
 
 function getChartItem(): ChartItem {
-  const item = {
+  return {
     id: getRandomString(),
     duration: getRandomInt(0, 100),
     timestamp: getRandomDate(oneWeekAgo, now)
   }
-  console.log(item)
-
-  return item
 }
 
 function getRandomString(): string {
@@ -35,7 +32,6 @@ function getRandomInt(min, max): number {
 }
 
 function getRandomDate(start, end) {
-  console.log(start, end)
   return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
 }
 </script>
