@@ -3,8 +3,7 @@
     <svg :id="id" ref="chart" class="scatter-plot__svg">
       <!-- This comment is needed here so linter doesn't turn <svg> into self-closing tag  -->
     </svg>
-
-    <div class="scatter-plot__dots-container"></div>
+    <div id="tooltip" class="scatter-plot__tooltip">Hello!</div>
   </div>
 </template>
 
@@ -22,7 +21,6 @@ const props = defineProps<{
   chartPadding?: {
     top?: number,
     bottom?: number,
-    middle?: number,
     left?: number,
     right?: number,
   },
@@ -31,6 +29,7 @@ const props = defineProps<{
 
 const container = ref<HTMLElement>()
 const dotContainer = ref()
+let tooltip: any | undefined
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
 
@@ -75,6 +74,23 @@ const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
 const xAccessor = (d: ChartItem) => d.timestamp
 const yAccessor = (d: ChartItem) => d.duration
 
+
+const mouseover = function (e: any, datum: any): void {
+  d3.select(this)
+    .attr('r', 8)
+
+  tooltip.style('display', 'block')
+    .style('top', yScale.value(yAccessor(datum)) - 35 + "px")
+    .style('left', xScale.value(xAccessor(datum)) + "px")
+}
+const mouseleave = function (e: any, datum: any): void {
+  d3.select(this)
+    .attr('class', () => `${datum.state_type?.toLowerCase()}-bg dot`)
+    .attr('r', 7)
+
+  tooltip.style('display', 'none')
+}
+
 const updateScales = (): void => {
   xScale.value
     .domain(d3.extent(props.items, xAccessor))
@@ -96,7 +112,7 @@ const updateScales = (): void => {
 
     yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
     yAxisGroup.select('.domain').style('stroke', '#cacccf')
-    yAxisGroup.select('.tick text').attr('x', '-15') // for whatever reason first tick renders to close to axis without this setup
+    yAxisGroup.select('.tick text').attr('x', '-15') // for whatever reason first tick renders too close to axis without this setup
   }
 
   if (dotContainer.value) {
@@ -108,7 +124,9 @@ const updateScales = (): void => {
       .attr("cx", (d: ChartItem) => xScale.value(xAccessor(d)))
       .attr("cy", (d: ChartItem) => yScale.value(yAccessor(d)))
       .attr("r", 7)
-      .attr('class', (d: ChartItem) => `${d.state_type?.toLowerCase()}-bg`)
+      .attr('class', (d: ChartItem) => `${d.state_type?.toLowerCase()}-bg dot`)
+      .on('mouseenter', mouseover)
+      .on('mouseleave', mouseleave)
   }
 }
 
@@ -117,7 +135,7 @@ onMounted(() => {
   xAxisGroup = svg.append('g').attr('class', '.scatter-plot__x-axis-group')
   yAxisGroup = svg.append('g').attr('class', '.scatter-plot__y-axis-group')
   dotContainer.value = svg.append('g').attr('class', '.scatter-plot__dot-container')
-
+  tooltip = d3.select('#tooltip')
 
   updateScales()
 })
@@ -164,5 +182,14 @@ watch(() => props.chartPadding, (val) => {
 .scatter-plot__svg {
   height: 100%;
   width: 100%;
+}
+
+.scatter-plot__tooltip {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  position: absolute;
+  padding: 10px;
+  background-color: #fff;
+  display: none;
 }
 </style>
