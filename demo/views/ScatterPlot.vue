@@ -16,7 +16,7 @@ const items: ChartItem[] = new Array(100).fill(null).map(getChartItem)
 function getChartItem(): ChartItem {
   return {
     id: getRandomString(),
-    duration: getRandomInt(0, 100),
+    duration: getRandomInt(1, 100),
     timestamp: getRandomDate(oneWeekAgo, now)
   }
 }
