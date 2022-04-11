@@ -76,7 +76,7 @@ const xAccessor = (d: ChartItem) => d.timestamp
 const yAccessor = (d: ChartItem) => d.duration
 
 
-const mouseover = function (e: any, datum: any): void {
+const mouseover = function (this: any, e: any, datum: any): void {
   d3.select(this)
     .attr('r', 8)
 
@@ -85,7 +85,7 @@ const mouseover = function (e: any, datum: any): void {
     .style('left', xScale.value(xAccessor(datum)) + "px")
 }
 
-const mouseleave = function (e: any, datum: any): void {
+const mouseleave = function (this: any, e: any, datum: any): void {
   d3.select(this)
     .attr('class', () => `${datum.state_type?.toLowerCase()}-bg dot`)
     .attr('r', 7)
