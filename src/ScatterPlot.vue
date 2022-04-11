@@ -9,8 +9,10 @@
         <div
           :style="calculateDotPosition(item)"
           class="scatter-plot__dot"
-          :class="`scatter-plot__dot--${item.class?.toLowerCase()}`"
-        ></div>
+          :class="item.class?.toLowerCase()"
+        >
+          <slot v-if="slots.default" :item="item" />
+        </div>
       </template>
     </div>
   </div>
