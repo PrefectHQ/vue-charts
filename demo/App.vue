@@ -4,6 +4,7 @@
       <router-link to="/bar-chart">Bar Chart</router-link>
       <router-link to="/diverging-bar-chart">Diverging Bar Chart</router-link>
       <router-link to="/timeline">Timeline</router-link>
+      <router-link to="/scatter-plot">Scatter Plot</router-link>
     </nav>
     <main class="app__main">
       <router-view />
@@ -30,7 +31,7 @@
     padding: 0 8px;
     box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1);
 
-    > * {
+    >* {
       margin-right: 32px;
     }
   }
