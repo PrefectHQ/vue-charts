@@ -3,17 +3,24 @@
     <svg :id="id" ref="chart" class="scatter-plot__svg">
       <!-- This comment is needed here so linter doesn't turn <svg> into self-closing tag  -->
     </svg>
-    <div id="tooltip" class="scatter-plot__tooltip">Hello!</div>
+
+    <div class="scatter-plot__dots-container">
+      <template v-for="item in items" :key="item.id">
+        <div :style="calculateDotPosition(item)" class="scatter-plot__dot"></div>
+      </template>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import * as d3 from 'd3'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, useSlots, CSSProperties } from 'vue'
 import { useBaseChart } from './Base'
 import { formatLabel } from '@/utils/formatLabel'
 import { GroupSelection, TransitionSelection, ChartItem } from './types'
 import { extentUndefined } from './utils/extent'
+
+const slots = useSlots()
 
 const props = defineProps<{
   items: ChartItem[],
@@ -31,6 +38,10 @@ const dotContainer = ref()
 let tooltip: any | undefined
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
+const tooltipContainer = ref()
+
+const items = computed(() => props.items.map(item => ({ ...item, duration: item.duration || 0.1 })))
+
 
 // SETUP BASE
 const handleResize = (): void => {
@@ -41,18 +52,18 @@ const { id } = baseChart
 
 
 // AXIS
-const axisClasses = (g: GroupSelection) => {
-  const existingClasses = g.attr('class').split(' ') ?? []
-  const propClasses = props.axisClass?.split(' ') ?? []
-  const classes = [...existingClasses, ...propClasses.filter(pc => !existingClasses.includes(pc))]
-  return classes.join(' ')
-}
+// const axisClasses = (g: GroupSelection) => {
+//   const existingClasses = g.attr('class').split(' ') ?? []
+//   const propClasses = props.axisClass?.split(' ') ?? []
+//   const classes = [...existingClasses, ...propClasses.filter(pc => !existingClasses.includes(pc))]
+//   return classes.join(' ')
+// }
 
 // xAXIS
 let xAxisGroup: GroupSelection | undefined
 
 const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
-  .attr('class', axisClasses(g))
+  // .attr('class', axisClasses(g))
   .call(d3.axisBottom(xScale.value)
     .tickPadding(10)
     .tickSizeInner(5)
@@ -63,7 +74,7 @@ const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
 let yAxisGroup: GroupSelection | undefined
 
 const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
-  .attr('class', axisClasses(g))
+  // .attr('class', axisClasses(g))
   .call(d3.axisLeft(yScale.value)
     .tickPadding(10)
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
@@ -74,21 +85,41 @@ const xAccessor = (d: ChartItem) => d.timestamp
 const yAccessor = (d: ChartItem) => d.duration
 
 
-const mouseover = function (this: any, e: any, datum: any): void {
-  d3.select(this)
-    .attr('r', 8)
+// const mouseover = function (this: any, e: any, datum: any): void {
+//   d3.select(this)
+//     .attr('r', 8)
 
-  tooltip.style('display', 'block')
-    .style('top', yScale.value(yAccessor(datum)) - 35 + "px")
-    .style('left', xScale.value(xAccessor(datum)) + "px")
-}
+// tooltip.style('display', 'block')
+//   .style('top', yScale.value(yAccessor(datum)) - tooltipContainer.value.clientHeight + 5 + "px")
+//   .style('left', xScale.value(xAccessor(datum)) - tooltipContainer.value.clientWidth / 2 + "px") // can't figure out X alignment
 
-const mouseleave = function (this: any, e: any, datum: any): void {
-  d3.select(this)
-    .attr('class', () => `${datum.state_type?.toLowerCase()}-bg dot`)
-    .attr('r', 7)
+// console.log(datum.id)
+// tooltip.select('.link')
+//   // .attr('href', `flow-run/${id}`)
+//   .attr('href', `flow-run/78b05d2d-e18f-479f-841c-e86d4134aff6`)
+// }
 
-  tooltip.style('display', 'none')
+// const mouseleave = function (this: any, e: any, datum: any): void {
+//   d3.select(this)
+//     .attr('class', () => `${datum.state_type?.toLowerCase()}-bg`)
+//     .attr('r', 7)
+
+//   tooltip.style('display', 'none')
+// }
+
+const calculateDotPosition = (item: ChartItem): CSSProperties => {
+  console.log(baseChart.height.value);
+  const itemHeight = 14
+  const itemWidth = itemHeight
+  const top = yScale.value(item.duration) + baseChart.padding.top - itemHeight / 2
+  const left = baseChart.padding.left + xScale.value(item.timestamp) - itemWidth // figure out how to recalculate dot position on screen size change
+  return {
+    height: `${itemHeight}px`,
+    width: `${itemWidth}px`,
+    left: `${left}px`,
+    top: `${top}px`,
+    backgroundColor: `red`
+  }
 }
 
 const updateScales = (): void => {
@@ -115,23 +146,23 @@ const updateScales = (): void => {
     yAxisGroup.select('.tick text').attr('x', '-23') // for whatever reason first tick renders too close to axis without this setup
   }
 
-  if (dotContainer.value) {
-    dotContainer.value
-      .attr("transform", `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
-      .selectAll('circle')
-      .data(props.items)
-      .join("circle")
-      .attr("cx", (d: ChartItem) => xScale.value(xAccessor(d)))
-      .attr("cy", (d: ChartItem) => yScale.value(yAccessor(d)))
-      .attr("r", 7)
-      .attr('class', (d: ChartItem) => `${d.state_type?.toLowerCase()}-bg dot`)
-      .on('mouseenter', mouseover)
-      .on('mouseleave', mouseleave)
-  }
+  // if (dotContainer.value) {
+  //   dotContainer.value
+  //     .attr("transform", `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
+  //     .selectAll('circle')
+  //     .data(props.items)
+  //     .join("circle")
+  //     .attr("cx", (d: ChartItem) => xScale.value(xAccessor(d)))
+  //     .attr("cy", (d: ChartItem) => yScale.value(yAccessor(d)))
+  //     .attr("r", 7)
+  //     .attr('class', (d: ChartItem) => `${d.state_type?.toLowerCase()}-bg dot`)
+  //     .on('mouseenter', mouseover)
+  //     .on('mouseleave', mouseleave)
+  // }
 }
 
 const updateXScale = (): void => {
-  let extentX = d3.extent(props.items, xAccessor)
+  let extentX = d3.extent(items.value, xAccessor)
 
   if (extentUndefined(extentX)) {
     // todo: replace this with an intuitive default
@@ -144,7 +175,7 @@ const updateXScale = (): void => {
 }
 
 const updateYScale = (): void => {
-  let extentY = d3.extent(props.items, yAccessor)
+  let extentY = d3.extent(items.value, yAccessor)
 
   if (extentUndefined(extentY)) {
     // todo: replace this with an intuitive default
@@ -154,8 +185,9 @@ const updateYScale = (): void => {
   yScale.value
     .domain(extentY)
     .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
-    .base(5)
+    .base(2)
 }
+
 
 onMounted(() => {
   const svg = d3.select(`#${id}`)
@@ -211,6 +243,7 @@ watch(() => props.chartPadding, (val) => {
   min-height: 300px;
   height: 100%;
   width: 100%;
+  position: relative;
 }
 
 .scatter-plot__svg {
@@ -218,10 +251,23 @@ watch(() => props.chartPadding, (val) => {
   width: 100%;
 }
 
+.scatter-plot__dots-container {
+  width: 100%;
+}
+
+.scatter-plot__dot {
+  position: absolute;
+  transform: translateX(50%) scaleX(-1);
+  // width: 10px;
+  // height: 10px;
+  border-radius: 50%;
+}
+
 .scatter-plot__tooltip {
   border: 1px solid #ccc;
   border-radius: 4px;
   position: absolute;
+  box-sizing: border-box;
   padding: 10px;
   background-color: #fff;
   display: none;
