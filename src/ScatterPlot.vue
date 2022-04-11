@@ -13,8 +13,8 @@ import { ref, computed, onMounted, watch } from 'vue'
 import { useBaseChart } from './Base'
 import { formatLabel } from '@/utils/formatLabel'
 import { GroupSelection, TransitionSelection, ChartItem } from './types'
+import { extentUndefined } from './utils/extent'
 
-// PROPS
 const props = defineProps<{
   items: ChartItem[],
   axisClass?: string, // do we need separate xAxisClass and yAxisClass? In RunHistory we pass 'caption'
@@ -25,7 +25,6 @@ const props = defineProps<{
     right?: number,
   },
 }>()
-
 
 const container = ref<HTMLElement>()
 const dotContainer = ref()
@@ -70,12 +69,10 @@ const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
   )
 
-
 const xAccessor = (d: ChartItem) => d.timestamp
 const yAccessor = (d: ChartItem) => d.duration
 
-
-const mouseover = function (e: any, datum: any): void {
+const mouseover = function (this: any, e: any, datum: any): void {
   d3.select(this)
     .attr('r', 8)
 
@@ -83,7 +80,7 @@ const mouseover = function (e: any, datum: any): void {
     .style('top', yScale.value(yAccessor(datum)) - 35 + "px")
     .style('left', xScale.value(xAccessor(datum)) + "px")
 }
-const mouseleave = function (e: any, datum: any): void {
+const mouseleave = function (this: any, e: any, datum: any): void {
   d3.select(this)
     .attr('class', () => `${datum.state_type?.toLowerCase()}-bg dot`)
     .attr('r', 7)
@@ -92,14 +89,8 @@ const mouseleave = function (e: any, datum: any): void {
 }
 
 const updateScales = (): void => {
-  xScale.value
-    .domain(d3.extent(props.items, xAccessor))
-    .rangeRound([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
-
-  yScale.value
-    .domain(d3.extent(props.items, yAccessor))
-    .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
-    .base(5)
+  updateXScale()
+  updateYScale()
 
   if (xAxisGroup) {
     xAxisGroup.call(xAxis)
@@ -130,6 +121,33 @@ const updateScales = (): void => {
   }
 }
 
+const updateXScale = (): void => {
+  let extentX = d3.extent(props.items, xAccessor)
+
+  if (extentUndefined(extentX)) {
+    // todo: replace this with an intuitive default
+    extentX = [new Date(), new Date()]
+  }
+
+  xScale.value
+    .domain(extentX)
+    .rangeRound([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
+}
+
+const updateYScale = (): void => {
+  let extentY = d3.extent(props.items, yAccessor)
+
+  if (extentUndefined(extentY)) {
+    // todo: replace this with an intuitive default
+    extentY = [0, 0]
+  }
+
+  yScale.value
+    .domain(extentY)
+    .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
+    .base(5)
+}
+
 onMounted(() => {
   const svg = d3.select(`#${id}`)
   xAxisGroup = svg.append('g').attr('class', '.scatter-plot__x-axis-group')
@@ -152,22 +170,27 @@ watch(() => props.chartPadding, (val) => {
   stroke: #2ac769;
   fill: rgb(42, 199, 105, 0.5);
 }
+
 .running-bg {
   stroke: #1860f2;
   fill: rgb(24, 96, 242, 0.5);
 }
+
 .failed-bg {
   stroke: #fb4e4e;
   fill: rgb(251, 78, 78, 0.5);
 }
+
 .cancelled-bg {
   stroke: #3d3d3d;
   fill: rgb(61, 61, 61, 0.5);
 }
+
 .scheduled-bg {
   stroke: #fcd14e;
   fill: rgb(252, 209, 78, 0.5);
 }
+
 .pending-bg {
   stroke: #ebeef7;
   fill: rgb(235, 238, 247, 0.9);
@@ -179,6 +202,7 @@ watch(() => props.chartPadding, (val) => {
   height: 100%;
   width: 100%;
 }
+
 .scatter-plot__svg {
   height: 100%;
   width: 100%;
