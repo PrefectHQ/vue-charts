@@ -68,6 +68,7 @@ const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
   .call(d3.axisLeft(yScale.value)
     .tickPadding(10)
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
+    .tickFormat(d => d + 's')
   )
 
 
@@ -83,6 +84,7 @@ const mouseover = function (e: any, datum: any): void {
     .style('top', yScale.value(yAccessor(datum)) - 35 + "px")
     .style('left', xScale.value(xAccessor(datum)) + "px")
 }
+
 const mouseleave = function (e: any, datum: any): void {
   d3.select(this)
     .attr('class', () => `${datum.state_type?.toLowerCase()}-bg dot`)
@@ -103,16 +105,22 @@ const updateScales = (): void => {
 
   if (xAxisGroup) {
     xAxisGroup.call(xAxis)
-    xAxisGroup.attr("transform", `translate(${baseChart.padding.left}, ${baseChart.height.value - baseChart.padding.bottom})`)
+    xAxisGroup
+      .attr("transform", `translate(${baseChart.padding.left}, ${baseChart.height.value - baseChart.padding.bottom})`)
+      .attr('font-family', 'input-sans')
+      .attr('font-size', '11')
   }
 
   if (yAxisGroup) {
     yAxisGroup.call(yAxis)
-    yAxisGroup.attr("transform", `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
+    yAxisGroup
+      .attr("transform", `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
+      .attr('font-family', 'input-sans')
+      .attr('font-size', '11')
 
     yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
     yAxisGroup.select('.domain').style('stroke', '#cacccf')
-    yAxisGroup.select('.tick text').attr('x', '-15') // for whatever reason first tick renders too close to axis without this setup
+    yAxisGroup.select('.tick text').attr('x', '-23') // for whatever reason first tick renders too close to axis without this setup
   }
 
   if (dotContainer.value) {
@@ -148,6 +156,7 @@ watch(() => props.chartPadding, (val) => {
 </script>
 
 <style lang="scss">
+// update to use miter imports
 .completed-bg {
   stroke: #2ac769;
   fill: rgb(42, 199, 105, 0.5);
@@ -169,7 +178,7 @@ watch(() => props.chartPadding, (val) => {
   fill: rgb(252, 209, 78, 0.5);
 }
 .pending-bg {
-  stroke: #ebeef7;
+  stroke: #8ea0ae;
   fill: rgb(235, 238, 247, 0.9);
 }
 
