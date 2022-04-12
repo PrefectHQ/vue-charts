@@ -165,7 +165,6 @@ watch(() => props.items, () => updateScales())
 <style lang="scss">
 .scatter-plot {
   box-sizing: border-box;
-  min-height: 300px;
   height: 100%;
   width: 100%;
   position: relative;
