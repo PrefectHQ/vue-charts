@@ -32,7 +32,7 @@ export type ScatterPlotItem = {
   id: string,
   x: Date,
   y: number,
-  class?: string
+  itemClass?: string
 }
 export type ChartProps = {
   items: ScatterPlotItem[]

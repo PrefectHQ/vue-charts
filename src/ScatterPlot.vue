@@ -6,7 +6,10 @@
 
     <div class="scatter-plot__dots-container">
       <template v-for="item in items" :key="item.id">
-        <div :style="calculateDotPosition(item)" class="scatter-plot__dot" :class="item.class">
+        <div
+          :style="calculateDotPosition(item)"
+          :class="item.itemClass ? item.itemClass : 'scatter-plot__dot'"
+        >
           <slot :item="item" />
         </div>
       </template>
@@ -155,7 +158,6 @@ watch(() => props.chartPadding, (val) => {
 </script>
 
 <style lang="scss">
-// update to use miter imports
 .scatter-plot__dot--completed {
   border: 1px solid #2ac769;
   background-color: rgb(42, 199, 105, 0.5);
@@ -185,7 +187,6 @@ watch(() => props.chartPadding, (val) => {
   border: 1px solid #8ea0ae;
   background-color: rgb(235, 238, 247, 0.9);
 }
-
 .scatter-plot {
   box-sizing: border-box;
   min-height: 300px;
@@ -207,5 +208,6 @@ watch(() => props.chartPadding, (val) => {
   position: absolute;
   transform: translateX(50%) scaleX(-1);
   border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 </style>
