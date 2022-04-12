@@ -158,6 +158,8 @@ watch(() => props.chartPadding, (val) => {
   baseChart.padding = { ...baseChart.padding, ...val }
 })
 
+watch(() => props.items, () => updateScales())
+
 </script>
 
 <style lang="scss">
