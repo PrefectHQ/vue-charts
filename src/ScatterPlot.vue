@@ -74,10 +74,9 @@ const yAccessor = (d: ScatterPlotItem) => d.y
 
 
 const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
-  console.log(baseChart.height.value);
   const radius = 14
   const top = yScale.value(item.y) + baseChart.padding.top - radius / 2
-  const left = baseChart.padding.left + xScale.value(item.x) - radius // figure out how to recalculate dot position on screen size change
+  const left = baseChart.padding.left + xScale.value(item.x) - radius
   return {
     height: `${radius}px`,
     width: `${radius}px`,
@@ -120,7 +119,8 @@ const updateXScale = (): void => {
     extentX = [dayAgo, dateNow]
   }
 
-  xScale.value
+  xScale.value = d3
+    .scaleTime()
     .domain(extentX)
     .rangeRound([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
 }
@@ -132,12 +132,12 @@ const updateYScale = (): void => {
     extentY = [0.1, 100]
   }
 
-  yScale.value
+  yScale.value = d3
+    .scaleLog()
     .domain(extentY)
     .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
     .base(2)
 }
-
 
 onMounted(() => {
   const svg = d3.select(`#${id}`)
