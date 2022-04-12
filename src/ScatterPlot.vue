@@ -6,12 +6,8 @@
 
     <div class="scatter-plot__dots-container">
       <template v-for="item in items" :key="item.id">
-        <div
-          :style="calculateDotPosition(item)"
-          class="scatter-plot__dot"
-          :class="item.class?.toLowerCase()"
-        >
-          <slot v-if="slots.default" :item="item" />
+        <div :style="calculateDotPosition(item)" class="scatter-plot__dot" :class="item.class">
+          <slot :item="item" />
         </div>
       </template>
     </div>
@@ -79,13 +75,12 @@ const yAccessor = (d: ScatterPlotItem) => d.y
 
 const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
   console.log(baseChart.height.value);
-  const itemHeight = 14
-  const itemWidth = itemHeight
-  const top = yScale.value(item.y) + baseChart.padding.top - itemHeight / 2
-  const left = baseChart.padding.left + xScale.value(item.x) - itemWidth // figure out how to recalculate dot position on screen size change
+  const radius = 14
+  const top = yScale.value(item.y) + baseChart.padding.top - radius / 2
+  const left = baseChart.padding.left + xScale.value(item.x) - radius // figure out how to recalculate dot position on screen size change
   return {
-    height: `${itemHeight}px`,
-    width: `${itemWidth}px`,
+    height: `${radius}px`,
+    width: `${radius}px`,
     left: `${left}px`,
     top: `${top}px`,
   }
@@ -119,8 +114,10 @@ const updateXScale = (): void => {
   let extentX = d3.extent(items.value, xAccessor)
 
   if (extentUndefined(extentX)) {
-    // todo: replace this with an intuitive default
-    extentX = [new Date(), new Date()]
+    let dateNow = new Date
+    let offset = dateNow.setDate(dateNow.getDate() - 1)
+    let dayAgo = new Date(offset)
+    extentX = [dayAgo, dateNow]
   }
 
   xScale.value
@@ -132,8 +129,7 @@ const updateYScale = (): void => {
   let extentY = d3.extent(items.value, yAccessor)
 
   if (extentUndefined(extentY)) {
-    // todo: replace this with an intuitive default
-    extentY = [0, 0]
+    extentY = [0.1, 100]
   }
 
   yScale.value
@@ -144,8 +140,6 @@ const updateYScale = (): void => {
 
 
 onMounted(() => {
-  console.log(props.items);
-
   const svg = d3.select(`#${id}`)
   xAxisGroup = svg.append('g').attr('class', '.scatter-plot__x-axis-group')
   yAxisGroup = svg.append('g').attr('class', '.scatter-plot__y-axis-group')
@@ -154,9 +148,8 @@ onMounted(() => {
   updateScales()
 })
 
-watch(() => [props.chartPadding, xScale.value], ([paddingVal], [scaleVal]) => {
-  baseChart.padding = { ...baseChart.padding, ...paddingVal }
-
+watch(() => props.chartPadding, (val) => {
+  baseChart.padding = { ...baseChart.padding, ...val }
 })
 
 </script>
