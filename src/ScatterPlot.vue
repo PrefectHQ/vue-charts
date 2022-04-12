@@ -26,6 +26,8 @@ const slots = useSlots()
 
 const props = withDefaults(defineProps<{
   items: ScatterPlotItem[],
+  startDate?: Date,
+  endDate?: Date
   chartPadding?: {
     top?: number,
     bottom?: number,
@@ -124,6 +126,14 @@ const updateXScale = (): void => {
     let offset = dateNow.setDate(dateNow.getDate() - 1)
     let dayAgo = new Date(offset)
     extentX = [dayAgo, dateNow]
+  }
+
+  if (props.startDate) {
+    extentX[0] = props.startDate
+  }
+
+  if (props.endDate) {
+    extentX[1] = props.endDate
   }
 
   xScale.value = d3
