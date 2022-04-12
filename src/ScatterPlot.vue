@@ -138,7 +138,6 @@ const updateYScale = (): void => {
     .base(2)
 }
 
-
 onMounted(() => {
   const svg = d3.select(`#${id}`)
   xAxisGroup = svg.append('g').attr('class', '.scatter-plot__x-axis-group')
