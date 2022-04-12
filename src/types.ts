@@ -27,3 +27,13 @@ export type TimelineChartItem<T = unknown> = {
   end?: Date,
   data?: T
 }
+
+export type ScatterPlotItem = {
+  id: string,
+  x: Date,
+  y: number,
+  itemClass?: string
+}
+export type ChartProps = {
+  items: ScatterPlotItem[]
+}

@@ -17,6 +17,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/Timeline.vue'),
   },
   {
+    path: '/scatter-plot',
+    name: 'Scatter Plot',
+    component: () => import('../views/ScatterPlot.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart'
   }
