@@ -1,7 +1,8 @@
 <template>
   <div ref="container" class="scatter-plot">
     <svg :id="id" ref="chart" class="scatter-plot__svg">
-      <!-- This comment is needed here so linter doesn't turn <svg> into self-closing tag  -->
+      <g class="scatter-plot__x-axis-group" />
+      <g class="scatter-plot__y-axis-group" />
     </svg>
 
     <div class="scatter-plot__dots-container">
@@ -37,7 +38,6 @@ const props = defineProps<{
 }>()
 
 const container = ref<HTMLElement>()
-const dotContainer = ref()
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
 
@@ -144,9 +144,8 @@ const updateYScale = (): void => {
 
 onMounted(() => {
   const svg = d3.select(`#${id}`)
-  xAxisGroup = svg.append('g').attr('class', '.scatter-plot__x-axis-group')
-  yAxisGroup = svg.append('g').attr('class', '.scatter-plot__y-axis-group')
-  dotContainer.value = svg.append('g').attr('class', '.scatter-plot__dot-container')
+  xAxisGroup = svg.select('.scatter-plot__x-axis-group')
+  yAxisGroup = svg.select('.scatter-plot__y-axis-group')
 
   updateScales()
 })
@@ -158,35 +157,6 @@ watch(() => props.chartPadding, (val) => {
 </script>
 
 <style lang="scss">
-.scatter-plot__dot--completed {
-  border: 1px solid #2ac769;
-  background-color: rgb(42, 199, 105, 0.5);
-}
-
-.scatter-plot__dot--running {
-  border: 1px solid #1860f2;
-  background-color: rgb(24, 96, 242, 0.5);
-}
-
-.scatter-plot__dot--failed {
-  border: 1px solid #fb4e4e;
-  background-color: rgb(251, 78, 78, 0.5);
-}
-
-.scatter-plot__dot--cancelled {
-  border: 1px solid #3d3d3d;
-  background-color: rgb(61, 61, 61, 0.5);
-}
-
-.scatter-plot__dot--scheduled {
-  border: 1px solid #fcd14e;
-  background-color: rgb(252, 209, 78, 0.5);
-}
-
-.scatter-plot__dot--pending {
-  border: 1px solid #8ea0ae;
-  background-color: rgb(235, 238, 247, 0.9);
-}
 .scatter-plot {
   box-sizing: border-box;
   min-height: 300px;
