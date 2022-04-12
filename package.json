@@ -1,6 +1,6 @@
 {
   "name": "@prefecthq/vue-charts",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "private": false,
   "keywords": [
     "vue3",
@@ -10,15 +10,14 @@
   "scripts": {
     "serve": "vite",
     "dev": "vue-tsc -w & tsc-alias -w & vite build -w",
-    "build": "vue-tsc --declaration --emitDeclarationOnly && vite build",
-    "build:watch": "vue-tsc --declaration --emitDeclarationOnly && vite build --watch",
+    "build": "vue-tsc && tsc-alias && vite build",
     "lint": "eslint src --ext .js,.ts,.vue --debug",
     "lint:fix": "eslint src --ext .js,.ts,.vue --debug --fix",
     "validate:types": "tsc"
   },
   "main": "./dist/vue-charts.umd.js",
   "module": "./dist/vue-charts.es.js",
-  "typings": "./dist_types/index.d.ts",
+  "typings": "./dist/types/",
   "files": [
     "src",
     "dist",
