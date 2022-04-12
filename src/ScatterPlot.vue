@@ -22,7 +22,6 @@
 import * as d3 from 'd3'
 import { ref, computed, onMounted, watch, useSlots, CSSProperties } from 'vue'
 import { useBaseChart } from './Base'
-import { formatLabel } from '@/utils/formatLabel'
 import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
 import { extentUndefined } from './utils/extent'
 
@@ -30,7 +29,6 @@ const slots = useSlots()
 
 const props = defineProps<{
   items: ScatterPlotItem[],
-  axisClass?: string, // do we need separate xAxisClass and yAxisClass? In RunHistory we pass 'caption'
   chartPadding?: {
     top?: number,
     bottom?: number,
@@ -41,7 +39,6 @@ const props = defineProps<{
 
 const container = ref<HTMLElement>()
 const dotContainer = ref()
-let tooltip: any | undefined
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
 
@@ -60,7 +57,6 @@ const { id } = baseChart
 let xAxisGroup: GroupSelection | undefined
 
 const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
-  // .attr('class', axisClasses(g))
   .call(d3.axisBottom(xScale.value)
     .tickPadding(10)
     .tickSizeInner(5)
@@ -116,7 +112,6 @@ const updateScales = (): void => {
 
     yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
     yAxisGroup.select('.domain').style('stroke', '#cacccf')
-    yAxisGroup.select('.tick text').attr('x', '-23') // for whatever reason first tick renders too close to axis without this setup
   }
 }
 
@@ -155,7 +150,6 @@ onMounted(() => {
   xAxisGroup = svg.append('g').attr('class', '.scatter-plot__x-axis-group')
   yAxisGroup = svg.append('g').attr('class', '.scatter-plot__y-axis-group')
   dotContainer.value = svg.append('g').attr('class', '.scatter-plot__dot-container')
-  tooltip = d3.select('#tooltip')
 
   updateScales()
 })
@@ -219,18 +213,6 @@ watch(() => [props.chartPadding, xScale.value], ([paddingVal], [scaleVal]) => {
 .scatter-plot__dot {
   position: absolute;
   transform: translateX(50%) scaleX(-1);
-  // width: 10px;
-  // height: 10px;
   border-radius: 50%;
-}
-
-.scatter-plot__tooltip {
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  position: absolute;
-  box-sizing: border-box;
-  padding: 10px;
-  background-color: #fff;
-  display: none;
 }
 </style>
