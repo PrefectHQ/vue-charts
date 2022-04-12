@@ -5,13 +5,15 @@
       <g class="scatter-plot__y-axis-group" />
     </svg>
 
-    <div class="scatter-plot__dots-container">
-      <template v-for="item in items" :key="item.id">
-        <div :style="calculateDotPosition(item)" class="scatter-plot__dot" :class="item.itemClass">
-          <slot :item="item" />
-        </div>
-      </template>
-    </div>
+    <template v-for="item in items" :key="item.id">
+      <div :style="calculateDotPosition(item)" class="scatter-plot__dot" :class="item.itemClass">
+        <slot :item="item" />
+      </div>
+    </template>
+
+    <template v-if="showNowLine && calculateNowPosition()">
+      <div class="scatter-plot__now" :style="calculateNowPosition()!" />
+    </template>
   </div>
 </template>
 
@@ -27,7 +29,8 @@ const slots = useSlots()
 const props = withDefaults(defineProps<{
   items: ScatterPlotItem[],
   startDate?: Date,
-  endDate?: Date
+  endDate?: Date,
+  showNowLine?: boolean,
   chartPadding?: {
     top?: number,
     bottom?: number,
@@ -94,6 +97,43 @@ const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
   }
 }
 
+const calculateNowPosition = (): CSSProperties | null => {
+  const [start, end] = getXExtent()
+  const now = new Date()
+
+  if (start > now || end < now) {
+    return null
+  }
+
+  const left = baseChart.padding.left + xScale.value(now)
+
+  return {
+    left: `${left}px`
+  }
+
+}
+
+const getXExtent = (): [Date, Date] => {
+  let extent = d3.extent(items.value, xAccessor)
+
+  if (extentUndefined(extent)) {
+    let dateNow = new Date
+    let offset = dateNow.setDate(dateNow.getDate() - 1)
+    let dayAgo = new Date(offset)
+    extent = [dayAgo, dateNow]
+  }
+
+  if (props.startDate) {
+    extent[0] = props.startDate
+  }
+
+  if (props.endDate) {
+    extent[1] = props.endDate
+  }
+
+  return extent
+}
+
 const updateScales = (): void => {
   updateXScale()
   updateYScale()
@@ -119,22 +159,7 @@ const updateScales = (): void => {
 }
 
 const updateXScale = (): void => {
-  let extentX = d3.extent(items.value, xAccessor)
-
-  if (extentUndefined(extentX)) {
-    let dateNow = new Date
-    let offset = dateNow.setDate(dateNow.getDate() - 1)
-    let dayAgo = new Date(offset)
-    extentX = [dayAgo, dateNow]
-  }
-
-  if (props.startDate) {
-    extentX[0] = props.startDate
-  }
-
-  if (props.endDate) {
-    extentX[1] = props.endDate
-  }
+  const extentX = getXExtent()
 
   xScale.value = d3
     .scaleTime()
@@ -185,8 +210,41 @@ watch(() => props.items, () => updateScales())
   width: 100%;
 }
 
-.scatter-plot__dots-container {
-  width: 100%;
+.scatter-plot__x-axis-group,
+.scatter-plot__y-axis-group {
+  user-select: none;
+}
+
+.scatter-plot__now {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+
+  &::before {
+    content: 'Now';
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--font-secondary);
+    font-size: 11px;
+    color: var(--grey-80);
+    letter-spacing: -0.09;
+  }
+
+  &::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 20px;
+    bottom: 35px;
+    width: 1px;
+    background-color: #465968;
+  }
 }
 
 .scatter-plot__dot {
@@ -194,5 +252,6 @@ watch(() => props.items, () => updateScales())
   transform: translateX(50%) scaleX(-1);
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
+  z-index: 2;
 }
 </style>
