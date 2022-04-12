@@ -27,7 +27,7 @@ import { extentUndefined } from './utils/extent'
 
 const slots = useSlots()
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   items: ScatterPlotItem[],
   chartPadding?: {
     top?: number,
@@ -35,7 +35,14 @@ const props = defineProps<{
     left?: number,
     right?: number,
   },
-}>()
+}>(),
+  {
+    chartPadding: () => {
+      return { top: 30, left: 70, bottom: 35, right: 20 }
+    }
+
+  }
+)
 
 const container = ref<HTMLElement>()
 const xScale = ref(d3.scaleTime())
