@@ -3,21 +3,32 @@
     <svg :id="id" ref="chart" class="scatter-plot__svg">
       <!-- This comment is needed here so linter doesn't turn <svg> into self-closing tag  -->
     </svg>
-    <div id="tooltip" class="scatter-plot__tooltip">Hello!</div>
+
+    <div class="scatter-plot__dots-container">
+      <template v-for="item in items" :key="item.id">
+        <div
+          :style="calculateDotPosition(item)"
+          class="scatter-plot__dot"
+          :class="item.class?.toLowerCase()"
+        >
+          <slot v-if="slots.default" :item="item" />
+        </div>
+      </template>
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import * as d3 from 'd3'
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, useSlots, CSSProperties } from 'vue'
 import { useBaseChart } from './Base'
-import { formatLabel } from '@/utils/formatLabel'
-import { GroupSelection, TransitionSelection, ChartItem } from './types'
+import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
 import { extentUndefined } from './utils/extent'
 
+const slots = useSlots()
+
 const props = defineProps<{
-  items: ChartItem[],
-  axisClass?: string, // do we need separate xAxisClass and yAxisClass? In RunHistory we pass 'caption'
+  items: ScatterPlotItem[],
   chartPadding?: {
     top?: number,
     bottom?: number,
@@ -28,9 +39,11 @@ const props = defineProps<{
 
 const container = ref<HTMLElement>()
 const dotContainer = ref()
-let tooltip: any | undefined
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
+
+const items = computed(() => props.items.map(item => ({ ...item, y: item.y || 0.1 })))
+
 
 // SETUP BASE
 const handleResize = (): void => {
@@ -40,19 +53,10 @@ const baseChart = useBaseChart(container, { onResize: handleResize, padding: pro
 const { id } = baseChart
 
 
-// AXIS
-const axisClasses = (g: GroupSelection) => {
-  const existingClasses = g.attr('class').split(' ') ?? []
-  const propClasses = props.axisClass?.split(' ') ?? []
-  const classes = [...existingClasses, ...propClasses.filter(pc => !existingClasses.includes(pc))]
-  return classes.join(' ')
-}
-
 // xAXIS
 let xAxisGroup: GroupSelection | undefined
 
 const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
-  .attr('class', axisClasses(g))
   .call(d3.axisBottom(xScale.value)
     .tickPadding(10)
     .tickSizeInner(5)
@@ -63,32 +67,28 @@ const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
 let yAxisGroup: GroupSelection | undefined
 
 const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
-  .attr('class', axisClasses(g))
   .call(d3.axisLeft(yScale.value)
     .tickPadding(10)
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
     .tickFormat(d => d + 's')
   )
 
-const xAccessor = (d: ChartItem) => d.timestamp
-const yAccessor = (d: ChartItem) => d.duration
+const xAccessor = (d: ScatterPlotItem) => d.x
+const yAccessor = (d: ScatterPlotItem) => d.y
 
 
-const mouseover = function (this: any, e: any, datum: any): void {
-  d3.select(this)
-    .attr('r', 8)
-
-  tooltip.style('display', 'block')
-    .style('top', yScale.value(yAccessor(datum)) - 35 + "px")
-    .style('left', xScale.value(xAccessor(datum)) + "px")
-}
-
-const mouseleave = function (this: any, e: any, datum: any): void {
-  d3.select(this)
-    .attr('class', () => `${datum.state_type?.toLowerCase()}-bg dot`)
-    .attr('r', 7)
-
-  tooltip.style('display', 'none')
+const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
+  console.log(baseChart.height.value);
+  const itemHeight = 14
+  const itemWidth = itemHeight
+  const top = yScale.value(item.y) + baseChart.padding.top - itemHeight / 2
+  const left = baseChart.padding.left + xScale.value(item.x) - itemWidth // figure out how to recalculate dot position on screen size change
+  return {
+    height: `${itemHeight}px`,
+    width: `${itemWidth}px`,
+    left: `${left}px`,
+    top: `${top}px`,
+  }
 }
 
 const updateScales = (): void => {
@@ -112,26 +112,11 @@ const updateScales = (): void => {
 
     yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
     yAxisGroup.select('.domain').style('stroke', '#cacccf')
-    yAxisGroup.select('.tick text').attr('x', '-23') // for whatever reason first tick renders too close to axis without this setup
-  }
-
-  if (dotContainer.value) {
-    dotContainer.value
-      .attr("transform", `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
-      .selectAll('circle')
-      .data(props.items)
-      .join("circle")
-      .attr("cx", (d: ChartItem) => xScale.value(xAccessor(d)))
-      .attr("cy", (d: ChartItem) => yScale.value(yAccessor(d)))
-      .attr("r", 7)
-      .attr('class', (d: ChartItem) => `${d.state_type?.toLowerCase()}-bg dot`)
-      .on('mouseenter', mouseover)
-      .on('mouseleave', mouseleave)
   }
 }
 
 const updateXScale = (): void => {
-  let extentX = d3.extent(props.items, xAccessor)
+  let extentX = d3.extent(items.value, xAccessor)
 
   if (extentUndefined(extentX)) {
     // todo: replace this with an intuitive default
@@ -144,7 +129,7 @@ const updateXScale = (): void => {
 }
 
 const updateYScale = (): void => {
-  let extentY = d3.extent(props.items, yAccessor)
+  let extentY = d3.extent(items.value, yAccessor)
 
   if (extentUndefined(extentY)) {
     // todo: replace this with an intuitive default
@@ -154,21 +139,23 @@ const updateYScale = (): void => {
   yScale.value
     .domain(extentY)
     .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
-    .base(5)
+    .base(2)
 }
 
+
 onMounted(() => {
+  console.log(props.items);
+
   const svg = d3.select(`#${id}`)
   xAxisGroup = svg.append('g').attr('class', '.scatter-plot__x-axis-group')
   yAxisGroup = svg.append('g').attr('class', '.scatter-plot__y-axis-group')
   dotContainer.value = svg.append('g').attr('class', '.scatter-plot__dot-container')
-  tooltip = d3.select('#tooltip')
 
   updateScales()
 })
 
-watch(() => props.chartPadding, (val) => {
-  baseChart.padding = { ...baseChart.padding, ...val }
+watch(() => [props.chartPadding, xScale.value], ([paddingVal], [scaleVal]) => {
+  baseChart.padding = { ...baseChart.padding, ...paddingVal }
 
 })
 
@@ -176,34 +163,34 @@ watch(() => props.chartPadding, (val) => {
 
 <style lang="scss">
 // update to use miter imports
-.completed-bg {
-  stroke: #2ac769;
-  fill: rgb(42, 199, 105, 0.5);
+.scatter-plot__dot--completed {
+  border: 1px solid #2ac769;
+  background-color: rgb(42, 199, 105, 0.5);
 }
 
-.running-bg {
-  stroke: #1860f2;
-  fill: rgb(24, 96, 242, 0.5);
+.scatter-plot__dot--running {
+  border: 1px solid #1860f2;
+  background-color: rgb(24, 96, 242, 0.5);
 }
 
-.failed-bg {
-  stroke: #fb4e4e;
-  fill: rgb(251, 78, 78, 0.5);
+.scatter-plot__dot--failed {
+  border: 1px solid #fb4e4e;
+  background-color: rgb(251, 78, 78, 0.5);
 }
 
-.cancelled-bg {
-  stroke: #3d3d3d;
-  fill: rgb(61, 61, 61, 0.5);
+.scatter-plot__dot--cancelled {
+  border: 1px solid #3d3d3d;
+  background-color: rgb(61, 61, 61, 0.5);
 }
 
-.scheduled-bg {
-  stroke: #fcd14e;
-  fill: rgb(252, 209, 78, 0.5);
+.scatter-plot__dot--scheduled {
+  border: 1px solid #fcd14e;
+  background-color: rgb(252, 209, 78, 0.5);
 }
 
-.pending-bg {
-  stroke: #8ea0ae;
-  fill: rgb(235, 238, 247, 0.9);
+.scatter-plot__dot--pending {
+  border: 1px solid #8ea0ae;
+  background-color: rgb(235, 238, 247, 0.9);
 }
 
 .scatter-plot {
@@ -211,6 +198,7 @@ watch(() => props.chartPadding, (val) => {
   min-height: 300px;
   height: 100%;
   width: 100%;
+  position: relative;
 }
 
 .scatter-plot__svg {
@@ -218,12 +206,13 @@ watch(() => props.chartPadding, (val) => {
   width: 100%;
 }
 
-.scatter-plot__tooltip {
-  border: 1px solid #ccc;
-  border-radius: 4px;
+.scatter-plot__dots-container {
+  width: 100%;
+}
+
+.scatter-plot__dot {
   position: absolute;
-  padding: 10px;
-  background-color: #fff;
-  display: none;
+  transform: translateX(50%) scaleX(-1);
+  border-radius: 50%;
 }
 </style>
