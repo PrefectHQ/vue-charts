@@ -7,10 +7,7 @@
 
     <div class="scatter-plot__dots-container">
       <template v-for="item in items" :key="item.id">
-        <div
-          :style="calculateDotPosition(item)"
-          :class="item.itemClass ? item.itemClass : 'scatter-plot__dot'"
-        >
+        <div :style="calculateDotPosition(item)" class="scatter-plot__dot" :class="item.itemClass">
           <slot :item="item" />
         </div>
       </template>
