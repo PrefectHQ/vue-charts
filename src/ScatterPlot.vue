@@ -52,8 +52,7 @@ const container = ref<HTMLElement>()
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
 
-const items = computed(() => props.items.map(item => ({ ...item, y: item.y || 0.1 })))
-
+const items = computed(() => props.items)
 
 // SETUP BASE
 const handleResize = (): void => {
@@ -67,7 +66,7 @@ const { id } = baseChart
 let xAxisGroup: GroupSelection | undefined
 
 const xTicks = computed(() => {
-  if (!props.items.length) return 1
+  if (!props.items.length) return 5
   const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
   return Math.max(ticks, 1)
 })
@@ -104,7 +103,7 @@ const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
     .tickPadding(10)
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
     .tickFormat(d => formatYAxis(d))
-    .tickValues(yScale.value.ticks().concat(yScale.value.domain()))
+    .tickValues(yScale.value.ticks())
   )
 
 const xAccessor = (d: ScatterPlotItem) => d.x
@@ -190,7 +189,7 @@ const updateXScale = (): void => {
   xScale.value = d3
     .scaleTime()
     .domain(extentX)
-    .rangeRound([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
+    .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
 }
 
 const updateYScale = (): void => {
@@ -200,10 +199,18 @@ const updateYScale = (): void => {
     extentY = [0.1, 20]
   }
 
+  extentY[0] = extentY[0] * 0.95
+  extentY[1] = extentY[1] * 1.05
+
+  if (extentY.every(extent => extent === 0)) {
+    extentY = [0.1, 20]
+  }
+
   yScale.value = d3
     .scaleLog()
     .domain(extentY)
-    .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
+    .range([baseChart.height.value - baseChart.paddingY, 0])
+    .clamp(true)
     .base(2)
 }
 
