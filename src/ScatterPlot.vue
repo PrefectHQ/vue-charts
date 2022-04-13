@@ -23,6 +23,7 @@ import { ref, computed, onMounted, watch, CSSProperties } from 'vue'
 import { useBaseChart } from './Base'
 import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
 import { extentUndefined } from './utils/extent'
+import formatLabel from './utils/formatLabel'
 
 const props = withDefaults(defineProps<{
   items: ScatterPlotItem[],
@@ -62,11 +63,19 @@ const { id } = baseChart
 // xAXIS
 let xAxisGroup: GroupSelection | undefined
 
+const xTicks = computed(() => {
+  if (!props.items.length) return 1
+  const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
+  return Math.max(ticks, 1)
+})
+
 const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
   .call(d3.axisBottom(xScale.value)
     .tickPadding(10)
     .tickSizeInner(5)
-    .tickSizeOuter(0),
+    .tickSizeOuter(0)
+    .ticks(xTicks.value)
+    .tickFormat(formatLabel)
   )
 
 // yAXIS
@@ -77,6 +86,7 @@ const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
     .tickPadding(10)
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
     .tickFormat(d => d + 's')
+    .tickValues(yScale.value.ticks().concat(yScale.value.domain()))
   )
 
 const xAccessor = (d: ScatterPlotItem) => d.x
@@ -178,7 +188,6 @@ const updateYScale = (): void => {
     .scaleLog()
     .domain(extentY)
     .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
-    .base(2)
 }
 
 onMounted(() => {
