@@ -104,7 +104,7 @@ const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
     .tickPadding(10)
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
     .tickFormat(d => formatYAxis(d))
-    .tickValues(yScale.value.ticks().concat(yScale.value.domain()))
+    .tickValues(yScale.value.ticks().concat(yScale.value.domain()[0]))
   )
 
 const xAccessor = (d: ScatterPlotItem) => d.x
@@ -190,7 +190,7 @@ const updateXScale = (): void => {
   xScale.value = d3
     .scaleTime()
     .domain(extentX)
-    .rangeRound([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
+    .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
 }
 
 const updateYScale = (): void => {
@@ -200,10 +200,13 @@ const updateYScale = (): void => {
     extentY = [0.1, 20]
   }
 
+  extentY[0] = extentY[0] * 0.95
+  extentY[1] = extentY[1] * 1.05
+
   yScale.value = d3
     .scaleLog()
     .domain(extentY)
-    .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
+    .range([baseChart.height.value - baseChart.paddingY, 0])
     .base(2)
 }
 
