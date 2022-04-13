@@ -86,7 +86,7 @@ const yAccessor = (d: ScatterPlotItem) => d.y
 const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
   const radius = 14
   const top = yScale.value(item.y) + baseChart.padding.top - radius / 2
-  const left = baseChart.padding.left + xScale.value(item.x) - radius
+  const left = xScale.value(item.x) - radius
   return {
     height: `${radius}px`,
     width: `${radius}px`,
@@ -103,7 +103,7 @@ const calculateNowPosition = (): CSSProperties | null => {
     return null
   }
 
-  const left = baseChart.padding.left + xScale.value(now)
+  const left = xScale.value(now)
 
   return {
     left: `${left}px`
@@ -139,9 +139,11 @@ const updateScales = (): void => {
   if (xAxisGroup) {
     xAxisGroup.call(xAxis)
     xAxisGroup
-      .attr("transform", `translate(${baseChart.padding.left}, ${baseChart.height.value - baseChart.padding.bottom})`)
+      .attr("transform", `translate(0, ${baseChart.height.value - baseChart.padding.bottom})`)
       .attr('font-family', 'input-sans')
       .attr('font-size', '11')
+    xAxisGroup.select('.domain').style('opacity', '0')
+
   }
 
   if (yAxisGroup) {
@@ -152,7 +154,7 @@ const updateScales = (): void => {
       .attr('font-size', '11')
 
     yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
-    yAxisGroup.select('.domain').style('stroke', '#cacccf')
+    yAxisGroup.select('.domain').style('opacity', '0')
   }
 }
 
