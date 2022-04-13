@@ -31,6 +31,7 @@ const props = withDefaults(defineProps<{
   startDate?: Date,
   endDate?: Date,
   showNowLine?: boolean,
+  dotDiameter?: number,
   chartPadding?: {
     top?: number,
     bottom?: number,
@@ -39,6 +40,7 @@ const props = withDefaults(defineProps<{
   },
 }>(),
   {
+    dotDiameter: 14,
     chartPadding: () => {
       return { top: 30, left: 70, bottom: 50, right: 20 }
     }
@@ -49,7 +51,6 @@ const props = withDefaults(defineProps<{
 const container = ref<HTMLElement>()
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
-const dotDiameter = 14
 
 const items = computed(() => props.items.map(item => ({ ...item, y: item.y || 0.1 })))
 
@@ -110,11 +111,11 @@ const xAccessor = (d: ScatterPlotItem) => d.x
 const yAccessor = (d: ScatterPlotItem) => d.y
 
 const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
-  const top = yScale.value(item.y) + baseChart.padding.top - dotDiameter / 2
+  const top = yScale.value(item.y) + baseChart.padding.top - props.dotDiameter / 2
   const left = xScale.value(item.x)
   return {
-    height: `${dotDiameter}px`,
-    width: `${dotDiameter}px`,
+    height: `${props.dotDiameter}px`,
+    width: `${props.dotDiameter}px`,
     left: `${left}px`,
     top: `${top}px`,
   }
@@ -128,7 +129,7 @@ const calculateNowPosition = (): CSSProperties | null => {
     return null
   }
 
-  const left = xScale.value(now) + dotDiameter
+  const left = xScale.value(now) + props.dotDiameter
 
   return {
     left: `${left}px`
@@ -164,7 +165,7 @@ const updateScales = (): void => {
   if (xAxisGroup) {
     xAxisGroup.call(xAxis)
     xAxisGroup
-      .attr("transform", `translate(${dotDiameter}, ${baseChart.height.value - baseChart.padding.bottom + dotDiameter})`)
+      .attr("transform", `translate(${props.dotDiameter}, ${baseChart.height.value - baseChart.padding.bottom + props.dotDiameter})`)
       .attr('font-family', 'input-sans')
       .attr('font-size', '11')
     xAxisGroup.select('.domain').style('opacity', '0')
