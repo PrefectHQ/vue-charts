@@ -181,13 +181,14 @@ const updateYScale = (): void => {
   let extentY = d3.extent(items.value, yAccessor)
 
   if (extentUndefined(extentY)) {
-    extentY = [0.1, 100]
+    extentY = [0.1, 20]
   }
 
   yScale.value = d3
     .scaleLog()
     .domain(extentY)
     .rangeRound([baseChart.height.value - baseChart.paddingY, 0])
+    .base(2)
 }
 
 onMounted(() => {
