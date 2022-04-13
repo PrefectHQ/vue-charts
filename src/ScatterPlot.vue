@@ -19,6 +19,7 @@
 
 <script lang="ts" setup>
 import * as d3 from 'd3'
+import { NumberValue } from 'd3'
 import { ref, computed, onMounted, watch, CSSProperties } from 'vue'
 import { useBaseChart } from './Base'
 import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
@@ -82,17 +83,31 @@ const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
 // yAXIS
 let yAxisGroup: GroupSelection | undefined
 
+const formatYAxis = (value: NumberValue): string => {
+  if (typeof value !== 'number') {
+    return `${value}`
+  }
+
+  const formatter = d3.format(".0f")
+  const decimalFormat = d3.format('.2f')
+
+  if (value < 1) {
+    return `${decimalFormat(value)}s`
+  }
+
+  return `${formatter(value)}s`
+}
+
 const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
   .call(d3.axisLeft(yScale.value)
     .tickPadding(10)
     .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
-    .tickFormat(d => d + 's')
+    .tickFormat(d => formatYAxis(d))
     .tickValues(yScale.value.ticks().concat(yScale.value.domain()))
   )
 
 const xAccessor = (d: ScatterPlotItem) => d.x
 const yAccessor = (d: ScatterPlotItem) => d.y
-
 
 const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
   const top = yScale.value(item.y) + baseChart.padding.top - dotDiameter / 2
