@@ -19,12 +19,10 @@
 
 <script lang="ts" setup>
 import * as d3 from 'd3'
-import { ref, computed, onMounted, watch, useSlots, CSSProperties } from 'vue'
+import { ref, computed, onMounted, watch, CSSProperties } from 'vue'
 import { useBaseChart } from './Base'
 import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
 import { extentUndefined } from './utils/extent'
-
-const slots = useSlots()
 
 const props = withDefaults(defineProps<{
   items: ScatterPlotItem[],
