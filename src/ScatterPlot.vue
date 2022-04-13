@@ -179,7 +179,7 @@ const updateScales = (): void => {
       .attr('font-size', '11')
 
     yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
-    yAxisGroup.select('.domain').style('opacity', '0')
+    yAxisGroup.select('.domain').style('opacity', 0)
   }
 }
 
