@@ -5,6 +5,7 @@
     "strict": true,
     "declaration": true,
     "esModuleInterop": true,
+    "jsx": "preserve",
     "moduleResolution": "node",
     "emitDeclarationOnly": true,
     "sourceMap": true,
@@ -28,6 +29,9 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "src/**/*.vue",
+    "demo/**/*.ts",
+    "demo/**/*.d.ts",
+    "demo/**/*.vue",
   ],
   "exclude": [
     "node_modules",

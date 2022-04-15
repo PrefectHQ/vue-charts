@@ -1,4 +1,4 @@
-import { timeFormat } from "d3"
+import { timeFormat } from 'd3'
 
 const formatMillisecond = timeFormat('.%L')
 const formatSecond = timeFormat(':%S')
@@ -17,5 +17,5 @@ export {
   formatDay,
   formatWeek,
   formatMonth,
-  formatYear,
+  formatYear
 }

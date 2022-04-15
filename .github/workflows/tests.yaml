@@ -1,0 +1,21 @@
+name: Tests
+
+on: [pull_request]
+
+jobs:
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Lint application
+        run: |
+          npm run lint

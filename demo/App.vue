@@ -1,10 +1,18 @@
 <template>
   <div class="app">
     <nav class="app__nav">
-      <router-link to="/bar-chart">Bar Chart</router-link>
-      <router-link to="/diverging-bar-chart">Diverging Bar Chart</router-link>
-      <router-link to="/timeline">Timeline</router-link>
-      <router-link to="/scatter-plot">Scatter Plot</router-link>
+      <router-link to="/bar-chart">
+        Bar Chart
+      </router-link>
+      <router-link to="/diverging-bar-chart">
+        Diverging Bar Chart
+      </router-link>
+      <router-link to="/timeline">
+        Timeline
+      </router-link>
+      <router-link to="/scatter-plot">
+        Scatter Plot
+      </router-link>
     </nav>
     <main class="app__main">
       <router-view />

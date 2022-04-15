@@ -1,7 +1,7 @@
 <template>
   <div ref="container" class="bar-chart">
     <template v-if="_items.length">
-      <svg :id="id" ref="chart" class="bar-chart__svg">
+      <svg :id="id" class="bar-chart__svg">
         <!-- -->
       </svg>
 
@@ -22,104 +22,105 @@
 
     <template v-else>
       <slot name="empty">
-        <div class="bar-chart__empty">--</div>
+        <div class="bar-chart__empty">
+          --
+        </div>
       </slot>
     </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-import * as d3 from 'd3'
-import { useBaseChart } from './Base'
-import { BarChartItem } from './types'
-import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch } from 'vue'
-import { CSSProperties } from '@vue/runtime-dom'
+  import { CSSProperties } from '@vue/runtime-dom'
+  import * as d3 from 'd3'
+  import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch } from 'vue'
+  import { useBaseChart } from '@/Base'
+  import { BarChartItem } from '@/types'
 
-const slots = useSlots()
+  const slots = useSlots()
 
-const props = defineProps<{
-  intervalStart: Date,
-  intervalEnd: Date,
-  items: BarChartItem<any>[],
-  chartPadding?: {
-    top?: number,
-    bottom?: number,
-    left?: number,
-    right?: number
-  },
-  axisPadding?: number
-}>()
+  const props = defineProps<{
+    intervalStart: Date,
+    intervalEnd: Date,
+    items: BarChartItem[],
+    chartPadding?: {
+      top?: number,
+      bottom?: number,
+      left?: number,
+      right?: number,
+    },
+    axisPadding?: number,
+  }>()
 
-const container = ref<HTMLElement>()
+  const container = ref<HTMLElement>()
 
-const xScale = d3.scaleTime()
-const yScale = d3.scaleLinear()
-const handleResize = (): void => {
-  updateScales()
-}
-
-const updateScales = (): void => {
-  const start = props.intervalStart
-  const end = props.intervalEnd
-
-  xScale
-    .domain([start, end])
-    .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX])
-
-  yScale
-    .domain([0, maxValue.value || 1])
-    .range([baseChart.padding.top, baseChart.height.value - baseChart.padding.bottom])
-
-}
-
-const baseChart = useBaseChart(container, { onResize: handleResize, padding: props?.chartPadding })
-const { id } = baseChart
-
-watch(() => props.chartPadding, (val) => {
-  baseChart.padding = { ...baseChart.padding, ...val }
-})
-
-const barWidth = computed<number>(() => {
-  return Math.floor(
-    Math.min(10, (baseChart.width.value - baseChart.paddingX) / props.items.length / 2),
-  )
-})
-
-const _items = computed(() => {
-  return props.items.filter((item) => item.value)
-})
-
-const maxValue = computed(() => {
-  const values = props.items.map((item) => item.value)
-  return Math.max(...values)
-})
-
-const calculateItemPosition = (item: BarChartItem): CSSProperties => {
-  const itemHeight = yScale(item.value)
-  const top = baseChart.height.value - baseChart.padding.bottom - itemHeight
-  const left = xScale(item.intervalStart) + baseChart.padding.left
-  return {
-    height: `${itemHeight}px`,
-    left: `${left}px`,
-    top: `${top}px`,
-    width: `${barWidth.value}px`,
+  const xScale = d3.scaleTime()
+  const yScale = d3.scaleLinear()
+  const handleResize = (): void => {
+    updateScales()
   }
-}
 
-const axisPosition = computed((): CSSProperties => {
-  return {
-    bottom: `${baseChart.padding.bottom - (props.axisPadding ?? 0)}px`
+  const updateScales = (): void => {
+    const start = props.intervalStart
+    const end = props.intervalEnd
+
+    xScale
+      .domain([start, end])
+      .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX])
+
+    yScale
+      .domain([0, maxValue.value || 1])
+      .range([baseChart.padding.top, baseChart.height.value - baseChart.padding.bottom])
+
   }
-})
 
-onMounted(() => {
-  updateScales()
-})
+  const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
+  const { id } = baseChart
 
-onBeforeUpdate(() => {
-  updateScales()
-})
+  watch(() => props.chartPadding, (val) => {
+    baseChart.padding = { ...baseChart.padding, ...val }
+  })
 
+  const barWidth = computed<number>(() => {
+    return Math.floor(
+      Math.min(10, (baseChart.width.value - baseChart.paddingX) / props.items.length / 2),
+    )
+  })
+
+  const _items = computed(() => {
+    return props.items.filter((item) => item.value)
+  })
+
+  const maxValue = computed(() => {
+    const values = props.items.map((item) => item.value)
+    return Math.max(...values)
+  })
+
+  const calculateItemPosition = (item: BarChartItem): CSSProperties => {
+    const itemHeight = yScale(item.value)
+    const top = baseChart.height.value - baseChart.padding.bottom - itemHeight
+    const left = xScale(item.intervalStart) + baseChart.padding.left
+    return {
+      height: `${itemHeight}px`,
+      left: `${left}px`,
+      top: `${top}px`,
+      width: `${barWidth.value}px`,
+    }
+  }
+
+  const axisPosition = computed((): CSSProperties => {
+    return {
+      bottom: `${baseChart.padding.bottom - (props.axisPadding ?? 0)}px`,
+    }
+  })
+
+  onMounted(() => {
+    updateScales()
+  })
+
+  onBeforeUpdate(() => {
+    updateScales()
+  })
 </script>
 
 <style lang="scss">

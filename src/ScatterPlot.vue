@@ -1,6 +1,6 @@
 <template>
   <div ref="container" class="scatter-plot">
-    <svg :id="id" ref="chart" class="scatter-plot__svg">
+    <svg :id="id" class="scatter-plot__svg">
       <g class="scatter-plot__x-axis-group" />
       <g class="scatter-plot__y-axis-group" />
     </svg>
@@ -18,216 +18,217 @@
 </template>
 
 <script lang="ts" setup>
-import * as d3 from 'd3'
-import { NumberValue } from 'd3'
-import { ref, computed, onMounted, watch, CSSProperties } from 'vue'
-import { useBaseChart } from './Base'
-import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
-import { extentUndefined } from './utils/extent'
-import formatLabel from './utils/formatLabel'
+  import * as d3 from 'd3'
+  import { NumberValue } from 'd3'
+  import { ref, computed, onMounted, watch, CSSProperties, withDefaults } from 'vue'
+  import { useBaseChart } from './Base'
+  import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
+  import { extentUndefined } from './utils/extent'
+  import { formatLabel } from './utils/formatLabel'
 
-const props = withDefaults(defineProps<{
-  items: ScatterPlotItem[],
-  startDate?: Date,
-  endDate?: Date,
-  showNowLine?: boolean,
-  dotDiameter?: number,
-  chartPadding?: {
-    top?: number,
-    bottom?: number,
-    left?: number,
-    right?: number,
-  },
-}>(),
-  {
+  const props = withDefaults(defineProps<{
+    items: ScatterPlotItem[],
+    startDate?: Date | null,
+    endDate?: Date | null,
+    showNowLine?: boolean,
+    dotDiameter?: number,
+    chartPadding?: {
+      top?: number,
+      bottom?: number,
+      left?: number,
+      right?: number,
+    },
+  }>(), {
+    startDate: null,
+    endDate: null,
     dotDiameter: 14,
     chartPadding: () => {
       return { top: 30, left: 70, bottom: 50, right: 20 }
+    },
+
+  })
+
+  const container = ref<HTMLElement>()
+  const xScale = ref(d3.scaleTime())
+  const yScale = ref(d3.scaleLog())
+
+  const items = computed(() => props.items)
+
+  // SETUP BASE
+  const handleResize = (): void => {
+    updateScales()
+  }
+  const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
+  const { id } = baseChart
+
+
+  // xAXIS
+  let xAxisGroup: GroupSelection | undefined
+
+  const xTicks = computed(() => {
+    if (!props.items.length) {
+      return 5
+    }
+    const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
+    return Math.max(ticks, 1)
+  })
+
+  const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
+    .call(d3.axisBottom(xScale.value)
+      .tickPadding(10)
+      .tickSizeInner(5)
+      .tickSizeOuter(0)
+      .ticks(xTicks.value)
+      .tickFormat(formatLabel),
+    )
+
+  // yAXIS
+  let yAxisGroup: GroupSelection | undefined
+
+  const formatYAxis = (value: NumberValue): string => {
+    if (typeof value !== 'number') {
+      return `${value.valueOf()}`
+    }
+
+    const formatter = d3.format('.0f')
+    const decimalFormat = d3.format('.2f')
+
+    if (value < 1) {
+      return `${decimalFormat(value)}s`
+    }
+
+    return `${formatter(value)}s`
+  }
+
+  const yAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
+    .call(d3.axisLeft(yScale.value)
+      .tickPadding(10)
+      .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
+      .tickFormat(domain => formatYAxis(domain))
+      .tickValues(yScale.value.ticks()),
+    )
+
+  const xAccessor = (item: ScatterPlotItem): Date => item.x
+  const yAccessor = (item: ScatterPlotItem): number => item.y
+
+  const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
+    const top = yScale.value(item.y) + baseChart.padding.top - props.dotDiameter / 2
+    const left = xScale.value(item.x)
+    return {
+      height: `${props.dotDiameter}px`,
+      width: `${props.dotDiameter}px`,
+      left: `${left}px`,
+      top: `${top}px`,
+    }
+  }
+
+  const calculateNowPosition = (): CSSProperties | null => {
+    const [start, end] = getXExtent()
+    const now = new Date()
+
+    if (start > now || end < now) {
+      return null
+    }
+
+    const left = xScale.value(now) + props.dotDiameter
+
+    return {
+      left: `${left}px`,
     }
 
   }
-)
 
-const container = ref<HTMLElement>()
-const xScale = ref(d3.scaleTime())
-const yScale = ref(d3.scaleLog())
+  const getXExtent = (): [Date, Date] => {
+    let extent = d3.extent(items.value, xAccessor)
 
-const items = computed(() => props.items)
+    if (extentUndefined(extent)) {
+      let dateNow = new Date
+      let offset = dateNow.setDate(dateNow.getDate() - 1)
+      let dayAgo = new Date(offset)
+      extent = [dayAgo, dateNow]
+    }
 
-// SETUP BASE
-const handleResize = (): void => {
-  updateScales()
-}
-const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
-const { id } = baseChart
+    if (props.startDate) {
+      extent[0] = props.startDate
+    }
 
+    if (props.endDate) {
+      extent[1] = props.endDate
+    }
 
-// xAXIS
-let xAxisGroup: GroupSelection | undefined
-
-const xTicks = computed(() => {
-  if (!props.items.length) return 5
-  const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
-  return Math.max(ticks, 1)
-})
-
-const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
-  .call(d3.axisBottom(xScale.value)
-    .tickPadding(10)
-    .tickSizeInner(5)
-    .tickSizeOuter(0)
-    .ticks(xTicks.value)
-    .tickFormat(formatLabel)
-  )
-
-// yAXIS
-let yAxisGroup: GroupSelection | undefined
-
-const formatYAxis = (value: NumberValue): string => {
-  if (typeof value !== 'number') {
-    return `${value}`
+    return extent
   }
 
-  const formatter = d3.format(".0f")
-  const decimalFormat = d3.format('.2f')
+  const updateScales = (): void => {
+    updateXScale()
+    updateYScale()
 
-  if (value < 1) {
-    return `${decimalFormat(value)}s`
+    if (xAxisGroup) {
+      xAxisGroup.call(xAxis)
+      xAxisGroup
+        .attr('transform', `translate(${props.dotDiameter}, ${baseChart.height.value - baseChart.padding.bottom + props.dotDiameter})`)
+        .attr('font-family', 'input-sans')
+        .attr('font-size', '11')
+      xAxisGroup.select('.domain').style('opacity', '0')
+
+    }
+
+    if (yAxisGroup) {
+      yAxisGroup.call(yAxis)
+      yAxisGroup
+        .attr('transform', `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
+        .attr('font-family', 'input-sans')
+        .attr('font-size', '11')
+
+      yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
+      yAxisGroup.select('.domain').style('opacity', 0)
+    }
   }
 
-  return `${formatter(value)}s`
-}
+  const updateXScale = (): void => {
+    const extentX = getXExtent()
 
-const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
-  .call(d3.axisLeft(yScale.value)
-    .tickPadding(10)
-    .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
-    .tickFormat(d => formatYAxis(d))
-    .tickValues(yScale.value.ticks())
-  )
-
-const xAccessor = (d: ScatterPlotItem) => d.x
-const yAccessor = (d: ScatterPlotItem) => d.y
-
-const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
-  const top = yScale.value(item.y) + baseChart.padding.top - props.dotDiameter / 2
-  const left = xScale.value(item.x)
-  return {
-    height: `${props.dotDiameter}px`,
-    width: `${props.dotDiameter}px`,
-    left: `${left}px`,
-    top: `${top}px`,
-  }
-}
-
-const calculateNowPosition = (): CSSProperties | null => {
-  const [start, end] = getXExtent()
-  const now = new Date()
-
-  if (start > now || end < now) {
-    return null
+    xScale.value = d3
+      .scaleTime()
+      .domain(extentX)
+      .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
   }
 
-  const left = xScale.value(now) + props.dotDiameter
+  const updateYScale = (): void => {
+    let extentY = d3.extent(items.value, yAccessor)
 
-  return {
-    left: `${left}px`
+    if (extentUndefined(extentY)) {
+      extentY = [0.1, 20]
+    }
+
+    extentY[0] = extentY[0] * 0.95
+    extentY[1] = extentY[1] * 1.05
+
+    if (extentY.every(extent => extent === 0)) {
+      extentY = [0.1, 20]
+    }
+
+    yScale.value = d3
+      .scaleLog()
+      .domain(extentY)
+      .range([baseChart.height.value - baseChart.paddingY, 0])
+      .clamp(true)
+      .base(2)
   }
 
-}
+  onMounted(() => {
+    const svg = d3.select(`#${id}`)
+    xAxisGroup = svg.select('.scatter-plot__x-axis-group')
+    yAxisGroup = svg.select('.scatter-plot__y-axis-group')
 
-const getXExtent = (): [Date, Date] => {
-  let extent = d3.extent(items.value, xAccessor)
+    updateScales()
+  })
 
-  if (extentUndefined(extent)) {
-    let dateNow = new Date
-    let offset = dateNow.setDate(dateNow.getDate() - 1)
-    let dayAgo = new Date(offset)
-    extent = [dayAgo, dateNow]
-  }
+  watch(() => props.chartPadding, (val) => {
+    baseChart.padding = { ...baseChart.padding, ...val }
+  })
 
-  if (props.startDate) {
-    extent[0] = props.startDate
-  }
-
-  if (props.endDate) {
-    extent[1] = props.endDate
-  }
-
-  return extent
-}
-
-const updateScales = (): void => {
-  updateXScale()
-  updateYScale()
-
-  if (xAxisGroup) {
-    xAxisGroup.call(xAxis)
-    xAxisGroup
-      .attr("transform", `translate(${props.dotDiameter}, ${baseChart.height.value - baseChart.padding.bottom + props.dotDiameter})`)
-      .attr('font-family', 'input-sans')
-      .attr('font-size', '11')
-    xAxisGroup.select('.domain').style('opacity', '0')
-
-  }
-
-  if (yAxisGroup) {
-    yAxisGroup.call(yAxis)
-    yAxisGroup
-      .attr("transform", `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
-      .attr('font-family', 'input-sans')
-      .attr('font-size', '11')
-
-    yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
-    yAxisGroup.select('.domain').style('opacity', 0)
-  }
-}
-
-const updateXScale = (): void => {
-  const extentX = getXExtent()
-
-  xScale.value = d3
-    .scaleTime()
-    .domain(extentX)
-    .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX - baseChart.padding.right])
-}
-
-const updateYScale = (): void => {
-  let extentY = d3.extent(items.value, yAccessor)
-
-  if (extentUndefined(extentY)) {
-    extentY = [0.1, 20]
-  }
-
-  extentY[0] = extentY[0] * 0.95
-  extentY[1] = extentY[1] * 1.05
-
-  if (extentY.every(extent => extent === 0)) {
-    extentY = [0.1, 20]
-  }
-
-  yScale.value = d3
-    .scaleLog()
-    .domain(extentY)
-    .range([baseChart.height.value - baseChart.paddingY, 0])
-    .clamp(true)
-    .base(2)
-}
-
-onMounted(() => {
-  const svg = d3.select(`#${id}`)
-  xAxisGroup = svg.select('.scatter-plot__x-axis-group')
-  yAxisGroup = svg.select('.scatter-plot__y-axis-group')
-
-  updateScales()
-})
-
-watch(() => props.chartPadding, (val) => {
-  baseChart.padding = { ...baseChart.padding, ...val }
-})
-
-watch(() => props.items, () => updateScales())
-
+  watch(() => props.items, () => updateScales())
 </script>
 
 <style lang="scss">
