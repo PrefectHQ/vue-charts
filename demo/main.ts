@@ -1,11 +1,10 @@
+import MiterDesign from '@prefecthq/miter-design'
 import { createApp } from 'vue'
-import router from './router'
+import App from './App.vue'
+import { router } from './router'
 
 // Add global miter styles
 import '@prefecthq/miter-design/dist/style.css'
-
-import App from './App.vue'
-import MiterDesign from '@prefecthq/miter-design'
 
 const app = createApp(App)
 app.use(MiterDesign)

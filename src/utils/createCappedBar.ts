@@ -1,4 +1,4 @@
-const createCappedBar = (
+export const createCappedBar = (
   options: {
     capTop: boolean,
     capBottom: boolean,
@@ -8,14 +8,14 @@ const createCappedBar = (
     width: number,
     radius: number,
   } = {
-      capTop: true,
-      capBottom: true,
-      x: 0,
-      y: 0,
-      height: 0,
-      width: 0,
-      radius: 1,
-    },
+    capTop: true,
+    capBottom: true,
+    x: 0,
+    y: 0,
+    height: 0,
+    width: 0,
+    radius: 1,
+  },
 ): string => {
   const { capTop, capBottom, height, width, x, y, radius } = options
 
@@ -27,8 +27,5 @@ const createCappedBar = (
     : `a 0 0 0 1 0 ${width} 0`
 
   return `M${x},${y} v${height} ${cB} ${capBottom ? '' : `h${width}`
-    } v-${height} ${cT}`
+  } v-${height} ${cT}`
 }
-
-export default createCappedBar
-export { createCappedBar }

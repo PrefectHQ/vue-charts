@@ -11,8 +11,8 @@
     "serve": "vite",
     "dev": "vue-tsc -w & tsc-alias -w & vite build -w",
     "build": "vue-tsc --declaration --emitDeclarationOnly && vite build",
-    "lint": "eslint src --ext .js,.ts,.vue --debug",
-    "lint:fix": "eslint src --ext .js,.ts,.vue --debug --fix",
+    "lint": "eslint src && eslint demo",
+    "lint:fix": "eslint src --fix && eslint demo --fix",
     "validate:types": "tsc"
   },
   "main": "./dist/vue-charts.umd.js",

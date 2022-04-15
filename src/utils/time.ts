@@ -7,11 +7,14 @@ export type TimeIntervals = {
 
 export type TimeIntervalRankingValue = 0 | 1 | 2 | 3 | 4
 
-const _y = 31536000, // Seconds in a year
-  _d = 86400, // Seconds in a day
-  _h = 3600, // Seconds in an hour
-  _m = 60, // Seconds in a minute
-  _s = 1 // Seconds in a second :)
+// Seconds in a year
+const _y = 31536000
+// Seconds in a day
+const _d = 86400
+// Seconds in an hour
+const _h = 3600
+// Seconds in a minute
+const _m = 60
 
 export const TimeIntervalRanking: { [K in TimeIntervalKey]: TimeIntervalRankingValue } = {
   'years': 4,
@@ -29,28 +32,28 @@ export const TimeIntervalReverseRanking: { [K in TimeIntervalRankingValue]: Time
   0: 'seconds',
 }
 
-const aggregateSeconds = (s: number): TimeIntervals => {
-  const years = Math.floor(s / _y)
-  const days = Math.floor(s % _y / _d)
-  const hours = Math.floor(s % _y % _d / _h)
-  const minutes = Math.floor(s % _y % _d % _h / _m)
-  const seconds = Math.ceil(s % _y % _d % _h % _m)
+const aggregateSeconds = (value: number): TimeIntervals => {
+  const years = Math.floor(value / _y)
+  const days = Math.floor(value % _y / _d)
+  const hours = Math.floor(value % _y % _d / _h)
+  const minutes = Math.floor(value % _y % _d % _h / _m)
+  const seconds = Math.ceil(value % _y % _d % _h % _m)
 
   return { years, days, hours, minutes, seconds }
 }
 
-const intervalSeconds = (s: number): TimeIntervals => {
-  const years = Math.floor(s / _y)
-  const days = Math.floor(s / _d)
-  const hours = Math.floor(s / _h)
-  const minutes = Math.floor(s / _m)
-  const seconds = s
+const intervalSeconds = (value: number): TimeIntervals => {
+  const years = Math.floor(value / _y)
+  const days = Math.floor(value / _d)
+  const hours = Math.floor(value / _h)
+  const minutes = Math.floor(value / _m)
+  const seconds = value
 
   return { years, days, hours, minutes, seconds }
 }
 
-const getLargestInterval = (s: number): TimeIntervalKey => {
-  const _t = aggregateSeconds(s)
+const getLargestInterval = (value: number): TimeIntervalKey => {
+  const _t = aggregateSeconds(value)
 
   if (_t.years > 0) {
     return 'years'
@@ -71,8 +74,8 @@ const getLargestInterval = (s: number): TimeIntervalKey => {
   return 'seconds'
 }
 
-const getSmallestInterval = (s: number): TimeIntervalKey => {
-  const { seconds, minutes, hours, days, years } = intervalSeconds(s)
+const getSmallestInterval = (value: number): TimeIntervalKey => {
+  const { seconds, minutes, hours, days, years } = intervalSeconds(value)
 
   const s0 = seconds == 0
   const m0 = minutes == 0
@@ -80,10 +83,18 @@ const getSmallestInterval = (s: number): TimeIntervalKey => {
   const d0 = days == 0
   const y0 = years == 0
 
-  if (m0 && h0 && d0 && y0) return 'seconds'
-  if (!s0 && h0 && d0 && y0) return 'minutes'
-  if (!m0 && d0 && y0) return 'hours'
-  if (!h0 && y0) return 'days'
+  if (m0 && h0 && d0 && y0) {
+    return 'seconds'
+  }
+  if (!s0 && h0 && d0 && y0) {
+    return 'minutes'
+  }
+  if (!m0 && d0 && y0) {
+    return 'hours'
+  }
+  if (!h0 && y0) {
+    return 'days'
+  }
   return 'years'
 }
 
@@ -137,8 +148,10 @@ const getNextHighestInterval = (interval: TimeIntervalKey): TimeIntervalKey => {
 
 
 const getMinInterval = (start: Date, end: Date, min: number = 5): TimeIntervalKey => {
-  const timeStart = start.getTime() / 1000 // time in seconds
-  const timeEnd = end.getTime() / 1000 // time in seconds
+  // time in seconds
+  const timeStart = start.getTime() / 1000
+  // time in seconds
+  const timeEnd = end.getTime() / 1000
 
   const _s = aggregateSeconds(timeEnd - timeStart)
   const _t = getLargestInterval(timeEnd - timeStart)

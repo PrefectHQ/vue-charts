@@ -16,16 +16,26 @@
       </div>
 
       <div class="mr-2">
-        <m-number-input v-model="medianPadding" :min="0" :max="128" :step="4">Median Padding</m-number-input>
+        <m-number-input v-model="medianPadding" :min="0" :max="128" :step="4">
+          Median Padding
+        </m-number-input>
 
-        <m-checkbox v-model="staticMedian">Static median</m-checkbox>
+        <m-checkbox v-model="staticMedian">
+          Static median
+        </m-checkbox>
       </div>
-      <m-checkbox v-model="showAxis">Show Axis</m-checkbox>
+      <m-checkbox v-model="showAxis">
+        Show Axis
+      </m-checkbox>
     </div>
 
     <m-tabs v-model="tab">
-      <m-tab href="chart">Chart</m-tab>
-      <m-tab href="data">Data</m-tab>
+      <m-tab href="chart">
+        Chart
+      </m-tab>
+      <m-tab href="data">
+        Data
+      </m-tab>
     </m-tabs>
 
     <div v-if="tab == 'chart'" class="diverging-bar-chart-view__chart">
@@ -47,7 +57,7 @@
             class="diverging-bar-chart-view__bar-container"
             :placement="['top', 'right', 'bottom', 'left']"
           >
-            <template #trigger="{ toggle, open, close }">
+            <template #trigger="{ open, close }">
               <div
                 class="diverging-bar-chart-view__bar-container"
                 tabindex="0"
@@ -83,58 +93,65 @@
       </div>
 
       <m-data-table :columns="columns" :rows="data.data">
-        <template #column-start="{ row }">{{ row.intervalStart.toLocaleTimeString() }}</template>
-        <template #column-end="{ row }">{{ row.intervalEnd.toLocaleTimeString() }}</template>
+        <template #column-start="{ row }">
+          {{ row.intervalStart.toLocaleTimeString() }}
+        </template>
+        <template #column-end="{ row }">
+          {{ row.intervalEnd.toLocaleTimeString() }}
+        </template>
         <template
           v-for="key in data.keys"
           :key="key"
           #[getColumnKey(key)]="{ row }"
-        >{{ row.data[key].toLocaleString() }}</template>
+        >
+          {{ row.data[key].toLocaleString() }}
+        </template>
       </m-data-table>
     </div>
   </main>
 </template>
 
 <script lang="ts" setup>
-import DivergingBarChart from '../../src/DivergingBarChart.vue'
-import { generateSentimentData } from '../data';
-import { computed, ref } from 'vue'
+  import { computed, ref } from 'vue'
+  import DivergingBarChart from '../../src/DivergingBarChart.vue'
+  import { generateSentimentData } from '../data'
 
-const start = ref(new Date())
-const tab = ref('chart')
+  const start = ref(new Date())
+  const tab = ref('chart')
 
-const skew = ref('none')
-const skewOptions = [
-  { label: 'None', value: 'none', icon: 'subtract-fill' },
-  { label: 'Positive', value: 'positive', icon: 'arrow-up-s-fill' },
-  { label: 'Negative', value: 'negative', icon: 'arrow-down-s-fill' }
-]
-
-const staticMedian = ref(false)
-const showAxis = ref(false)
-const multiplier = ref("2")
-const buckets = ref("10")
-const keys = ref("8")
-const medianPadding = ref(24)
-
-const data = computed(() => generateSentimentData({
-  intervalStart: start.value,
-  buckets: parseInt(buckets.value),
-  keys: parseInt(keys.value),
-  skew: skew.value == 'none' ? undefined : skew.value as 'positive' | 'negative',
-  skewMultiplier: parseInt(multiplier.value)
-}))
-
-const getColumnKey = (key: string) => `column-${key.replace(' ', '-').toLowerCase()}`
-
-const columns = computed(() => {
-  return [
-    { label: 'Start', value: 'start' },
-    { label: 'End', value: 'end' },
-    ...data.value.keys.map(key => { return { label: key, value: key } })
+  const skew = ref('none')
+  const skewOptions = [
+    { label: 'None', value: 'none', icon: 'subtract-fill' },
+    { label: 'Positive', value: 'positive', icon: 'arrow-up-s-fill' },
+    { label: 'Negative', value: 'negative', icon: 'arrow-down-s-fill' },
   ]
-})
 
+  const staticMedian = ref(false)
+  const showAxis = ref(false)
+  const multiplier = ref('2')
+  const buckets = ref('10')
+  const keys = ref('8')
+  const medianPadding = ref(24)
+
+  const data = computed(() => generateSentimentData({
+    intervalStart: start.value,
+    buckets: parseInt(buckets.value),
+    keys: parseInt(keys.value),
+    skew: skew.value == 'none' ? undefined : skew.value as 'positive' | 'negative',
+    skewMultiplier: parseInt(multiplier.value),
+  }))
+
+  const getColumnKey = (key: string): string => `column-${key.replace(' ', '-').toLowerCase()}`
+
+  const columns = computed(() => {
+    return [
+      { label: 'Start', value: 'start' },
+      { label: 'End', value: 'end' },
+      ...data.value.keys.map(key => {
+        return { label: key, value: key }
+      }),
+    ]
+  })
 </script>
 
 <style lang="scss">
