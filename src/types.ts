@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 
-export type BarChartItem<T = unknown> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type BarChartItem<T = any> = {
   intervalStart: Date,
   intervalEnd: Date,
   value: number,
@@ -25,7 +26,8 @@ export type DivergingBarChartSeries = d3.Series<DivergingBarChartData, string>
 export type DivergingBarChartStack = d3.Stack<any, DivergingBarChartSeries, string>
 export type DivergingBarChartSeriesPoint = d3.SeriesPoint<DivergingBarChartData>
 
-export type TimelineChartItem<T = unknown> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type TimelineChartItem<T = any> = {
   id: string | number,
   start: Date,
   end?: Date,
