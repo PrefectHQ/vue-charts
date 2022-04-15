@@ -75,10 +75,6 @@ export class Base implements IBase {
   private resizeObserver: ResizeObserver | undefined
 
   public constructor(container: ElementRef, options?: IBaseOptions) {
-    if (container.value === undefined) {
-      throw new Error('Error initializing chart; must pass valid reference to element.')
-    }
-
     this.container = container
 
     if (options?.onResize) {
