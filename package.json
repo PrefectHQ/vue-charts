@@ -24,8 +24,6 @@
     "dist_types"
   ],
   "devDependencies": {
-    "@babel/helper-compilation-targets": "^7.16.3",
-    "@babel/runtime": "^7.16.3",
     "@prefecthq/eslint-config": "1.0.14",
     "@prefecthq/miter-design": "^0.1.22",
     "@types/d3": "^7.0.0",
