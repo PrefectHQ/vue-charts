@@ -25,6 +25,7 @@
   import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
   import { extentUndefined } from './utils/extent'
   import { formatLabel } from './utils/formatLabel'
+  import { formatTick } from './utils/formatTick'
 
   const props = withDefaults(defineProps<{
     items: ScatterPlotItem[],
@@ -65,33 +66,17 @@
   // xAXIS
   let xAxisGroup: GroupSelection | undefined
 
-  const xTicks = computed(() => {
-    if (!props.items.length) {
-      return 5
-    }
-    const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
-    return Math.max(ticks, 1)
-  })
-
   const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
     .call(d3.axisBottom(xScale.value)
       .tickPadding(10)
       .tickSizeInner(5)
       .tickSizeOuter(0)
-      .ticks(xTicks.value)
+      .ticks(formatTick(props.items.length, baseChart.width.value, baseChart.paddingX, 150))
       .tickFormat(formatLabel),
     )
 
   // yAXIS
   let yAxisGroup: GroupSelection | undefined
-
-  const yTicks = computed(() => {
-    if (!props.items.length) {
-      return 5
-    }
-    const ticks = Math.floor(props.items.length * ((baseChart.height.value - baseChart.paddingY) / (props.items.length * 40)))
-    return Math.max(ticks, 5)
-  })
 
   const formatYAxis = (value: NumberValue): string => {
     if (typeof value !== 'number') {
@@ -113,7 +98,7 @@
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
       .tickFormat(domain => formatYAxis(domain))
-      .ticks(yTicks.value),
+      .ticks(formatTick(props.items.length, baseChart.height.value, baseChart.paddingY, 40, 5)),
     )
 
   const xAccessor = (item: ScatterPlotItem): Date => item.x
