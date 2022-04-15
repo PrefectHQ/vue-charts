@@ -50,7 +50,7 @@
 
         <template #default="{ node }">
           <m-popover class="timeline-view__node" :placement="['top', 'bottom', 'right', 'left']">
-            <template #trigger="{ toggle, open, close }">
+            <template #trigger="{ open, close }">
               <div
                 class="timeline-view__node"
                 :style="{ 'background-color': node.data.color }"
@@ -102,14 +102,14 @@
   import Timeline from '../../src/Timeline.vue'
   import { generateRandomTimelineData, generateInitialTimelineData, updateTimelineData, TimelineData } from '../data'
 
-  let liveInterval: NodeJS.Timeout
+  let liveInterval: ReturnType<typeof setInterval> | undefined
 
   const live = ref(false)
   const hideAxis = ref(false)
   const tab = ref('chart')
   const data = ref<TimelineData>(generateInitialTimelineData())
 
-  const reset = () => {
+  const reset = (): void => {
     stopLiveInterval()
 
     data.value = generateInitialTimelineData()
@@ -125,30 +125,34 @@
     { label: 'Color', value: 'color' },
   ]
 
-  const generateFull = () => {
+  const generateFull = (): void => {
     stopLiveInterval()
     live.value = false
 
     data.value = generateRandomTimelineData()
   }
 
-  const startLiveInterval = () => {
+  const startLiveInterval = (): void => {
     if (liveInterval) {
       clearInterval(liveInterval)
     }
-    data.value = updateTimelineData(data.value ?? generateInitialTimelineData(), false, 0.9)
+
+    data.value = updateTimelineData(data.value, false, 0.9)
 
     liveInterval = setInterval(() => {
-      data.value = updateTimelineData(data.value ?? generateInitialTimelineData(), false, 0.9)
+      data.value = updateTimelineData(data.value, false, 0.9)
     }, 3000)
   }
 
-  const stopLiveInterval = () => {
-    clearInterval(liveInterval)
-    data.value = updateTimelineData(data.value ?? generateInitialTimelineData(), true)
+  const stopLiveInterval = (): void => {
+    if (liveInterval) {
+      clearInterval(liveInterval)
+    }
+
+    data.value = updateTimelineData(data.value, true)
   }
 
-  watch(() => live.value, (oldVal, newVal) => {
+  watch(() => live.value, () => {
     if (live.value) {
       startLiveInterval()
     } else {

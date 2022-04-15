@@ -19,7 +19,7 @@
       >
         <template #default="{ item }">
           <m-popover class="bar-chart-view__bar" :placement="['top', 'right', 'bottom', 'left']">
-            <template #trigger="{ toggle, open, close }">
+            <template #trigger="{ open, close }">
               <div
                 class="bar-chart-view__bar"
                 :style="{ 'background-color': item.data?.color }"

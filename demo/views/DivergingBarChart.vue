@@ -57,7 +57,7 @@
             class="diverging-bar-chart-view__bar-container"
             :placement="['top', 'right', 'bottom', 'left']"
           >
-            <template #trigger="{ toggle, open, close }">
+            <template #trigger="{ open, close }">
               <div
                 class="diverging-bar-chart-view__bar-container"
                 tabindex="0"
@@ -141,7 +141,7 @@
     skewMultiplier: parseInt(multiplier.value),
   }))
 
-  const getColumnKey = (key: string) => `column-${key.replace(' ', '-').toLowerCase()}`
+  const getColumnKey = (key: string): string => `column-${key.replace(' ', '-').toLowerCase()}`
 
   const columns = computed(() => {
     return [
