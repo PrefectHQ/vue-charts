@@ -190,9 +190,11 @@
 
       let row = 0
 
+      // eslint-disable-next-line no-constant-condition, @typescript-eslint/no-unnecessary-condition
       while (true) {
         const curr = _rows[row]
         // If no row at this index, we create one instead and place this node on it
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (curr) {
           const [, r] = curr
           // If the left edge of this node is greater than the right boundary of the
