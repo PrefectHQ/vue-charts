@@ -1,7 +1,7 @@
 <template>
   <div ref="container" class="bar-chart">
     <template v-if="_items.length">
-      <svg :id="id" ref="chart" class="bar-chart__svg">
+      <svg :id="id" class="bar-chart__svg">
         <!-- -->
       </svg>
 
@@ -42,7 +42,7 @@
   const props = defineProps<{
     intervalStart: Date,
     intervalEnd: Date,
-    items: BarChartItem<any>[],
+    items: BarChartItem[],
     chartPadding?: {
       top?: number,
       bottom?: number,

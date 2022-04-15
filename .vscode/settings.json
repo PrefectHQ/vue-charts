@@ -24,9 +24,12 @@
     "composables",
     "datetime",
     "emperical",
+    "esbuild",
     "idempotency",
     "pinia",
     "prefecthq",
-    "vite"
+    "scripthost",
+    "vite",
+    "vitejs"
   ]
 }

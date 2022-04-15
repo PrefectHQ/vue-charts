@@ -1,6 +1,6 @@
 <template>
   <div ref="container" class="scatter-plot">
-    <svg :id="id" ref="chart" class="scatter-plot__svg">
+    <svg :id="id" class="scatter-plot__svg">
       <g class="scatter-plot__x-axis-group" />
       <g class="scatter-plot__y-axis-group" />
     </svg>
@@ -20,16 +20,16 @@
 <script lang="ts" setup>
   import * as d3 from 'd3'
   import { NumberValue } from 'd3'
-  import { ref, computed, onMounted, watch, CSSProperties } from 'vue'
+  import { ref, computed, onMounted, watch, CSSProperties, withDefaults } from 'vue'
   import { useBaseChart } from './Base'
   import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
   import { extentUndefined } from './utils/extent'
-  import formatLabel from './utils/formatLabel'
+  import { formatLabel } from './utils/formatLabel'
 
   const props = withDefaults(defineProps<{
     items: ScatterPlotItem[],
-    startDate?: Date,
-    endDate?: Date,
+    startDate?: Date | null,
+    endDate?: Date | null,
     showNowLine?: boolean,
     dotDiameter?: number,
     chartPadding?: {
@@ -38,15 +38,15 @@
       left?: number,
       right?: number,
     },
-  }>(),
-                             {
-                               dotDiameter: 14,
-                               chartPadding: () => {
-                                 return { top: 30, left: 70, bottom: 50, right: 20 }
-                               },
+  }>(), {
+    startDate: null,
+    endDate: null,
+    dotDiameter: 14,
+    chartPadding: () => {
+      return { top: 30, left: 70, bottom: 50, right: 20 }
+    },
 
-                             },
-  )
+  })
 
   const container = ref<HTMLElement>()
   const xScale = ref(d3.scaleTime())
@@ -73,7 +73,7 @@
     return Math.max(ticks, 1)
   })
 
-  const xAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
+  const xAxis = (group: GroupSelection): GroupSelection | TransitionSelection => group
     .call(d3.axisBottom(xScale.value)
       .tickPadding(10)
       .tickSizeInner(5)
@@ -87,7 +87,7 @@
 
   const formatYAxis = (value: NumberValue): string => {
     if (typeof value !== 'number') {
-      return `${value}`
+      return `${value.valueOf()}`
     }
 
     const formatter = d3.format('.0f')
@@ -100,16 +100,16 @@
     return `${formatter(value)}s`
   }
 
-  const yAxis = (g: GroupSelection): GroupSelection | TransitionSelection => g
+  const yAxis = (group: GroupSelection): GroupSelection | TransitionSelection => group
     .call(d3.axisLeft(yScale.value)
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
-      .tickFormat(d => formatYAxis(d))
+      .tickFormat(domain => formatYAxis(domain))
       .tickValues(yScale.value.ticks()),
     )
 
-  const xAccessor = (d: ScatterPlotItem) => d.x
-  const yAccessor = (d: ScatterPlotItem) => d.y
+  const xAccessor = (item: ScatterPlotItem): Date => item.x
+  const yAccessor = (item: ScatterPlotItem): number => item.y
 
   const calculateDotPosition = (item: ScatterPlotItem): CSSProperties => {
     const top = yScale.value(item.y) + baseChart.padding.top - props.dotDiameter / 2

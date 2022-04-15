@@ -22,6 +22,16 @@
     }
   },
   "rules": {
-    "import/no-default-export": "error"
+    "import/no-default-export": "error",
+    "id-length": [
+      "warn",
+      {
+        "exceptions": [
+          "x",
+          "y",
+          "i"
+        ]
+      }
+    ]
   }
 }

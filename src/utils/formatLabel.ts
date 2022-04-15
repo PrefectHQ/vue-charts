@@ -18,28 +18,38 @@ import {
   formatYear
 } from './formatTime'
 
-const formatLabel = (date: AxisDomain): string => {
+export const formatLabel = (date: AxisDomain): string => {
   if (!(date instanceof Date)) {
     return ''
   }
-  return (
-    timeSecond(date) < date
-      ? formatMillisecond
-      : timeMinute(date) < date
-        ? formatSecond
-        : timeHour(date) < date
-          ? formatMinute
-          : timeDay(date) < date
-            ? formatHour
-            : timeMonth(date) < date
-              ? timeWeek(date) < date
-                ? formatDay
-                : formatWeek
-              : timeYear(date) < date
-                ? formatMonth
-                : formatYear
-  )(date)
-}
 
-export default formatLabel
-export { formatLabel }
+  if (timeSecond(date) < date) {
+    return formatMillisecond(date)
+  }
+
+  if (timeMinute(date) < date) {
+    return formatSecond(date)
+  }
+
+  if (timeHour(date) < date) {
+    return formatMinute(date)
+  }
+
+  if (timeDay(date) < date) {
+    return formatHour(date)
+  }
+
+  if (timeMonth(date) < date) {
+    if (timeWeek(date) < date) {
+      return formatDay(date)
+    }
+
+    return formatWeek(date)
+  }
+
+  if (timeYear(date) < date) {
+    return formatMonth(date)
+  }
+
+  return formatYear(date)
+}

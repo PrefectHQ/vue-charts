@@ -1,4 +1,5 @@
-const stringAccessor = (object: any, property: string): any => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const stringAccessor = (object: any, property: string): any => {
   if (typeof object !== 'object') {
     throw new Error('stringAccessor: passed object is not of type "object"')
   }
@@ -13,6 +14,3 @@ const stringAccessor = (object: any, property: string): any => {
     return prev ? prev[curr] : undefined
   }, object || self)
 }
-
-export default stringAccessor
-export { stringAccessor }

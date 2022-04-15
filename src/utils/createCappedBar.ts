@@ -1,4 +1,4 @@
-const createCappedBar = (
+export const createCappedBar = (
   options: {
     capTop: boolean,
     capBottom: boolean,
@@ -29,6 +29,3 @@ const createCappedBar = (
   return `M${x},${y} v${height} ${cB} ${capBottom ? '' : `h${width}`
   } v-${height} ${cT}`
 }
-
-export default createCappedBar
-export { createCappedBar }

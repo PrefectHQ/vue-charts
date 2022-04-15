@@ -1,6 +1,6 @@
 <template>
   <div ref="container" class="diverging-bar-chart">
-    <svg :id="id" ref="chart" class="diverging-bar-chart__svg">
+    <svg :id="id" class="diverging-bar-chart__svg">
       <g class="diverging-bar-chart__axis-group" />
     </svg>
 
@@ -11,9 +11,9 @@
       </div>
 
       <div class="diverging-bar-chart__series-container">
-        <template v-for="[key, series] in seriesMap" :key="key">
-          <div class="diverging-bar-chart__series" :style="calculateSeriesPosition(series.data)">
-            <template v-for="seriesPoint in series.series" :key="seriesPoint.key">
+        <template v-for="[key, seriesItem] in seriesMap" :key="key">
+          <div class="diverging-bar-chart__series" :style="calculateSeriesPosition(seriesItem.data)">
+            <template v-for="seriesPoint in seriesItem.series" :key="seriesPoint.key">
               <div
                 class="diverging-bar-chart__series-point"
                 :style="calculateSeriesPointPosition(seriesPoint.value)"
@@ -22,7 +22,7 @@
                   v-if="slots.default"
                   :key="seriesPoint.key"
                   :value="seriesPoint.value.data[seriesPoint.key]"
-                  :series="series"
+                  :series="seriesItem"
                 />
                 <div v-else class="diverging-bar-chart__series-bar" />
               </div>
@@ -44,7 +44,7 @@
 
 <script lang="ts" setup>
   import * as d3 from 'd3'
-  import { computed, ref, onMounted, useSlots, watchEffect } from 'vue'
+  import { computed, ref, onMounted, useSlots, watchEffect, StyleValue } from 'vue'
   import { useBaseChart } from './Base'
   import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
   import { formatLabel } from '@/utils/formatLabel'
@@ -54,8 +54,7 @@
   const props = defineProps<{
     intervalStart: Date,
     intervalEnd: Date,
-    intervalSeconds: number,
-    items: DivergingBarChartItem<any>[],
+    items: DivergingBarChartItem[],
     staticMedian?: boolean,
     showAxis?: boolean,
     axisClass?: string,
@@ -103,10 +102,10 @@
   })
 
   const xAxis = (
-    g: GroupSelection,
-  ): GroupSelection | TransitionSelection => g
+    group: GroupSelection,
+  ): GroupSelection | TransitionSelection => group
     .attr('class', () => {
-      const existingClasses = g.attr('class').split(' ') ?? []
+      const existingClasses = group.attr('class').split(' ')
       const propClasses = props.axisClass?.split(' ') ?? []
       const classes = [...existingClasses, ...propClasses.filter(pc => !existingClasses.includes(pc))]
       return classes.join(' ')
@@ -120,8 +119,8 @@
         .tickSizeInner(0)
         .tickSizeOuter(0),
     )
-    .call((g) => g.select('.domain').remove())
-    .call((g) => g.selectAll('.tick').style('opacity', 1))
+    .call((group) => group.select('.domain').remove())
+    .call((group) => group.selectAll('.tick').style('opacity', 1))
 
 
   const series = computed<DivergingBarChartSeries[]>(() => {
@@ -141,8 +140,8 @@
 
   const seriesMap = computed<Map<Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }>>(() => {
     const itemsMap = props.items.map<[Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }]>((item, i) => {
-      const seriesMap = series.value.map(s => {
-        return { key: s.key, value: s[i] }
+      const seriesMap = series.value.map(series => {
+        return { key: series.key, value: series[i] }
       })
       return [item.intervalStart, { data: item, series: seriesMap }]
     })
@@ -150,7 +149,7 @@
     return new Map(itemsMap)
   })
 
-  const calculateSeriesPosition = (item: DivergingBarChartItem) => {
+  const calculateSeriesPosition = (item: DivergingBarChartItem): StyleValue => {
     const start = xScale.value(item.intervalStart)
     const end = xScale.value(item.intervalEnd)
     return {
@@ -159,7 +158,7 @@
     }
   }
 
-  const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
+  const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint): StyleValue => {
     const offset = baseChart.padding.middle / 2
     let start = yScale.value(point[0])
     let end = yScale.value(point[1])
