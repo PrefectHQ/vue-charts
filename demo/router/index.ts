@@ -23,8 +23,8 @@ const routes: RouteRecordRaw[] = [
   },
   {
     path: '/',
-    redirect: '/bar-chart'
-  }
+    redirect: '/bar-chart',
+  },
 ]
 
 const router = createRouter({

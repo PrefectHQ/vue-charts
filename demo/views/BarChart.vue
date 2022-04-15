@@ -1,8 +1,12 @@
 <template>
   <main class="bar-chart-view">
     <m-tabs v-model="tab">
-      <m-tab href="chart">Chart</m-tab>
-      <m-tab href="data">Data</m-tab>
+      <m-tab href="chart">
+        Chart
+      </m-tab>
+      <m-tab href="data">
+        Data
+      </m-tab>
     </m-tabs>
 
     <div v-if="tab == 'chart'" class="bar-chart-view__chart">
@@ -30,10 +34,10 @@
             <div>
               <strong>Start</strong>
               : {{ item.intervalStart.toLocaleTimeString() }}
-              <br />
+              <br>
               <strong>End</strong>
               : {{ item.intervalEnd.toLocaleTimeString() }}
-              <br />
+              <br>
               <strong>Value</strong>
               : {{ item.value }}
             </div>
@@ -48,30 +52,35 @@
 
     <div v-if="tab == 'data'" class="bar-chart-view__data">
       <m-data-table :columns="columns" :rows="data.items">
-        <template #column-color="{ row }">{{ row.data?.color }}</template>
-        <template #column-start="{ row }">{{ row.intervalStart.toLocaleTimeString() }}</template>
-        <template #column-end="{ row }">{{ row.intervalEnd.toLocaleTimeString() }}</template>
+        <template #column-color="{ row }">
+          {{ row.data?.color }}
+        </template>
+        <template #column-start="{ row }">
+          {{ row.intervalStart.toLocaleTimeString() }}
+        </template>
+        <template #column-end="{ row }">
+          {{ row.intervalEnd.toLocaleTimeString() }}
+        </template>
       </m-data-table>
     </div>
   </main>
 </template>
 
 <script lang="ts" setup>
-import BarChart from '../../src/BarChart.vue'
-import { generateBarChartData } from '../data';
-import { computed, ref } from 'vue'
+  import { computed, ref } from 'vue'
+  import BarChart from '../../src/BarChart.vue'
+  import { generateBarChartData } from '../data'
 
-const start = ref(new Date())
-const tab = ref('chart')
-const data = computed(() => generateBarChartData({ intervalStart: start.value, buckets: 50 }))
+  const start = ref(new Date())
+  const tab = ref('chart')
+  const data = computed(() => generateBarChartData({ intervalStart: start.value, buckets: 50 }))
 
-const columns = [
-  { label: 'Start', value: 'start' },
-  { label: 'End', value: 'end' },
-  { label: 'Color', value: 'color' },
-  { label: 'Value', value: 'value' }
-]
-
+  const columns = [
+    { label: 'Start', value: 'start' },
+    { label: 'End', value: 'end' },
+    { label: 'Color', value: 'color' },
+    { label: 'Value', value: 'value' },
+  ]
 </script>
 
 <style lang="scss">

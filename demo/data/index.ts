@@ -1,10 +1,10 @@
-import { BarChartItem, DivergingBarChartItem, TimelineChartItem } from '@/types'
 import { fruits } from './fruits'
+import { BarChartItem, DivergingBarChartItem, TimelineChartItem } from '@/types'
 
 // This is necessary until TypeScript 4.6 extends the crypto interface
 declare global {
   interface Crypto {
-    randomUUID: () => string;
+    randomUUID: () => string,
   }
 }
 
@@ -13,13 +13,13 @@ export type DemoBarChartItem = BarChartItem<{ color: string }>
 export type BarChartDataOptions = {
   buckets?: number,
   intervalStart?: Date,
-  intervalEnd?: Date
+  intervalEnd?: Date,
 }
 
 type BarChartData = {
   intervalStart: Date,
   intervalEnd: Date,
-  items: DemoBarChartItem[]
+  items: DemoBarChartItem[],
 }
 
 const generateBarChartData = (options?: BarChartDataOptions): BarChartData => {
@@ -42,8 +42,8 @@ const generateBarChartData = (options?: BarChartDataOptions): BarChartData => {
       intervalEnd: _intervalEnd,
       value: Math.floor(Math.random() * 100),
       data: {
-        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
-      }
+        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+      },
     }
 
     const proxy = new Proxy<DemoBarChartItem>(target, {})
@@ -62,7 +62,7 @@ export type DivergingBarChartDataOptions = {
   skew?: 'positive' | 'negative' | undefined,
   skewMultiplier?: number,
   intervalStart?: Date,
-  intervalEnd?: Date
+  intervalEnd?: Date,
 }
 
 type DivergingBarChartData = {
@@ -72,7 +72,7 @@ type DivergingBarChartData = {
   keys: string[],
   positiveSentimentKeys: string[],
   negativeSentimentKeys: string[],
-  data: DivergingBarChartItem[]
+  data: DivergingBarChartItem[],
 }
 
 const generateSentimentData = (options?: DivergingBarChartDataOptions): DivergingBarChartData => {
@@ -104,7 +104,7 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
     const target: DivergingBarChartItem = {
       intervalStart: _intervalStart,
       intervalEnd: _intervalEnd,
-      data: {}
+      data: {},
     }
 
     for (let i = 0; i < Math.round(Math.random() * keyFruits.length); ++i) {
@@ -130,20 +130,20 @@ const generateSentimentData = (options?: DivergingBarChartDataOptions): Divergin
 
 
   return {
-    intervalStart, intervalEnd, intervalSeconds: millisecondsInterval / 1000, data, keys: keyFruits, positiveSentimentKeys, negativeSentimentKeys
+    intervalStart, intervalEnd, intervalSeconds: millisecondsInterval / 1000, data, keys: keyFruits, positiveSentimentKeys, negativeSentimentKeys,
   }
 }
 
 export type TimelineDataOptions = {
   start?: Date,
   end?: Date,
-  items?: number
+  items?: number,
 }
 
 export type TimelineData = {
   start: Date,
   end?: Date,
-  data: TimelineChartItem[]
+  data: TimelineChartItem[],
 }
 
 const randomDate = (start: Date, end?: Date): Date => {
@@ -161,7 +161,7 @@ const generateRandomTimelineData = (options?: TimelineDataOptions): TimelineData
     start.setMinutes(start.getMinutes() - 15)
   }
 
-  if (options?.start && !options?.end) {
+  if (options?.start && !options.end) {
     end.setMinutes(end.getMinutes() + 15)
   }
 
@@ -184,8 +184,8 @@ const generateRandomTimelineData = (options?: TimelineDataOptions): TimelineData
       start: _start,
       end: _end,
       data: {
-        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
-      }
+        color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+      },
     }
 
     const proxy = new Proxy<TimelineChartItem>(target, {})
@@ -205,8 +205,8 @@ const generateTimelineChartItem = (): TimelineChartItem => {
     start: _start,
     end: undefined,
     data: {
-      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`
-    }
+      color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+    },
   }
 
   const proxy = new Proxy<TimelineChartItem>(target, {})
@@ -224,25 +224,27 @@ const updateTimelineData = (data: TimelineData, stop?: boolean, parallelChance: 
     data.end = new Date()
 
     data.data.forEach((item) => {
-      if (!item.end) item.end = data.end
-    })
-
-    return data
-  } else {
-    const _data: TimelineChartItem[] = [...data.data]
-
-    _data.filter(_d => !_d.end).forEach((_d) => {
-      if (Math.random() > parallelChance) {
-        _d.end = new Date()
+      if (!item.end) {
+        item.end = data.end
       }
     })
 
-    const newItem = generateTimelineChartItem()
-
-    _data.push(newItem)
-
-    return { ...data, data: _data }
+    return data
   }
+  const _data: TimelineChartItem[] = [...data.data]
+
+  _data.filter(_d => !_d.end).forEach((_d) => {
+    if (Math.random() > parallelChance) {
+      _d.end = new Date()
+    }
+  })
+
+  const newItem = generateTimelineChartItem()
+
+  _data.push(newItem)
+
+  return { ...data, data: _data }
+
 
 }
 

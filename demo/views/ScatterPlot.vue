@@ -5,36 +5,35 @@
 </template>
 
 <script lang="ts" setup>
+  import ScatterPlot from '../../src/ScatterPlot.vue'
+  import { ScatterPlotItem } from '../../src/types'
 
-import ScatterPlot from '../../src/ScatterPlot.vue'
-import { ScatterPlotItem } from '../../src/types';
+  const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7))
+  const now = new Date()
+  const items: ScatterPlotItem[] = new Array(100).fill(null).map(getChartItem)
 
-const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7))
-const now = new Date()
-const items: ScatterPlotItem[] = new Array(100).fill(null).map(getChartItem)
-
-function getChartItem(): ScatterPlotItem {
-  return {
-    id: getRandomString(),
-    y: getRandomInt(1, 100),
-    x: getRandomDate(oneWeekAgo, now)
+  function getChartItem(): ScatterPlotItem {
+    return {
+      id: getRandomString(),
+      y: getRandomInt(1, 100),
+      x: getRandomDate(oneWeekAgo, now),
+    }
   }
-}
 
-function getRandomString(): string {
-  return Math.random().toString(36).replace(/[^a-z]+/g, '')
-}
+  function getRandomString(): string {
+    return Math.random().toString(36).replace(/[^a-z]+/g, '')
+  }
 
-function getRandomInt(min, max): number {
-  min = Math.ceil(min);
-  max = Math.floor(max);
+  function getRandomInt(min, max): number {
+    min = Math.ceil(min)
+    max = Math.floor(max)
 
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+    return Math.floor(Math.random() * (max - min + 1)) + min
+  }
 
-function getRandomDate(start, end) {
-  return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));
-}
+  function getRandomDate(start, end) {
+    return new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
+  }
 </script>
 
 <style lang="scss" scoped>
