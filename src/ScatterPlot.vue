@@ -73,7 +73,7 @@
     return Math.max(ticks, 1)
   })
 
-  const xAxis = (group: GroupSelection): GroupSelection | TransitionSelection => group
+  const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
     .call(d3.axisBottom(xScale.value)
       .tickPadding(10)
       .tickSizeInner(5)
@@ -100,7 +100,7 @@
     return `${formatter(value)}s`
   }
 
-  const yAxis = (group: GroupSelection): GroupSelection | TransitionSelection => group
+  const yAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
     .call(d3.axisLeft(yScale.value)
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
