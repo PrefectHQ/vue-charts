@@ -52,8 +52,7 @@ const container = ref<HTMLElement>()
 const xScale = ref(d3.scaleTime())
 const yScale = ref(d3.scaleLog())
 
-const items = computed(() => props.items)
-
+const items = computed(() => props.items.map(item => ({ ...item, y: item.y || 0.1 })))
 // SETUP BASE
 const handleResize = (): void => {
   updateScales()
@@ -89,7 +88,7 @@ const formatYAxis = (value: NumberValue): string => {
   }
 
   const formatter = d3.format(".0f")
-  const decimalFormat = d3.format('.2f')
+  const decimalFormat = d3.format('.2s')
 
   if (value < 1) {
     return `${decimalFormat(value)}s`
@@ -199,8 +198,13 @@ const updateYScale = (): void => {
     extentY = [0.1, 20]
   }
 
-  extentY[0] = extentY[0] * 0.95
-  extentY[1] = extentY[1] * 1.05
+  if (extentY[0] >= 0 && extentY[1] <= 1) {
+    extentY[0] = extentY[0] * 0.5
+    extentY[1] = extentY[1] * 1.5
+  } else {
+    extentY[0] = extentY[0] * 0.95
+    extentY[1] = extentY[1] * 1.05
+  }
 
   if (extentY.every(extent => extent === 0)) {
     extentY = [0.1, 20]
