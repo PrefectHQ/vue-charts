@@ -85,12 +85,20 @@
   // yAXIS
   let yAxisGroup: GroupSelection | undefined
 
+  const yTicks = computed(() => {
+    if (!props.items.length) {
+      return 5
+    }
+    const ticks = Math.floor(props.items.length * ((baseChart.height.value - baseChart.paddingY) / (props.items.length * 40)))
+    return Math.max(ticks, 5)
+  })
+
   const formatYAxis = (value: NumberValue): string => {
     if (typeof value !== 'number') {
       return `${value.valueOf()}`
     }
 
-    const formatter = d3.format('.0f')
+    const formatter = value % 1 == 0? d3.format('.0f') : d3.format('.1f')
     const decimalFormat = d3.format('.2s')
 
     if (value < 1) {
@@ -105,7 +113,7 @@
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
       .tickFormat(domain => formatYAxis(domain))
-      .tickValues(yScale.value.ticks()),
+      .ticks(yTicks.value),
     )
 
   const xAccessor = (item: ScatterPlotItem): Date => item.x
@@ -201,16 +209,16 @@
       extentY = [0.1, 20]
     }
 
+    if (extentY.every(extent => extent === 0)) {
+      extentY = [0.1, 20]
+    }
+
     if (extentY[0] >= 0 && extentY[1] <= 1) {
-      extentY[0] = extentY[0] * 0.5
+      extentY[0] = extentY[0] * 0.6
       extentY[1] = extentY[1] * 1.5
     } else {
       extentY[0] = extentY[0] * 0.95
       extentY[1] = extentY[1] * 1.05
-    }
-
-    if (extentY.every(extent => extent === 0)) {
-      extentY = [0.1, 20]
     }
 
     yScale.value = d3
