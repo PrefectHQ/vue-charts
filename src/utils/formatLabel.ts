@@ -5,7 +5,7 @@ import {
   timeMonth,
   timeWeek,
   timeYear, timeSecond
-} from "d3"
+} from 'd3'
 import { AxisDomain } from 'd3-axis'
 import {
   formatMillisecond,
@@ -15,7 +15,7 @@ import {
   formatDay,
   formatWeek,
   formatMonth,
-  formatYear,
+  formatYear
 } from './formatTime'
 
 const formatLabel = (date: AxisDomain): string => {

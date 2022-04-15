@@ -5,7 +5,7 @@ export type BarChartItem<T = unknown> = {
   data?: T,
 }
 
-export type DivergingBarChartItem<T = { [key: string]: number }> = {
+export type DivergingBarChartItem<T = Record<string, number>> = {
   intervalStart: Date,
   intervalEnd: Date,
   data: T,
@@ -25,15 +25,15 @@ export type TimelineChartItem<T = unknown> = {
   id: string | number,
   start: Date,
   end?: Date,
-  data?: T
+  data?: T,
 }
 
 export type ScatterPlotItem = {
   id: string,
   x: Date,
   y: number,
-  itemClass?: string
+  itemClass?: string,
 }
 export type ChartProps = {
-  items: ScatterPlotItem[]
+  items: ScatterPlotItem[],
 }

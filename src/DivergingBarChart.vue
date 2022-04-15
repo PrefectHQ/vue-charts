@@ -20,8 +20,8 @@
               >
                 <slot
                   v-if="slots.default"
-                  :value="seriesPoint.value.data[seriesPoint.key]"
                   :key="seriesPoint.key"
+                  :value="seriesPoint.value.data[seriesPoint.key]"
                   :series="series"
                 />
                 <div v-else class="diverging-bar-chart__series-bar" />
@@ -34,224 +34,230 @@
 
     <template v-else>
       <slot name="empty">
-        <div class="diverging-bar-chart__empty">--</div>
+        <div class="diverging-bar-chart__empty">
+          --
+        </div>
       </slot>
     </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-import * as d3 from 'd3'
-import { useBaseChart } from './Base'
-import { computed, ref, onMounted, useSlots, watchEffect } from 'vue'
-import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
-import { formatLabel } from '@/utils/formatLabel'
+  import * as d3 from 'd3'
+  import { computed, ref, onMounted, useSlots, watchEffect } from 'vue'
+  import { useBaseChart } from './Base'
+  import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
+  import { formatLabel } from '@/utils/formatLabel'
 
-const slots = useSlots()
+  const slots = useSlots()
 
-const props = defineProps<{
-  intervalStart: Date,
-  intervalEnd: Date,
-  intervalSeconds: number,
-  items: DivergingBarChartItem<any>[],
-  staticMedian?: boolean,
-  showAxis?: boolean,
-  axisClass?: string,
-  positiveSentimentKeys: string[],
-  negativeSentimentKeys: string[],
-  chartPadding?: {
-    top?: number,
-    bottom?: number,
-    middle?: number,
-    left?: number,
-    right?: number
-  }
-}>()
+  const props = defineProps<{
+    intervalStart: Date,
+    intervalEnd: Date,
+    intervalSeconds: number,
+    items: DivergingBarChartItem<any>[],
+    staticMedian?: boolean,
+    showAxis?: boolean,
+    axisClass?: string,
+    positiveSentimentKeys: string[],
+    negativeSentimentKeys: string[],
+    chartPadding?: {
+      top?: number,
+      bottom?: number,
+      middle?: number,
+      left?: number,
+      right?: number,
+    },
+  }>()
 
-type sentimentDirection = 1 | -1
+  type sentimentDirection = 1 | -1
 
-const sentimentMap = computed<Map<string, 1 | -1>>(() => {
-  const positive = new Map<string, sentimentDirection>(props.positiveSentimentKeys.map(sen => [sen, -1]))
-  const negative = new Map<string, sentimentDirection>(props.negativeSentimentKeys.map(sen => [sen, 1]))
+  const sentimentMap = computed<Map<string, 1 | -1>>(() => {
+    const positive = new Map<string, sentimentDirection>(props.positiveSentimentKeys.map(sen => [sen, -1]))
+    const negative = new Map<string, sentimentDirection>(props.negativeSentimentKeys.map(sen => [sen, 1]))
 
-  return new Map([...positive, ...negative])
-})
-
-
-const container = ref<HTMLElement>()
-const xScale = ref(d3.scaleTime())
-const yScale = ref(d3.scaleLinear())
-
-
-const handleResize = (): void => {
-  updateScales()
-}
-
-const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
-const { id } = baseChart
-
-let xAxisGroup: GroupSelection | undefined
-
-const ticks = computed(() => {
-  if (!props.items.length) return 1
-  const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
-  return Math.max(ticks, 1)
-})
-
-const xAxis = (
-  g: GroupSelection,
-): GroupSelection | TransitionSelection => g
-  .attr('class', () => {
-    const existingClasses = g.attr('class')?.split(' ') ?? []
-    const propClasses = props.axisClass?.split(' ') ?? []
-    const classes = [...existingClasses, ...propClasses.filter(pc => !existingClasses.includes(pc))]
-    return classes.join(' ')
+    return new Map([...positive, ...negative])
   })
-  .call(
-    d3
-      .axisTop(xScale.value)
-      .tickPadding(0)
-      .ticks(ticks.value)
-      .tickFormat(formatLabel)
-      .tickSizeInner(0)
-      .tickSizeOuter(0),
-  )
-  .call((g) => g.select('.domain').remove())
-  .call((g) => g.selectAll('.tick').style('opacity', 1))
 
 
-const series = computed<DivergingBarChartSeries[]>(() => {
-  const cleanedItems = props.items.map((item) => item.data)
-  const stack = d3
-    .stack()
-    .keys([...props.positiveSentimentKeys, ...props.negativeSentimentKeys])
-    .value((value, key) => {
-      const sentimentValue = sentimentMap.value.get(key)
-      return (value[key] * (sentimentValue ?? 1)) || 0
+  const container = ref<HTMLElement>()
+  const xScale = ref(d3.scaleTime())
+  const yScale = ref(d3.scaleLinear())
+
+
+  const handleResize = (): void => {
+    updateScales()
+  }
+
+  const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
+  const { id } = baseChart
+
+  let xAxisGroup: GroupSelection | undefined
+
+  const ticks = computed(() => {
+    if (!props.items.length) {
+      return 1
+    }
+    const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
+    return Math.max(ticks, 1)
+  })
+
+  const xAxis = (
+    g: GroupSelection,
+  ): GroupSelection | TransitionSelection => g
+    .attr('class', () => {
+      const existingClasses = g.attr('class').split(' ') ?? []
+      const propClasses = props.axisClass?.split(' ') ?? []
+      const classes = [...existingClasses, ...propClasses.filter(pc => !existingClasses.includes(pc))]
+      return classes.join(' ')
     })
-    .order(d3.stackOrderNone)
-    .offset(d3.stackOffsetDiverging)
+    .call(
+      d3
+        .axisTop(xScale.value)
+        .tickPadding(0)
+        .ticks(ticks.value)
+        .tickFormat(formatLabel)
+        .tickSizeInner(0)
+        .tickSizeOuter(0),
+    )
+    .call((g) => g.select('.domain').remove())
+    .call((g) => g.selectAll('.tick').style('opacity', 1))
 
-  return stack(cleanedItems)
-})
 
-const seriesMap = computed<Map<Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }>>(() => {
-  const itemsMap = props.items.map<[Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }]>((item, i) => {
-    const seriesMap = series.value.map(s => { return { key: s.key, value: s[i] } })
-    return [item.intervalStart, { data: item, series: seriesMap }]
+  const series = computed<DivergingBarChartSeries[]>(() => {
+    const cleanedItems = props.items.map((item) => item.data)
+    const stack = d3
+      .stack()
+      .keys([...props.positiveSentimentKeys, ...props.negativeSentimentKeys])
+      .value((value, key) => {
+        const sentimentValue = sentimentMap.value.get(key)
+        return value[key] * (sentimentValue ?? 1) || 0
+      })
+      .order(d3.stackOrderNone)
+      .offset(d3.stackOffsetDiverging)
+
+    return stack(cleanedItems)
   })
 
-  return new Map(itemsMap)
-})
+  const seriesMap = computed<Map<Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }>>(() => {
+    const itemsMap = props.items.map<[Date, { data: DivergingBarChartItem, series: { key: string, value: DivergingBarChartSeriesPoint }[] }]>((item, i) => {
+      const seriesMap = series.value.map(s => {
+        return { key: s.key, value: s[i] }
+      })
+      return [item.intervalStart, { data: item, series: seriesMap }]
+    })
 
-const calculateSeriesPosition = (item: DivergingBarChartItem) => {
-  const start = xScale.value(item.intervalStart)
-  const end = xScale.value(item.intervalEnd)
-  return {
-    left: `${start}px`,
-    width: `${end - start}px`
-  }
-}
+    return new Map(itemsMap)
+  })
 
-const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
-  const offset = baseChart.padding.middle / 2
-  let start = yScale.value(point[0])
-  let end = yScale.value(point[1])
-
-  if (point[0] < 0) {
-    start -= offset
-    end -= offset
-  } else {
-    start += offset
-    end += offset
+  const calculateSeriesPosition = (item: DivergingBarChartItem) => {
+    const start = xScale.value(item.intervalStart)
+    const end = xScale.value(item.intervalEnd)
+    return {
+      left: `${start}px`,
+      width: `${end - start}px`,
+    }
   }
 
-  const height = Math.ceil(end - start)
+  const calculateSeriesPointPosition = (point: DivergingBarChartSeriesPoint) => {
+    const offset = baseChart.padding.middle / 2
+    let start = yScale.value(point[0])
+    let end = yScale.value(point[1])
 
-  return {
-    height: `${height}px`,
-    top: `${start}px`
-  }
-}
+    if (point[0] < 0) {
+      start -= offset
+      end -= offset
+    } else {
+      start += offset
+      end += offset
+    }
 
-const median = computed(() => {
-  return yScale.value(0)
-})
+    const height = Math.ceil(end - start)
 
-const medianPosition = computed(() => {
-  const top = median.value > 0 ? median.value : baseChart.height.value / 2
-  return {
-    top: `${top}px`
-  }
-})
-
-const updateScales = (): void => {
-  const start = props.intervalStart
-  const end = props.intervalEnd
-  let axisHeight = 0
-
-  if (props.showAxis && xAxisGroup) {
-    xAxisGroup.call(xAxis)
-
-    axisHeight = xAxisGroup.node()?.getBBox().height ?? 0
-    xAxisGroup.attr('transform', `translate(0, ${baseChart.height.value - axisHeight / 2})`)
-  } else if (xAxisGroup) {
-    xAxisGroup.selectAll('.tick').style('opacity', 0)
+    return {
+      height: `${height}px`,
+      top: `${start}px`,
+    }
   }
 
-  xScale
-    .value = d3.scaleTime()
-      .domain([start, end])
-      .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX])
+  const median = computed(() => {
+    return yScale.value(0)
+  })
 
-  const flattened = series.value.flat(2)
-  let min = Math.min(...flattened)
-  let max = Math.max(...flattened)
+  const medianPosition = computed(() => {
+    const top = median.value > 0 ? median.value : baseChart.height.value / 2
+    return {
+      top: `${top}px`,
+    }
+  })
 
-  if (min == max) {
-    min = -1
-    max = 1
+  const updateScales = (): void => {
+    const start = props.intervalStart
+    const end = props.intervalEnd
+    let axisHeight = 0
+
+    if (props.showAxis && xAxisGroup) {
+      xAxisGroup.call(xAxis)
+
+      axisHeight = xAxisGroup.node()?.getBBox().height ?? 0
+      xAxisGroup.attr('transform', `translate(0, ${baseChart.height.value - axisHeight / 2})`)
+    } else if (xAxisGroup) {
+      xAxisGroup.selectAll('.tick').style('opacity', 0)
+    }
+
+    xScale
+      .value = d3.scaleTime()
+        .domain([start, end])
+        .range([baseChart.padding.left, baseChart.width.value - baseChart.paddingX])
+
+    const flattened = series.value.flat(2)
+    let min = Math.min(...flattened)
+    let max = Math.max(...flattened)
+
+    if (min == max) {
+      min = -1
+      max = 1
+    }
+
+    let scale = d3.scaleLinear()
+      .range([
+        baseChart.padding.top + baseChart.padding.middle / 2,
+        baseChart.height.value - baseChart.padding.bottom - baseChart.padding.middle / 2 - axisHeight,
+      ])
+
+
+    if (props.staticMedian) {
+      const extremity = Math.max(Math.abs(min), Math.abs(max))
+
+      // This can be used to keep a consistent middle line
+      // otherwise the chart median will move with the data
+      scale.domain([-extremity, extremity])
+    } else {
+      scale.domain([min, max])
+    }
+
+    yScale.value = scale
+
+    if (props.showAxis && xAxisGroup) {
+      xAxisGroup.call(xAxis)
+    } else if (xAxisGroup) {
+      xAxisGroup.selectAll('.tick').style('opacity', 0)
+    }
   }
 
-  let scale = d3.scaleLinear()
-    .range([
-      baseChart.padding.top + baseChart.padding.middle / 2,
-      baseChart.height.value - baseChart.padding.bottom - baseChart.padding.middle / 2 - axisHeight
-    ])
+  onMounted(() => {
+    const svg = d3.select(`#${id}`)
+    xAxisGroup = svg.select('.diverging-bar-chart__axis-group')
+    updateScales()
+  })
 
+  watchEffect(() => {
+    const svg = d3.select(`#${id}`)
+    xAxisGroup = svg.select('.diverging-bar-chart__axis-group')
 
-  if (props.staticMedian) {
-    const extremity = Math.max(Math.abs(min), Math.abs(max))
-
-    // This can be used to keep a consistent middle line
-    // otherwise the chart median will move with the data
-    scale.domain([-extremity, extremity])
-  } else {
-    scale.domain([min, max])
-  }
-
-  yScale.value = scale
-
-  if (props.showAxis && xAxisGroup) {
-    xAxisGroup.call(xAxis)
-  } else if (xAxisGroup) {
-    xAxisGroup.selectAll('.tick').style('opacity', 0)
-  }
-}
-
-onMounted(() => {
-  const svg = d3.select(`#${id}`)
-  xAxisGroup = svg.select('.diverging-bar-chart__axis-group')
-  updateScales()
-})
-
-watchEffect(() => {
-  const svg = d3.select(`#${id}`)
-  xAxisGroup = svg.select('.diverging-bar-chart__axis-group')
-
-  baseChart.padding = { ...baseChart.padding, ...props.chartPadding }
-  updateScales()
-})
+    baseChart.padding = { ...baseChart.padding, ...props.chartPadding }
+    updateScales()
+  })
 </script>
 
 <style lang="scss">

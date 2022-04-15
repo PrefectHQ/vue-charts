@@ -80,10 +80,18 @@ const getSmallestInterval = (s: number): TimeIntervalKey => {
   const d0 = days == 0
   const y0 = years == 0
 
-  if (m0 && h0 && d0 && y0) return 'seconds'
-  if (!s0 && h0 && d0 && y0) return 'minutes'
-  if (!m0 && d0 && y0) return 'hours'
-  if (!h0 && y0) return 'days'
+  if (m0 && h0 && d0 && y0) {
+    return 'seconds'
+  }
+  if (!s0 && h0 && d0 && y0) {
+    return 'minutes'
+  }
+  if (!m0 && d0 && y0) {
+    return 'hours'
+  }
+  if (!h0 && y0) {
+    return 'days'
+  }
   return 'years'
 }
 
