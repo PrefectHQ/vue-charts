@@ -1,6 +1,13 @@
 import { fruits } from './fruits'
 import { BarChartItem, DivergingBarChartItem, TimelineChartItem } from '@/types'
 
+// This is necessary until TypeScript 4.6 extends the crypto interface
+declare global {
+  interface Crypto {
+    randomUUID: () => string,
+  }
+}
+
 export type DemoBarChartItem = BarChartItem<{ color: string }>
 
 export type BarChartDataOptions = {

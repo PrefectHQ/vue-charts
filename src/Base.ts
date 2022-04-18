@@ -2,6 +2,12 @@ import * as d3 from 'd3'
 import { ref, Ref, onMounted, onUnmounted } from 'vue'
 
 
+// This is necessary until TypeScript 4.6 extends the crypto interface
+declare global {
+  interface Crypto {
+    randomUUID: () => string,
+  }
+}
 export type SelectionType = d3.Selection<SVGGElement, unknown, HTMLElement, null>
 export type ElementRef = Ref<HTMLElement | undefined>
 
