@@ -1,7 +1,6 @@
 import { resolve } from 'path'
-import { defineConfig } from 'vite'
-
 import vue from '@vitejs/plugin-vue'
+import { defineConfig } from 'vite'
 
 const config = defineConfig({
   plugins: [vue()],
@@ -14,6 +13,7 @@ const config = defineConfig({
     ],
   },
   build: {
+    emptyOutDir: false,
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'Vue Charts',
@@ -24,11 +24,12 @@ const config = defineConfig({
       output: {
         // Provide vue as a global variable to use in the UMD build
         globals: {
-          vue: 'Vue'
-        }
+          vue: 'Vue',
+        },
       },
-    }
+    },
   },
 })
 
+// eslint-disable-next-line import/no-default-export
 export default config

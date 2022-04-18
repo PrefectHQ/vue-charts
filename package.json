@@ -10,25 +10,30 @@
   "scripts": {
     "serve": "vite",
     "dev": "vue-tsc -w & tsc-alias -w & vite build -w",
-    "build": "vue-tsc --declaration --emitDeclarationOnly && vite build",
+    "build": "vue-tsc && tsc-alias && vite build",
     "lint": "eslint src && eslint demo",
     "lint:fix": "eslint src --fix && eslint demo --fix",
     "validate:types": "tsc"
   },
   "main": "./dist/vue-charts.umd.js",
   "module": "./dist/vue-charts.es.js",
-  "typings": "./dist_types/index.d.ts",
+  "types": "./dist/types/src/index.d.ts",
+  "exports": {
+      ".": {
+          "import": "./dist/vue-charts.es.js",
+          "require": "./dist/vue-charts.umd.js"
+      },
+      "./dist/style.css": "./dist/style.css"
+  },
   "files": [
-    "src",
-    "dist",
-    "dist_types"
+    "dist"
   ],
   "devDependencies": {
     "@prefecthq/eslint-config": "1.0.14",
     "@prefecthq/miter-design": "^0.1.22",
     "@types/d3": "^7.0.0",
     "@types/lodash.debounce": "^4.0.6",
-    "@types/node": "^15.14.1",
+    "@types/node": "15.14.9",
     "@vitejs/plugin-vue": "^1.2.5",
     "esbuild": "^0.13.4",
     "eslint": "^8.5.0",
