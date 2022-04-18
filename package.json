@@ -18,13 +18,6 @@
   "main": "./dist/vue-charts.umd.js",
   "module": "./dist/vue-charts.es.js",
   "types": "./dist/types/src/index.d.ts",
-  "exports": {
-      ".": {
-          "import": "./dist/vue-charts.es.js",
-          "require": "./dist/vue-charts.umd.js"
-      },
-      "./dist/style.css": "./dist/style.css"
-  },
   "files": [
     "dist"
   ],
