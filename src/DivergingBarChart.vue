@@ -47,6 +47,7 @@
   import { computed, ref, onMounted, useSlots, watchEffect, StyleValue } from 'vue'
   import { useBaseChart } from './Base'
   import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
+  import { formatTick } from './utils/formatTick'
   import { formatLabel } from '@/utils/formatLabel'
 
   const slots = useSlots()
@@ -93,14 +94,6 @@
 
   let xAxisGroup: GroupSelection | undefined
 
-  const ticks = computed(() => {
-    if (!props.items.length) {
-      return 1
-    }
-    const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
-    return Math.max(ticks, 1)
-  })
-
   const xAxis = (
     group: GroupSelection,
   ): GroupSelection | TransitionSelection => group
@@ -114,7 +107,7 @@
       d3
         .axisTop(xScale.value)
         .tickPadding(0)
-        .ticks(ticks.value)
+        .ticks(formatTick(props.items.length, baseChart.width.value, baseChart.paddingX, 150))
         .tickFormat(formatLabel)
         .tickSizeInner(0)
         .tickSizeOuter(0),
