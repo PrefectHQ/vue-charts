@@ -43,3 +43,8 @@ export type ScatterPlotItem = {
 export type ChartProps = {
   items: ScatterPlotItem[],
 }
+
+export type HeatmapItem = {
+  id: string,
+  x: Date,
+}
