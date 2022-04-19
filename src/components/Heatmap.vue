@@ -1,32 +1,27 @@
 <template>
   <div ref="container" class="heatmap">
-    <!--
-      <svg :id="id" class="heatmap__svg">
-      <g class="heatmap__x-axis-group" />
-      <g class="heatmap__y-axis-group" />
-      </svg>
-    -->
-
-    <template v-for="(group, key) in itemsGrouped" :key="key">
-      <div class="heatmap__bucket" :style="calculateOpacity(group)">
+    <div class="heatmap__bucket-container">
+      <template v-for="(group, key) in itemsGrouped" :key="key">
+        <div class="heatmap__bucket" :style="calculateOpacity(group)">
         <!-- {{ group.items.length }} -->
-      </div>
-    </template>
+        </div>
+      </template>
+    </div>
 
 
-    <!--
-      <div v-for="data in groupedData" :key="data.key" class="heatmap__heatmap-group">
-      <HeatmapGroup :data="data" :x-extent="getXExtent()" />
-      </div>
-    -->
+    <svg :id="id" class="heatmap__svg">
+      <g class="heatmap__x-axis-group" />
+    </svg>
   </div>
 </template>
 
 <script setup lang="ts">
   import * as d3 from 'd3'
-  import { ref, computed, onMounted, CSSProperties, withDefaults } from 'vue'
-  import { HeatmapItem, ScatterPlotItem } from './types'
-  import { extentUndefined } from './utils/extent'
+  import { ref, computed, onMounted, CSSProperties, withDefaults, watch } from 'vue'
+  import { GroupSelection, HeatmapItem, TransitionSelection } from '../types'
+  import { extentUndefined } from '../utilities/extent'
+  import { formatLabel } from '../utilities/formatLabel'
+  import { useBaseChart } from './Base'
 
   const props = withDefaults(defineProps<{
     items: HeatmapItem[],
@@ -47,7 +42,7 @@
     bucketAmount: 20,
     bucketOpacityRange: 4,
     chartPadding: () => {
-      return { top: 20, left: 100, bottom: 40, right: 40 }
+      return { top: 0, left: 0, bottom: 0, right: 20 }
     },
   })
 
@@ -64,12 +59,19 @@
   }
 
   const container = ref<HTMLElement>()
-  // const xScale = ref(d3.scaleTime())
-  // const yScale = ref(d3.scaleBand())
-  // let xAxisGroup: GroupSelection | undefined
-  // let yAxisGroup: GroupSelection | undefined
+  const xScale = ref(d3.scaleTime())
+  let xAxisGroup: GroupSelection | undefined
+
+  // SETUP BASE
+  const handleResize = (): void => {
+    updateScales()
+  }
+  const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
+  const { id } = baseChart
+
 
   const items = computed(() => props.items)
+  const xAccessor = (item: HeatmapItem): Date => item.date
 
   const itemGroups = computed(() => {
     const [start, end] = extent.value
@@ -108,7 +110,6 @@
     return grouped
   })
 
-
   const opacityGroups = computed<OpacityGroup[]>(() => {
     const [min, max] = [1, groupedMaxLength.value]
     const opacityGroupInterval = groupedMaxLength.value / props.bucketOpacityRange
@@ -142,22 +143,6 @@
 
   }
 
-  // SETUP BASE
-  // const handleResize = (): void => {
-  //   updateScales()
-  // }
-  // const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
-  // const { id } = baseChart
-
-  // const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
-  //   .call(d3.axisBottom(xScale.value))
-
-  // const yAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
-  //   .call(d3.axisLeft(yScale.value))
-
-  const xAccessor = (item: HeatmapItem): Date => item.date
-
-
   // make this a dateExtent utility
   const extent = computed((): [Date, Date] => {
     let extent = d3.extent(items.value, xAccessor)
@@ -180,7 +165,6 @@
     return extent
   })
 
-
   const groupedMaxLength = computed<number>(() => {
     const groupsArray = Object.values(itemsGrouped.value)
 
@@ -198,69 +182,62 @@
     return Math.ceil(bucketIntervalInMs)
   })
 
+  const ticks = computed(() => {
+    if (!props.items.length) {
+      return 5
+    }
+    const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
+    return Math.max(ticks, 1)
+  })
 
-  // const updateScales = (): void => {
-  //   updateXScale()
-  //   updateYScale()
+  const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
+    .call(d3.axisBottom(xScale.value)
+      .tickPadding(10)
+      .tickSizeInner(5)
+      .tickSizeOuter(0)
+      .ticks(ticks.value)
+      .tickFormat(formatLabel),
+    )
 
+  const updateScales = (): void => {
+    xScale.value = d3
+      .scaleTime()
+      .domain(extent.value)
+      .range([baseChart.padding.left, baseChart.width.value])
 
-  //   // if (xAxisGroup) {
-  //   //   xAxisGroup.call(xAxis)
+    if (xAxisGroup) {
+      xAxisGroup.call(xAxis)
+      xAxisGroup
+        .attr('font-family', 'input-sans')
+        .attr('font-size', '11')
+      xAxisGroup.select('.domain').style('opacity', '0')
+    }
+  }
 
-  //   //   xAxisGroup
-  //   //     .attr('transform', `translate(0, ${baseChart.height.value - baseChart.padding.bottom})`)
-  //   //     .attr('font-family', 'input-sans')
-  //   //     .attr('font-size', '11')
-  //   // }
+  onMounted(() => {
+    const svg = d3.select(`#${id}`)
+    xAxisGroup = svg.select('.heatmap__x-axis-group')
 
-  //   // if (yAxisGroup) {
-  //   //   yAxisGroup.call(yAxis)
-  //   //   yAxisGroup
-  //   //     .attr('transform', `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
-  //   //     .attr('font-family', 'input-sans')
-  //   //     .attr('font-size', '11')
-  //   // }
-  // }
+    console.log(itemsGrouped)
 
-  // const updateXScale = (): void => {
-  //   const extentX = getXExtent()
-
-  //   xScale.value = d3
-  //     .scaleTime()
-  //     .domain(extentX)
-  //     .range([0, props.bucketAmount])
-  // }
-
-  // const updateYScale = (): void => {
-  //   yScale.value = d3
-  //     .scaleBand()
-  //     .domain([0, props.bucketSize])
-  //     .range([0, 1])
-  // }
-
-
-  // onMounted(() => {
-  //   const svg = d3.select(`#${id}`)
-
-  //   xAxisGroup = svg.select('.heatmap__x-axis-group')
-  //   yAxisGroup = svg.select('.heatmap__y-axis-group')
+    updateScales()
+  })
 
 
-  //   groupItems()
-
-
-  //   updateScales()
-  // })
-
-
-  // watch(() => props.chartPadding, (val) => {
-  //   baseChart.padding = { ...baseChart.padding, ...val }
-  // })
-  // watch(() => props.items, () => updateScales())
+  watch(() => props.chartPadding, (val) => {
+    baseChart.padding = { ...baseChart.padding, ...val }
+  })
 </script>
 
 <style lang="scss">
 .heatmap {
+  box-sizing: border-box;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+
+.heatmap__bucket-container {
   --columns: v-bind(bucketAmount);
   display: grid;
   grid-template-columns: repeat(var(--columns), 1fr);
@@ -282,28 +259,9 @@
   border-radius: 3px;
 }
 
-// .heatmap__svg {
-//   height: 100%;
-//   width: 100%;
-// }
-
-// .heatmap__x-axis-group,
-// .heatmap__y-axis-group {
-//   user-select: none;
-// }
-
-// .heatmap__heatmap-group {
-//   position: absolute;
-//   top: 0;
-//   left:0;
-//   width: 100%;
-// }
-
-// .heatmap__bucket {
-//     position: absolute;
-//   transform: translateX(50%) scaleX(-1);
-//   // border-radius: 50%;
-//   background-color: rgba(0, 0, 0, 0.5);
-//   z-index: 2;
-// }
+.heatmap__svg {
+  margin-top: 5px;
+  height: 40px;
+  width: 100%;
+}
 </style>

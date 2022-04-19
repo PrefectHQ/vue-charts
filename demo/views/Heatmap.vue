@@ -1,10 +1,10 @@
 <template>
-  <Heatmap :items="items" />
+  <Heatmap class="heatmap" :items="items" />
 </template>
 
 <script lang="ts" setup>
-  import Heatmap from '../../src/Heatmap.vue'
-  import { HeatmapItem } from '../../src/types.vue'
+  import Heatmap from '../../src/components/Heatmap.vue'
+  import { HeatmapItem } from '../../src/types'
 
   const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7))
   const now = new Date()
@@ -27,5 +27,8 @@
 </script>
 
 <style lang="scss" scoped>
-
+.heatmap {
+height: min-content;
+padding: 20px;
+}
 </style>
