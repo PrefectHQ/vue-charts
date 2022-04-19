@@ -99,8 +99,8 @@
 
 <script lang="ts" setup>
   import { ref, watch } from 'vue'
-  import Timeline from '../../src/Timeline.vue'
   import { generateRandomTimelineData, generateInitialTimelineData, updateTimelineData, TimelineData } from '../data'
+  import Timeline from '@/components/Timeline.vue'
 
   let liveInterval: ReturnType<typeof setInterval> | undefined
 

@@ -113,8 +113,8 @@
 
 <script lang="ts" setup>
   import { computed, ref } from 'vue'
-  import DivergingBarChart from '../../src/DivergingBarChart.vue'
   import { generateSentimentData } from '../data'
+  import DivergingBarChart from '@/components/DivergingBarChart.vue'
 
   const start = ref(new Date())
   const tab = ref('chart')

@@ -5,8 +5,8 @@
 </template>
 
 <script lang="ts" setup>
-  import ScatterPlot from '../../src/ScatterPlot.vue'
   import { ScatterPlotItem } from '../../src/types'
+  import ScatterPlot from '@/components/ScatterPlot.vue'
 
   const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7))
   const now = new Date()

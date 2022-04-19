@@ -68,8 +68,8 @@
 
 <script lang="ts" setup>
   import { computed, ref } from 'vue'
-  import BarChart from '../../src/BarChart.vue'
   import { generateBarChartData } from '../data'
+  import BarChart from '@/components/BarChart.vue'
 
   const start = ref(new Date())
   const tab = ref('chart')
