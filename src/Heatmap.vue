@@ -7,7 +7,7 @@
       </svg>
     -->
 
-    <template v-for="(group, key) in grouped" :key="key">
+    <template v-for="(group, key) in itemsGrouped" :key="key">
       <div class="heatmap__bucket" :style="calculateOpacity(group)">
         <!-- {{ group.items.length }} -->
       </div>
@@ -24,12 +24,9 @@
 
 <script setup lang="ts">
   import * as d3 from 'd3'
-  import { ref, computed, onMounted, watch, CSSProperties, withDefaults } from 'vue'
-  import { useBaseChart } from './Base'
-  import HeatmapGroup from './HeatmapGroup.vue'
-  import { GroupSelection, HeatmapItem, ScatterPlotItem, TransitionSelection } from './types'
+  import { ref, computed, onMounted, CSSProperties, withDefaults } from 'vue'
+  import { HeatmapItem, ScatterPlotItem } from './types'
   import { extentUndefined } from './utils/extent'
-  import { formatLabel } from './utils/formatLabel'
 
   const props = withDefaults(defineProps<{
     items: HeatmapItem[],
@@ -37,6 +34,7 @@
     endDate?: Date | null,
     bucketAmount?: number,
     bucketOpacityRange?: number,
+    // do we need this?
     chartPadding?: {
       top?: number,
       bottom?: number,
@@ -72,28 +70,27 @@
   // let yAxisGroup: GroupSelection | undefined
 
   const items = computed(() => props.items)
-  let groupedData: any
 
-  const groups = computed(() => {
+  const itemGroups = computed(() => {
     const [start, end] = extent.value
-    let _groups = []
+    let groups = []
 
     let currentDate = start.getTime()
 
     while (currentDate < end.getTime()) {
       let nextDate = currentDate + bucketInterval.value
-      _groups.push({ start: currentDate, end: nextDate })
+      groups.push({ start: currentDate, end: nextDate })
       currentDate = nextDate
     }
 
-    return _groups
+    return groups
   })
 
-  const grouped = computed<Record<number, HeatMapItemGroup>>(() => {
-    const itemGroups = {}
+  const itemsGrouped = computed<Record<number, HeatMapItemGroup>>(() => {
+    const grouped = {} as Record<number, HeatMapItemGroup>
 
-    groups.value.forEach(group => {
-      itemGroups[group.start] = {
+    itemGroups.value.forEach(group => {
+      grouped[group.start] = {
         ...group,
         items: [],
       }
@@ -101,13 +98,14 @@
 
     props.items.forEach(item => {
       const ms = item.date.getTime()
-      const group = groups.value.find(group => group.start <= ms && group.end > ms)
+      const group = itemGroups.value.find(group => group.start <= ms && group.end > ms)
 
-      itemGroups[group.start].items.push(item)
+      if (group !== undefined) {
+        grouped[group.start].items.push(item)
+      }
     })
 
-
-    return itemGroups
+    return grouped
   })
 
 
@@ -121,7 +119,7 @@
 
     while (currentMin < max) {
       let nextMin = currentMin + opacityGroupInterval
-      const opacity = opacityInterval * (groups.length + 1)
+      const opacity: number = opacityInterval * (groups.length + 1)
       groups.push({ min: currentMin, max: nextMin, opacity })
       currentMin = nextMin
     }
@@ -129,15 +127,17 @@
     return groups
   })
 
-  const calculateOpacity = (group: HeatMapItemGroup): CSSProperties => {
-    if (group.items.length == 0) {
-      return { opacity: 0 }
+  const calculateOpacity = (itemGroup: HeatMapItemGroup): CSSProperties => {
+    let opacity = 0
+    const opacityGroup = opacityGroups.value.find(group => group.min <= itemGroup.items.length && group.max > itemGroup.items.length)
+
+    if (opacityGroup) {
+      // eslint-disable-next-line prefer-destructuring
+      opacity = opacityGroup.opacity
     }
 
-    const opacityGroup = opacityGroups.value.find(g => g.min <= group.items.length && g.max > group.items.length)
-
     return {
-      opacity: opacityGroup.opacity,
+      opacity,
     }
 
   }
@@ -155,7 +155,7 @@
   // const yAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
   //   .call(d3.axisLeft(yScale.value))
 
-  const xAccessor = (item: ScatterPlotItem): Date => item.date
+  const xAccessor = (item: HeatmapItem): Date => item.date
 
 
   // make this a dateExtent utility
@@ -182,17 +182,11 @@
 
 
   const groupedMaxLength = computed<number>(() => {
-    const groupsArray = Object.values(grouped.value)
+    const groupsArray = Object.values(itemsGrouped.value)
 
     const maxLength = Math.max(...groupsArray.map(item => item.items.length))
 
     return maxLength
-  })
-
-  onMounted(() => {
-    console.log(groupedMaxLength.value)
-    console.log(opacityGroups.value)
-    console.log(calculateOpacity)
   })
 
   const bucketInterval = computed(() => {
@@ -203,26 +197,6 @@
 
     return Math.ceil(bucketIntervalInMs)
   })
-
-  // const groupItems = () => {
-  //   const [start, end] = getXExtent()
-
-  //   let groups = []
-
-  //   let currentDate = start
-  //   while (currentDate < end) {
-  //     let nextDate = new Date(currentDate.getTime() + bucketInterval.value)
-  //     groups.push({ label: currentDate, groups: [] })
-  //     // items.value.map(d => {
-  //     //   if (currentDate <= d.x || nextDate > d.x) {
-  //     //     console.log(d)
-  //     //   }
-  //     // })
-  //     currentDate = nextDate
-  //   }
-
-
-  // }
 
 
   // const updateScales = (): void => {
