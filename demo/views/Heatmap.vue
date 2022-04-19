@@ -8,7 +8,7 @@
 
   const oneWeekAgo = new Date(new Date().setDate(new Date().getDate() - 7))
   const now = new Date()
-  const items: HeatmapItem[] = new Array(100).fill(null).map(getHeatmapItem)
+  const items: HeatmapItem[] = new Array(50).fill(null).map(getHeatmapItem)
 
   function getHeatmapItem(): HeatmapItem {
     return {

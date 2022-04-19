@@ -17,7 +17,7 @@
 
 <script setup lang="ts">
   import * as d3 from 'd3'
-  import { ref, computed, onMounted, CSSProperties, withDefaults, watch } from 'vue'
+  import { ref, computed, onMounted, CSSProperties, withDefaults } from 'vue'
   import { GroupSelection, HeatmapItem, TransitionSelection } from '../types'
   import { extentUndefined } from '../utilities/extent'
   import { formatLabel } from '../utilities/formatLabel'
@@ -127,9 +127,16 @@
       opacity = opacityGroup.opacity
     }
 
-    return {
+    const bucket = opacityGroup ? {
+      backgroundColor: '#2ac769', // replace with state color
       opacity,
+    }: {
+      backgroundColor: '#ebedf0',
+      border: 'rgba(27, 31, 35, 0.06)',
+      opacity: 1,
     }
+
+    return bucket
 
   }
 
@@ -237,13 +244,11 @@
 }
 
 .heatmap__bucket {
-  background-color: blue;
   aspect-ratio: 1/1;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
-  border: 1px solid #ccc;
   border-radius: 3px;
 }
 
