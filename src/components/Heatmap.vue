@@ -29,21 +29,11 @@
     endDate?: Date | null,
     bucketAmount?: number,
     bucketOpacityRange?: number,
-    // do we need this?
-    chartPadding?: {
-      top?: number,
-      bottom?: number,
-      left?: number,
-      right?: number,
-    },
   }>(), {
     startDate: null,
     endDate: null,
     bucketAmount: 20,
     bucketOpacityRange: 4,
-    chartPadding: () => {
-      return { top: 0, left: 0, bottom: 0, right: 20 }
-    },
   })
 
   type HeatMapItemGroup = {
@@ -66,7 +56,7 @@
   const handleResize = (): void => {
     updateScales()
   }
-  const baseChart = useBaseChart(container, { onResize: handleResize, padding: props.chartPadding })
+  const baseChart = useBaseChart(container, { onResize: handleResize })
   const { id } = baseChart
 
 
@@ -184,17 +174,20 @@
 
   const ticks = computed(() => {
     if (!props.items.length) {
-      return 5
+      return 4
     }
-    const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
-    return Math.max(ticks, 1)
+    const [start, end] = extent.value
+
+    const intervalInMs = end.getTime() - start.getTime()
+    const days = intervalInMs / (60*60*24*1000)
+
+    const ticks = Math.floor(days * (baseChart.width.value / (days * 100)))
+    return Math.max(ticks, 2)
   })
 
   const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
     .call(d3.axisBottom(xScale.value)
-      .tickPadding(10)
-      .tickSizeInner(5)
-      .tickSizeOuter(0)
+      .tickSizeInner(0)
       .ticks(ticks.value)
       .tickFormat(formatLabel),
     )
@@ -203,7 +196,7 @@
     xScale.value = d3
       .scaleTime()
       .domain(extent.value)
-      .range([baseChart.padding.left, baseChart.width.value])
+      .range([0, baseChart.width.value])
 
     if (xAxisGroup) {
       xAxisGroup.call(xAxis)
@@ -221,11 +214,6 @@
     console.log(itemsGrouped)
 
     updateScales()
-  })
-
-
-  watch(() => props.chartPadding, (val) => {
-    baseChart.padding = { ...baseChart.padding, ...val }
   })
 </script>
 
@@ -260,7 +248,6 @@
 }
 
 .heatmap__svg {
-  margin-top: 5px;
   height: 40px;
   width: 100%;
 }
