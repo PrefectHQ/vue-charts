@@ -22,6 +22,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('../views/ScatterPlot.vue'),
   },
   {
+    path: '/heatmap',
+    name: 'Heat Map',
+    component: () => import('../views/Heatmap.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart',
   },

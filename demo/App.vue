@@ -13,6 +13,9 @@
       <router-link to="/scatter-plot">
         Scatter Plot
       </router-link>
+      <router-link to="/heatmap">
+        Heatmap
+      </router-link>
     </nav>
     <main class="app__main">
       <router-view />
