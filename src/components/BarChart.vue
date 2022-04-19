@@ -34,7 +34,7 @@
   import { CSSProperties } from '@vue/runtime-dom'
   import * as d3 from 'd3'
   import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch } from 'vue'
-  import { useBaseChart } from '@/Base'
+  import { useBaseChart } from './Base'
   import { BarChartItem } from '@/types'
 
   const slots = useSlots()

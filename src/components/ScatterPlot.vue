@@ -22,9 +22,9 @@
   import { NumberValue } from 'd3'
   import { ref, computed, onMounted, watch, CSSProperties, withDefaults } from 'vue'
   import { useBaseChart } from './Base'
-  import { GroupSelection, TransitionSelection, ScatterPlotItem } from './types'
-  import { extentUndefined } from './utils/extent'
-  import { formatLabel } from './utils/formatLabel'
+  import { GroupSelection, TransitionSelection, ScatterPlotItem } from '@/types'
+  import { extentUndefined } from '@/utilities/extent'
+  import { formatLabel } from '@/utilities/formatLabel'
 
   const props = withDefaults(defineProps<{
     items: ScatterPlotItem[],

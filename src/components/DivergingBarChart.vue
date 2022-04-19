@@ -46,8 +46,8 @@
   import * as d3 from 'd3'
   import { computed, ref, onMounted, useSlots, watchEffect, StyleValue } from 'vue'
   import { useBaseChart } from './Base'
-  import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from './types'
-  import { formatLabel } from '@/utils/formatLabel'
+  import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from '@/types'
+  import { formatLabel } from '@/utilities/formatLabel'
 
   const slots = useSlots()
 
