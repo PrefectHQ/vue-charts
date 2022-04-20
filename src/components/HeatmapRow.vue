@@ -16,7 +16,6 @@
   const props = defineProps<{
     items: any[],
     presets: HeatmapPresets,
-
   }>()
 
   type HeatmapPresets = {

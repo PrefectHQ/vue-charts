@@ -46,6 +46,12 @@
   padding: 20px;
 }
 
+.controls {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+}
+
 .test-item {
   background-color: blue;
 }
