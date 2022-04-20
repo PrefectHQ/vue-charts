@@ -1,13 +1,15 @@
 <template>
   <div class="controls">
-    <span>BucketAmount</span>
+    <span>Buckets</span>
     <input v-model="bucketAmount" type="number">
+    <span>Opacity Range</span>
+    <input v-model="bucketOpacityRange" type="number">
     <input v-model="color" type="color">
     <button type="button" @click="add">
       Add Item
     </button>
   </div>
-  <Heatmap class="heatmap" v-bind="{ items, bucketAmount }" />
+  <Heatmap class="heatmap" v-bind="{ items, bucketAmount, bucketOpacityRange }" />
 </template>
 
 <script lang="ts" setup>
@@ -19,6 +21,7 @@
   const now = new Date()
   const items: Ref<HeatmapItem[]> = ref(new Array(50).fill(null).map(getHeatmapItem))
   const bucketAmount = ref(30)
+  const bucketOpacityRange = ref(4)
   const color = ref('#000000')
 
   function getHeatmapItem(): HeatmapItem {
