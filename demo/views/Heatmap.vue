@@ -45,7 +45,7 @@
 <style lang="scss">
 .heatmap {
   height: min-content;
-  padding: 20px;
+  padding: 8px;
 }
 
 .controls {
