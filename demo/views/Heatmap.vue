@@ -2,6 +2,7 @@
   <div class="controls">
     <span>BucketAmount</span>
     <input v-model="bucketAmount" type="number">
+    <input v-model="color" type="color">
     <button type="button" @click="add">
       Add Item
     </button>
@@ -18,6 +19,7 @@
   const now = new Date()
   const items: Ref<HeatmapItem[]> = ref(new Array(50).fill(null).map(getHeatmapItem))
   const bucketAmount = ref(30)
+  const color = ref('#000000')
 
   function getHeatmapItem(): HeatmapItem {
     return {
@@ -53,6 +55,6 @@
 }
 
 .test-item {
-  background-color: blue;
+  background-color: v-bind(color);
 }
 </style>
