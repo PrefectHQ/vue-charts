@@ -31,7 +31,6 @@
     bucketOpacityRange: 4,
   })
 
-
   const container = ref<HTMLElement>()
   const xScale = ref(d3.scaleTime())
   let xAxisGroup: GroupSelection | undefined
@@ -75,11 +74,11 @@
     return extent
   })
 
-  const presets = {
+  const presets = computed(() => ({
     extent: extent.value,
     bucketAmount: props.bucketAmount,
     bucketOpacityRange: props.bucketOpacityRange,
-  }
+  }))
 
   const ticks = computed(() => {
     if (!props.items.length) {
