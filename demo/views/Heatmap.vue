@@ -25,7 +25,7 @@
     return {
       id: getRandomString(),
       date: getRandomDate(oneWeekAgo, now),
-      itemClass: 'test-item',
+      group: 'test-item',
     }
   }
 
@@ -54,7 +54,7 @@
   padding: 8px;
 }
 
-.test-item {
+.heatmap-row__bucket--test-item {
   background-color: v-bind(color);
 }
 </style>

@@ -1,20 +1,20 @@
 <template>
   <div class="heatmap-row__bucket-container">
-    <template v-for="(group, key) in itemsGrouped" :key="key">
-      <div class="heatmap-row__bucket" :style="calculateOpacity(group)" :class="classItem">
-        {{ group.items.length }}
+    <template v-for="(itemGroup, key) in itemsGrouped" :key="key">
+      <div class="heatmap-row__bucket" :style="calculateOpacity(itemGroup)" :class="groupClass">
+        {{ itemGroup.items.length }}
       </div>
     </template>
   </div>
 </template>
 
 <script setup lang="ts">
-  import * as d3 from 'd3'
   import { computed, CSSProperties } from 'vue'
   import { HeatmapItem } from '../types'
 
   const props = defineProps<{
-    items: any[],
+    items: HeatmapItem[],
+    group?: string,
     presets: HeatmapPresets,
   }>()
 
@@ -36,8 +36,8 @@
     opacity: number,
   }
 
-  const items = computed(() => props.items[1])
-  const classItem = computed(() => props.items[0])
+  const items = computed(() => props.items)
+  const groupClass = computed(() => `heatmap-row__bucket--${props.group}`)
 
   const bucketInterval = computed(() => {
     const [start, end] = props.presets.extent
@@ -154,5 +154,6 @@
   justify-content: center;
   color: #fff;
   border-radius: 3px;
+  background-color: #000;
 }
 </style>

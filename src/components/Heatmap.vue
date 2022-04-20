@@ -1,7 +1,7 @@
 <template>
   <div ref="container" class="heatmap">
-    <template v-for="(group, key) in stateGroups" :key="key">
-      <HeatmapRow :items="group" :presets="presets" />
+    <template v-for="([group, groupItems], key) in itemGroups" :key="key">
+      <HeatmapRow :items="groupItems" v-bind="{ group, presets }" />
     </template>
     <svg :id="id" class="heatmap__svg">
       <g class="heatmap__x-axis-group" />
@@ -46,8 +46,8 @@
   const items = computed(() => props.items)
 
 
-  const stateGroups = computed(() => {
-    return d3.group(items.value, item => item.itemClass)
+  const itemGroups = computed(() => {
+    return d3.group(items.value, item => item.group)
   })
 
   const xAccessor = (item: HeatmapItem): Date => item.date
