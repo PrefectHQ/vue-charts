@@ -65,7 +65,7 @@
   })
 
   const itemsGrouped = computed<Record<number, HeatMapItemGroup>>(() => {
-    const grouped = {} as Record<number, HeatMapItemGroup>
+    const grouped: Record<number, HeatMapItemGroup> = {}
 
     itemGroups.value.forEach(group => {
       grouped[group.start] = {
