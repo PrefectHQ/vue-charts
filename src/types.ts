@@ -47,4 +47,5 @@ export type ChartProps = {
 export type HeatmapItem = {
   id: string,
   date: Date,
+  itemClass?: string,
 }
