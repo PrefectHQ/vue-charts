@@ -1,14 +1,16 @@
 <template>
-  <div ref="container" class="heatmap">
-    <div class="heatmap__groups">
-      <template v-for="([itemGroup], key) in itemGroups" :key="key">
-        <div class="heatmap__group">
-          <slot name="group" :group="itemGroup">
-            {{ itemGroup }}
-          </slot>
-        </div>
-      </template>
-    </div>
+  <div ref="container" class="heatmap" :class="classes">
+    <template v-if="showGroups">
+      <div class="heatmap__groups">
+        <template v-for="([itemGroup], key) in itemGroups" :key="key">
+          <div class="heatmap__group">
+            <slot name="group" :group="itemGroup">
+              {{ itemGroup }}
+            </slot>
+          </div>
+        </template>
+      </div>
+    </template>
     <div class="heatmap__rows">
       <template v-for="([itemGroup, groupItems], key) in itemGroups" :key="key">
         <HeatmapRow :items="groupItems" :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }" />
@@ -58,6 +60,16 @@
   const itemGroups = computed(() => {
     return group(items.value, item => item.group)
   })
+
+  const showGroups = computed(() => {
+    const keys = Array.from(itemGroups.value.keys())
+
+    return keys.length > 1 || keys[0] !== undefined
+  })
+
+  const classes = computed(() => ({
+    'heatmap--with-groups': showGroups.value,
+  }))
 
   const extent = computed((): [Date, Date] => {
     const { startDate, endDate } = props
@@ -129,14 +141,29 @@
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-areas: "groups rows"
-                       ".      scale";
-  grid-template-columns: min-content 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
+.heatmap--with-groups {
+  grid-template-areas: "groups rows"
+                       ".      scale";
+  grid-template-columns: min-content 1fr;
+
+  .heatmap__groups {
+    grid-area: groups;
+  }
+
+  .heatmap__rows {
+    grid-area: rows;
+  }
+
+  .heatmap__svg {
+    grid-area: scale;
+  }
+}
+
 .heatmap__groups {
-  grid-area: groups;
   white-space: nowrap;
   display: flex;
   flex-direction: column;
@@ -145,13 +172,11 @@
 }
 
 .heatmap__rows {
-  grid-area: rows;
   display: grid;
   gap: inherit;
 }
 
 .heatmap__svg {
-  grid-area: scale;
   height: 15px;
   width: 100%;
 }
