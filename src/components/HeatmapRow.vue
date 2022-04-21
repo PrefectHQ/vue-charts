@@ -45,7 +45,6 @@
     return Math.ceil(bucketIntervalInMs)
   })
 
-
   const itemGroups = computed(() => {
     const [start, end] = props.extent
     let groups = []
@@ -92,11 +91,17 @@
   })
 
   const opacityGroups = computed<OpacityGroup[]>(() => {
-    const [min, max] = [1, groupedMaxLength.value]
+    const min = 1
+    const max = groupedMaxLength.value
+
+    if (min == max) {
+      return [{ min: 1, max: 2, opacity: 1 }]
+    }
+
     const opacityGroupInterval = groupedMaxLength.value / props.bucketOpacityRange
     const opacityInterval = 1 / props.bucketOpacityRange
-    let groups = []
 
+    let groups = []
     let currentMin = min
 
     while (currentMin < max) {

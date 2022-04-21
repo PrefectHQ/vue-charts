@@ -92,16 +92,16 @@
   })
 
   const ticks = computed(() => {
-    if (!props.items.length) {
-      return 4
-    }
     const [start, end] = extent.value
-
     const intervalInMs = end.getTime() - start.getTime()
     const days = intervalInMs / (60*60*24*1000)
-
     const ticks = Math.floor(days * (baseChart.width.value / (days * 100)))
-    return Math.max(ticks, 2)
+
+    if (isNaN(ticks) || ticks < 2) {
+      return 2
+    }
+
+    return ticks
   })
 
   const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
@@ -132,7 +132,7 @@
     updateScales()
   })
 
-  watch(() => props.items, () => updateScales())
+  watch(() => items, updateScales, { deep: true })
 </script>
 
 <style lang="scss">
