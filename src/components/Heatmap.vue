@@ -1,7 +1,12 @@
 <template>
   <div ref="container" class="heatmap">
     <template v-for="([group, groupItems], key) in itemGroups" :key="key">
-      <HeatmapRow :items="groupItems" v-bind="{ group, presets }" />
+      <div class="heatmap__row-container">
+        <div class="d-flex justify-end align-center" :style="{ width: `${groupLabelWidth}px` }">
+          <slot name="icon" :group="group" />
+        </div>
+        <HeatmapRow :items="groupItems" v-bind="{ group, presets }" />
+      </div>
     </template>
     <svg :id="id" class="heatmap__svg">
       <g class="heatmap__x-axis-group" />
@@ -24,11 +29,13 @@
     endDate?: Date | null,
     bucketAmount?: number,
     bucketOpacityRange?: number,
+    groupLabelWidth?: number,
   }>(), {
     startDate: null,
     endDate: null,
     bucketAmount: 30,
     bucketOpacityRange: 4,
+    groupLabelWidth:30,
   })
 
   const container = ref<HTMLElement>()
@@ -44,7 +51,6 @@
 
 
   const items = computed(() => props.items)
-
 
   const itemGroups = computed(() => {
     return d3.group(items.value, item => item.group)
@@ -109,6 +115,7 @@
     if (xAxisGroup) {
       xAxisGroup.call(xAxis)
       xAxisGroup
+        .attr('transform', `translate(${props.groupLabelWidth}, 0)`)
         .attr('font-family', 'input-sans')
         .attr('font-size', '11')
       xAxisGroup.select('.domain').style('opacity', '0')
@@ -134,7 +141,13 @@
 }
 
 .heatmap__svg {
-  height: 40px;
+  height: 15px;
   width: 100%;
+}
+
+.heatmap__row-container {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 5px;
 }
 </style>

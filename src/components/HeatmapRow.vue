@@ -2,7 +2,7 @@
   <div class="heatmap-row__bucket-container">
     <template v-for="(itemGroup, key) in itemsGrouped" :key="key">
       <div class="heatmap-row__bucket" :style="calculateOpacity(itemGroup)" :class="groupClass">
-        {{ itemGroup.items.length }}
+        <!-- {{ itemGroup.items.length }} -->
       </div>
     </template>
   </div>
@@ -37,7 +37,8 @@
   }
 
   const items = computed(() => props.items)
-  const groupClass = computed(() => `heatmap-row__bucket--${props.group}`)
+  // need to replace 'scatter-plot-item--' with proper value
+  const groupClass = computed(() => `scatter-plot-item--${props.group}`)
 
   const bucketInterval = computed(() => {
     const [start, end] = props.presets.extent
@@ -130,13 +131,14 @@
     }
 
     return { opacity }
-
   }
+
+  const bucketSize = computed(() => props.presets.bucketAmount)
 </script>
 
 <style lang="scss">
 .heatmap-row__bucket-container {
-  --columns: v-bind(presets.bucketAmount);
+  --columns: v-bind(bucketSize);
   display: grid;
   grid-template-columns: repeat(var(--columns), 1fr);
   gap: 5px;
@@ -144,6 +146,7 @@
   height: 100%;
   width: 100%;
   position: relative;
+  align-items: center;
   margin-bottom: 5px;
 }
 
