@@ -3,7 +3,7 @@
     <template v-for="([group, groupItems], key) in itemGroups" :key="key">
       <div class="heatmap__row-container">
         <div class="d-flex justify-end align-center" :style="{ width: `${groupLabelWidth}px` }">
-          <slot name="icon" :group="group" />
+          <slot name="label" :group="group" />
         </div>
         <HeatmapRow :items="groupItems" v-bind="{ group, presets }" />
       </div>
