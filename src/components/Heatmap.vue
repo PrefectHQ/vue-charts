@@ -58,7 +58,13 @@
   const items = computed(() => props.items)
 
   const itemGroups = computed(() => {
-    return group(items.value, item => item.group)
+    const groups = group(items.value, item => item.group)
+
+    if (groups.size === 0) {
+      return new Map([[undefined, []]])
+    }
+
+    return groups
   })
 
   const showGroups = computed(() => {
