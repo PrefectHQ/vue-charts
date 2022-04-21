@@ -1,9 +1,11 @@
 <template>
   <div ref="container" class="heatmap">
-    <div class="heatmap__labels">
+    <div class="heatmap__groups">
       <template v-for="([itemGroup], key) in itemGroups" :key="key">
-        <div class="heatmap__label">
-          {{ itemGroup }}
+        <div class="heatmap__group">
+          <slot name="group" :group="itemGroup">
+            {{ itemGroup }}
+          </slot>
         </div>
       </template>
     </div>
@@ -127,14 +129,14 @@
   height: 100%;
   width: 100%;
   display: grid;
-  grid-template-areas: "labels rows"
+  grid-template-areas: "groups rows"
                        ".      scale";
   grid-template-columns: min-content 1fr;
   gap: 10px;
 }
 
-.heatmap__labels {
-  grid-area: labels;
+.heatmap__groups {
+  grid-area: groups;
   white-space: nowrap;
   display: flex;
   flex-direction: column;
