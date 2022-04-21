@@ -26,6 +26,7 @@
     "emperical",
     "esbuild",
     "idempotency",
+    "kebabcase",
     "pinia",
     "prefecthq",
     "scripthost",

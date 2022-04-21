@@ -1,5 +1,5 @@
 <template>
-  <div class="heatmap-row__bucket-container">
+  <div class="heatmap-row">
     <template v-for="(itemGroup, key) in itemsGrouped" :key="key">
       <div class="heatmap-row__bucket" :style="calculateOpacity(itemGroup)" :class="groupClass">
         <!-- {{ itemGroup.items.length }} -->
@@ -9,20 +9,17 @@
 </template>
 
 <script setup lang="ts">
+  import kebabcase from 'lodash.kebabcase'
   import { computed, CSSProperties } from 'vue'
   import { HeatmapItem } from '../types'
 
   const props = defineProps<{
     items: HeatmapItem[],
     group?: string,
-    presets: HeatmapPresets,
-  }>()
-
-  type HeatmapPresets = {
-    extent: Date[],
+    extent: [Date, Date],
     bucketAmount: number,
     bucketOpacityRange: number,
-  }
+  }>()
 
   type HeatMapItemGroup = {
     start: number,
@@ -37,21 +34,20 @@
   }
 
   const items = computed(() => props.items)
-  // need to replace 'scatter-plot-item--' with proper value
-  const groupClass = computed(() => `scatter-plot-item--${props.group}`)
+  const groupClass = computed(() => `heatmap-row__bucket--${kebabcase(props.group)}`)
 
   const bucketInterval = computed(() => {
-    const [start, end] = props.presets.extent
+    const [start, end] = props.extent
 
     const intervalInMs = end.getTime() - start.getTime()
-    const bucketIntervalInMs = intervalInMs / props.presets.bucketAmount
+    const bucketIntervalInMs = intervalInMs / props.bucketAmount
 
     return Math.ceil(bucketIntervalInMs)
   })
 
 
   const itemGroups = computed(() => {
-    const [start, end] = props.presets.extent
+    const [start, end] = props.extent
     let groups = []
 
     let currentDate = start.getTime()
@@ -97,8 +93,8 @@
 
   const opacityGroups = computed<OpacityGroup[]>(() => {
     const [min, max] = [1, groupedMaxLength.value]
-    const opacityGroupInterval = groupedMaxLength.value / props.presets.bucketOpacityRange
-    const opacityInterval = 1 / props.presets.bucketOpacityRange
+    const opacityGroupInterval = groupedMaxLength.value / props.bucketOpacityRange
+    const opacityInterval = 1 / props.bucketOpacityRange
     let groups = []
 
     let currentMin = min
@@ -133,21 +129,17 @@
     return { opacity }
   }
 
-  const bucketSize = computed(() => props.presets.bucketAmount)
+  const bucketSize = computed(() => props.bucketAmount)
 </script>
 
 <style lang="scss">
-.heatmap-row__bucket-container {
+.heatmap-row {
   --columns: v-bind(bucketSize);
   display: grid;
   grid-template-columns: repeat(var(--columns), 1fr);
   gap: 5px;
   box-sizing: border-box;
-  height: 100%;
-  width: 100%;
-  position: relative;
   align-items: center;
-  margin-bottom: 5px;
 }
 
 .heatmap-row__bucket {
