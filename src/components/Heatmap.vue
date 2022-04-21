@@ -17,7 +17,7 @@
       </template>
     </div>
     <div ref="container" class="heatmap__chart">
-      <svg :id="id" class="heatmap__svg">
+      <svg :id="baseChart.id" class="heatmap__svg">
         <g class="heatmap__x-axis-group" />
       </svg>
     </div>
@@ -55,8 +55,6 @@
     updateScales()
   }
   const baseChart = useBaseChart(container, { onResize: handleResize })
-  const { id } = baseChart
-
   const items = computed(() => props.items)
 
   const itemGroups = computed(() => {
@@ -128,7 +126,7 @@
   }
 
   onMounted(() => {
-    const svg = select(`#${id}`)
+    const svg = select(`#${baseChart.id}`)
     xAxisGroup = svg.select('.heatmap__x-axis-group')
 
     updateScales()
