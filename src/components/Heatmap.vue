@@ -1,5 +1,5 @@
 <template>
-  <div ref="container" class="heatmap" :class="classes">
+  <div class="heatmap" :class="classes">
     <template v-if="showGroups">
       <div class="heatmap__groups">
         <template v-for="([itemGroup], key) in itemGroups" :key="key">
@@ -16,9 +16,11 @@
         <HeatmapRow :items="groupItems" :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }" />
       </template>
     </div>
-    <svg :id="id" class="heatmap__svg">
-      <g class="heatmap__x-axis-group" />
-    </svg>
+    <div ref="container" class="heatmap__chart">
+      <svg :id="id" class="heatmap__svg">
+        <g class="heatmap__x-axis-group" />
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -147,7 +149,7 @@
 
 .heatmap--with-groups {
   grid-template-areas: "groups rows"
-                       ".      scale";
+                       ".      chart";
   grid-template-columns: min-content 1fr;
 
   .heatmap__groups {
@@ -158,8 +160,8 @@
     grid-area: rows;
   }
 
-  .heatmap__svg {
-    grid-area: scale;
+  .heatmap__chart {
+    grid-area: chart;
   }
 }
 
@@ -176,8 +178,12 @@
   gap: inherit;
 }
 
-.heatmap__svg {
+.heatmap__chart {
   height: 15px;
+}
+
+.heatmap__svg {
+  height: 100%;
   width: 100%;
 }
 </style>
