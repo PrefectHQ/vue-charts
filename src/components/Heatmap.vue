@@ -72,7 +72,7 @@
   })
 
   const showGroups = computed(() => {
-    return itemGroups.value.length > 1 || itemGroups.value[0].name !== ''
+    return itemGroups.value.length > 1 || itemGroups.value[0]?.name !== ''
   })
 
   const classes = computed(() => ({
