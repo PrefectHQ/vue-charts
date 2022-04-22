@@ -47,7 +47,12 @@ export type ChartProps = {
 export type HeatmapItem = {
   id: string,
   date: Date,
-  group?: string,
+}
+
+export type HeatmapGroup = {
+  name: string,
+  color?: string,
+  items: HeatmapItem[],
 }
 
 export type DateExtentAccessor<T> = (item: T) => T[keyof T] & Date

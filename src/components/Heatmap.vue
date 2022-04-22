@@ -2,18 +2,18 @@
   <div class="heatmap" :class="classes">
     <template v-if="showGroups">
       <div class="heatmap__groups">
-        <template v-for="([itemGroup], key) in itemGroups" :key="key">
+        <template v-for="({ name }, key) in itemGroups" :key="key">
           <div class="heatmap__group">
-            <slot name="group" :group="itemGroup">
-              {{ itemGroup }}
+            <slot name="group" :group="name">
+              {{ name }}
             </slot>
           </div>
         </template>
       </div>
     </template>
     <div class="heatmap__rows">
-      <template v-for="([itemGroup, groupItems], key) in itemGroups" :key="key">
-        <HeatmapRow :items="groupItems" :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }" />
+      <template v-for="(itemGroup, key) in itemGroups" :key="key">
+        <HeatmapRow :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }" />
       </template>
     </div>
     <div ref="container" class="heatmap__chart">
@@ -25,16 +25,17 @@
 </template>
 
 <script setup lang="ts">
-  import { select, scaleTime, group, axisBottom } from 'd3'
-  import { ref, computed, onMounted, withDefaults, watch } from 'vue'
-  import { GroupSelection, HeatmapItem, TransitionSelection } from '../types'
+  import { select, scaleTime, axisBottom } from 'd3'
+  import { ref, computed, onMounted, withDefaults, watch, useSlots } from 'vue'
+  import { GroupSelection, HeatmapGroup, HeatmapItem, TransitionSelection } from '../types'
   import { useBaseChart } from './Base'
   import HeatmapRow from './HeatmapRow.vue'
   import { getDateExtent } from '@/utilities/extent'
   import { formatLabel } from '@/utilities/formatLabel'
+  import { areHeatmapGroups } from '@/utilities/heatmap'
 
   const props = withDefaults(defineProps<{
-    items: HeatmapItem[],
+    items: HeatmapItem[] | HeatmapGroup[],
     startDate?: Date | null,
     endDate?: Date | null,
     bucketAmount?: number,
@@ -47,30 +48,31 @@
   })
 
   const container = ref<HTMLElement>()
+  const baseChart = useBaseChart(container, { onResize: (): void => updateScales() })
   const xScale = ref(scaleTime())
-  let xAxisGroup: GroupSelection | undefined
-
-  // SETUP BASE
-  const handleResize = (): void => {
-    updateScales()
-  }
-  const baseChart = useBaseChart(container, { onResize: handleResize })
+  const slots = useSlots()
   const items = computed(() => props.items)
 
-  const itemGroups = computed(() => {
-    const groups = group(items.value, item => item.group)
+  let xAxisGroup: GroupSelection | undefined
 
-    if (groups.size === 0) {
-      return new Map([[undefined, []]])
+  const itemGroups = computed<HeatmapGroup[]>(() => {
+    if (areHeatmapGroups(items.value)) {
+      return items.value
     }
 
-    return groups
+    return [
+      {
+        name: '',
+        items: items.value,
+      },
+    ]
   })
 
   const showGroups = computed(() => {
-    const keys = Array.from(itemGroups.value.keys())
+    return true
+    // const keys = Array.from(itemGroups.value.keys())
 
-    return keys.length > 1 || keys[0] !== undefined
+    // return slots.group ?? (keys.length > 1 || keys[0] !== undefined)
   })
 
   const classes = computed(() => ({
@@ -84,7 +86,8 @@
       return [startDate, endDate]
     }
 
-    let extent = getDateExtent(items.value, (item: HeatmapItem): Date => item.date)
+    const items = itemGroups.value.flatMap(group => group.items)
+    let extent = getDateExtent(items, (item: HeatmapItem): Date => item.date)
 
     if (startDate) {
       extent[0] = startDate

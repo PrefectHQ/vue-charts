@@ -11,11 +11,10 @@
 <script setup lang="ts">
   import kebabcase from 'lodash.kebabcase'
   import { computed, CSSProperties } from 'vue'
-  import { HeatmapItem } from '../types'
+  import { HeatmapGroup, HeatmapItem } from '../types'
 
   const props = defineProps<{
-    items: HeatmapItem[],
-    group?: string,
+    group: HeatmapGroup,
     extent: [Date, Date],
     bucketAmount: number,
     bucketOpacityRange: number,
@@ -33,8 +32,8 @@
     opacity: number,
   }
 
-  const items = computed(() => props.items)
-  const groupClass = computed(() => `heatmap-row__bucket--${kebabcase(props.group)}`)
+  const items = computed(() => props.group.items)
+  const groupClass = computed(() => `heatmap-row__bucket--${kebabcase(props.group.name)}`)
 
   const bucketInterval = computed(() => {
     const [start, end] = props.extent
@@ -147,6 +146,7 @@
   }
 
   const bucketSize = computed(() => props.bucketAmount)
+  const groupColor = computed(() => props.group.color ?? '#000')
 </script>
 
 <style lang="scss">
@@ -166,7 +166,7 @@
   justify-content: center;
   color: #fff;
   border-radius: 3px;
-  background-color: var(--bucket-color, #000);
+  background-color: var(--bucket-color, v-bind('groupColor'));
 }
 
 .heatmap-row__bucket--empty {
