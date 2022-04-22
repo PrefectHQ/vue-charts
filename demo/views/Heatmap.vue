@@ -37,6 +37,9 @@
         </button>
       </div>
     </template>
+    <template #bucket="{ items }">
+      {{ items.length }}
+    </template>
   </Heatmap>
 </template>
 

@@ -1,8 +1,8 @@
 <template>
-  <div class="heatmap-row">
+  <div class="heatmap-group">
     <template v-for="(itemGroup, key) in itemsGrouped" :key="key">
-      <div class="heatmap-row__bucket" :style="groupStyles(itemGroup)" :class="groupClasses(itemGroup)">
-        {{ itemGroup.items.length }}
+      <div class="heatmap-group__bucket" :style="groupStyles(itemGroup)" :class="groupClasses(itemGroup)">
+        <slot name="bucket" v-bind="itemGroup" />
       </div>
     </template>
   </div>
@@ -33,7 +33,7 @@
   }
 
   const items = computed(() => props.group.items)
-  const groupClass = computed(() => `heatmap-row__bucket--${kebabcase(props.group.name)}`)
+  const groupClass = computed(() => `heatmap-group__bucket--${kebabcase(props.group.name)}`)
 
   const bucketInterval = computed(() => {
     const [start, end] = props.extent
@@ -119,7 +119,7 @@
     return [
       groupClass.value,
       {
-        'heatmap-row__bucket--empty': itemGroup.items.length === 0,
+        'heatmap-group__bucket--empty': itemGroup.items.length === 0,
       },
     ]
   }
@@ -155,7 +155,7 @@
 </script>
 
 <style lang="scss">
-.heatmap-row {
+.heatmap-group {
   --columns: v-bind(bucketSize);
   display: grid;
   grid-template-columns: repeat(var(--columns), 1fr);
@@ -164,7 +164,7 @@
   align-items: center;
 }
 
-.heatmap-row__bucket {
+.heatmap-group__bucket {
   aspect-ratio: 1/1;
   display: flex;
   align-items: center;
@@ -174,7 +174,7 @@
   background-color: var(--bucket-color, v-bind('groupColor'));
 }
 
-.heatmap-row__bucket--empty {
+.heatmap-group__bucket--empty {
   background-color: #ebedf0;
 }
 </style>

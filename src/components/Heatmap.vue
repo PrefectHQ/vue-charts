@@ -13,7 +13,11 @@
     </template>
     <div class="heatmap__rows">
       <template v-for="(itemGroup, key) in itemGroups" :key="key">
-        <HeatmapGroupVue :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }" />
+        <HeatmapGroupVue :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }">
+          <template #bucket="scope">
+            <slot name="bucket" v-bind="scope" />
+          </template>
+        </HeatmapGroupVue>
       </template>
     </div>
     <div ref="container" class="heatmap__chart">
