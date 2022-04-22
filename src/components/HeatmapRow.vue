@@ -48,12 +48,12 @@
     const [start, end] = props.extent
 
     let groups = []
-    let currentDate = start.getTime()
+    let currentTime = start.getTime()
 
-    while (currentDate < end.getTime()) {
-      let nextDate = currentDate + bucketInterval.value
-      groups.push({ start: currentDate, end: nextDate })
-      currentDate = nextDate
+    while (currentTime < end.getTime()) {
+      const nextTime = currentTime + bucketInterval.value
+      groups.push({ start: currentTime, end: nextTime })
+      currentTime = nextTime
     }
 
     return groups
@@ -136,7 +136,7 @@
 
   const getGroupOpacity = (itemGroup: HeatMapItemGroup): number => {
     const opacityGroup = opacityGroups.value.find(group => {
-        return group.min <= itemGroup.items.length && group.max >= itemGroup.items.length
+      return group.min <= itemGroup.items.length && group.max >= itemGroup.items.length
     })
 
     if (opacityGroup === undefined) {
