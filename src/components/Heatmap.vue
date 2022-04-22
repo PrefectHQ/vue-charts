@@ -2,7 +2,7 @@
   <div class="heatmap" :class="classes">
     <template v-if="showGroups">
       <div class="heatmap__groups">
-        <template v-for="({ name }, key) in itemGroups" :key="key">
+        <template v-for="({ name }) in itemGroups" :key="name">
           <div class="heatmap__group">
             <slot name="group" :group="name">
               {{ name }}
@@ -26,7 +26,7 @@
 
 <script setup lang="ts">
   import { select, scaleTime, axisBottom } from 'd3'
-  import { ref, computed, onMounted, withDefaults, watch, useSlots } from 'vue'
+  import { ref, computed, onMounted, withDefaults, watch } from 'vue'
   import { GroupSelection, HeatmapGroup, HeatmapItem, TransitionSelection } from '../types'
   import { useBaseChart } from './Base'
   import HeatmapRow from './HeatmapRow.vue'
