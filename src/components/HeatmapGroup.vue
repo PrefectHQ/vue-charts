@@ -108,8 +108,7 @@
     while (currentMin < max) {
       let nextMin = currentMin + opacityGroupInterval
       const opacity: number = opacityInterval * (groups.length + 1)
-      const minOffset = 0.1
-      groups.push({ min: currentMin + minOffset, max: nextMin, opacity })
+      groups.push({ min: currentMin, max: nextMin, opacity })
       currentMin = nextMin
     }
 
@@ -134,11 +133,17 @@
   }
 
   const getGroupOpacity = (itemGroup: HeatMapItemGroup): number => {
-    const opacityGroup = opacityGroups.value.find(group => {
-      return group.min <= itemGroup.items.length && group.max >= itemGroup.items.length
+    const opacityGroup = opacityGroups.value.find((group, index) => {
+      const isLastGroup = index == itemGroups.value.length - 1
+
+      if (isLastGroup) {
+        return group.min <= itemGroup.items.length && group.max >= itemGroup.items.length
+      }
+
+      return group.min <= itemGroup.items.length && group.max > itemGroup.items.length
     })
 
-    if (opacityGroup === undefined) {
+    if (opacityGroup === undefined || itemGroup.items.length === 0) {
       return 1
     }
 
