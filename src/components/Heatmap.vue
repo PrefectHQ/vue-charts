@@ -2,10 +2,10 @@
   <div class="heatmap" :class="classes">
     <template v-if="showGroups">
       <div class="heatmap__groups">
-        <template v-for="({ name }) in itemGroups" :key="name">
+        <template v-for="group in itemGroups" :key="group.name">
           <div class="heatmap__group">
-            <slot name="group" :group="name">
-              {{ name }}
+            <slot name="group" :group="group">
+              {{ group.name }}
             </slot>
           </div>
         </template>

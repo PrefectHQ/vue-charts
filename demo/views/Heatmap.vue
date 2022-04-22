@@ -6,8 +6,8 @@
     <input v-model="bucketOpacityRange" type="number">
   </div>
   <div class="controls">
-    <input v-model="groupName" type="text">
-    <button type="button" @click="addGroup(groupName)">
+    <input v-model="groupName" placeholder="Group Name" type="text">
+    <button type="button" :disabled="!groupName.length" @click="addGroup(groupName)">
       Add Group
     </button>
   </div>
@@ -28,11 +28,11 @@
   <Heatmap class="heatmap" :items="groups" v-bind="{ bucketAmount, bucketOpacityRange }">
     <template #group="{ group }">
       <div class="controls">
-        <span class="group-name">{{ group }}</span>
-        <template v-if="group.length">
-          <input v-model="findGroup(group).color" type="color">
+        <span class="group-name">{{ group.name }}</span>
+        <template v-if="group.name.length">
+          <input v-model="findGroup(group.name).color" type="color">
         </template>
-        <button type="button" @click="removeGroup(group)">
+        <button type="button" @click="removeGroup(group.name)">
           X
         </button>
       </div>
@@ -51,7 +51,7 @@
   const bucketOpacityRange = ref(4)
   const groupToAddTo = ref('')
   const itemsToAdd = ref(10)
-  const groupName = ref('Group 2')
+  const groupName = ref('')
 
   const groups: HeatmapGroup[] = reactive([])
 
