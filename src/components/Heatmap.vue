@@ -50,7 +50,6 @@
   const container = ref<HTMLElement>()
   const baseChart = useBaseChart(container, { onResize: (): void => updateScales() })
   const xScale = ref(scaleTime())
-  const slots = useSlots()
   const items = computed(() => props.items)
 
   let xAxisGroup: GroupSelection | undefined
@@ -69,10 +68,7 @@
   })
 
   const showGroups = computed(() => {
-    return true
-    // const keys = Array.from(itemGroups.value.keys())
-
-    // return slots.group ?? (keys.length > 1 || keys[0] !== undefined)
+    return itemGroups.value.length > 1 || itemGroups.value[0].name !== ''
   })
 
   const classes = computed(() => ({
