@@ -13,7 +13,7 @@
     </template>
     <div class="heatmap__rows">
       <template v-for="(itemGroup, key) in itemGroups" :key="key">
-        <HeatmapRow :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }" />
+        <HeatmapGroupVue :group="itemGroup" v-bind="{ extent, bucketAmount, bucketOpacityRange }" />
       </template>
     </div>
     <div ref="container" class="heatmap__chart">
@@ -29,7 +29,7 @@
   import { ref, computed, onMounted, withDefaults, watch } from 'vue'
   import { GroupSelection, HeatmapGroup, HeatmapItem, TransitionSelection } from '../types'
   import { useBaseChart } from './Base'
-  import HeatmapRow from './HeatmapRow.vue'
+  import HeatmapGroupVue from './HeatmapGroup.vue'
   import { getDateExtent } from '@/utilities/extent'
   import { formatLabel } from '@/utilities/formatLabel'
   import { areHeatmapGroups } from '@/utilities/heatmap'
