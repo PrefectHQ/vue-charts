@@ -1,8 +1,8 @@
 <template>
   <div class="heatmap-row">
     <template v-for="(itemGroup, key) in itemsGrouped" :key="key">
-      <div class="heatmap-row__bucket" :style="calculateOpacity(itemGroup)" :class="groupClass">
-        <!-- {{ itemGroup.items.length }} -->
+      <div class="heatmap-row__bucket" :style="groupStyles(itemGroup)" :class="groupClasses(itemGroup)">
+        {{ itemGroup.items.length }}
       </div>
     </template>
   </div>
@@ -38,7 +38,6 @@
 
   const bucketInterval = computed(() => {
     const [start, end] = props.extent
-
     const intervalInMs = end.getTime() - start.getTime()
     const bucketIntervalInMs = intervalInMs / props.bucketAmount
 
@@ -47,8 +46,8 @@
 
   const itemGroups = computed(() => {
     const [start, end] = props.extent
-    let groups = []
 
+    let groups = []
     let currentDate = start.getTime()
 
     while (currentDate < end.getTime()) {
@@ -72,7 +71,15 @@
 
     items.value.forEach((item: { date: Date, id: string, itemClass?: string | undefined }) => {
       const ms = item.date.getTime()
-      const group = itemGroups.value.find(group => group.start <= ms && group.end > ms)
+      const group = itemGroups.value.find((group, index) => {
+        const isLastGroup = index == itemGroups.value.length - 1
+
+        if (isLastGroup) {
+          return group.start <= ms && group.end >= ms
+        }
+
+        return group.start <= ms && group.end > ms
+      })
 
       if (group !== undefined) {
         grouped[group.start].items.push(item)
@@ -91,13 +98,8 @@
   })
 
   const opacityGroups = computed<OpacityGroup[]>(() => {
-    const min = 1
+    const min = 0
     const max = groupedMaxLength.value
-
-    if (min == max) {
-      return [{ min: 1, max: 2, opacity: 1 }]
-    }
-
     const opacityGroupInterval = groupedMaxLength.value / props.bucketOpacityRange
     const opacityInterval = 1 / props.bucketOpacityRange
 
@@ -114,24 +116,43 @@
     return groups
   })
 
-  const calculateOpacity = (itemGroup: HeatMapItemGroup): CSSProperties => {
-    let opacity = 0
-    const opacityGroup = opacityGroups.value.find(group => group.min <= itemGroup.items.length && group.max > itemGroup.items.length)
+  function groupClasses(itemGroup: HeatMapItemGroup): (string | Record<string, boolean>)[] {
+    return [
+      groupClass.value,
+      {
+        'heatmap-row__bucket--empty': itemGroup.items.length === 0,
+      },
+    ]
+  }
 
-    if (opacityGroup) {
-      // eslint-disable-next-line prefer-destructuring
-      opacity = opacityGroup.opacity
+  const groupStyles = (itemGroup: HeatMapItemGroup): CSSProperties => {
+    const opacity = getGroupOpacity(itemGroup)
+
+    return {
+      opacity,
+    }
+  }
+
+  const getGroupOpacity = (itemGroup: HeatMapItemGroup): number => {
+    if (itemGroup.items.length == 0) {
+      return 1
     }
 
-    if (!opacityGroup) {
-      return {
-        backgroundColor: '#ebedf0',
-        border: 'rgba(27, 31, 35, 0.06)',
-        opacity: 1,
+    const opacityGroup = opacityGroups.value.find((group, index) => {
+      const isLastGroup = index == opacityGroups.value.length - 1
+
+      if (isLastGroup) {
+        return group.min <= itemGroup.items.length && group.max >= itemGroup.items.length
       }
+
+      return group.min <= itemGroup.items.length && group.max > itemGroup.items.length
+    })
+
+    if (opacityGroup === undefined) {
+      return 0
     }
 
-    return { opacity }
+    return opacityGroup.opacity
   }
 
   const bucketSize = computed(() => props.bucketAmount)
@@ -154,6 +175,10 @@
   justify-content: center;
   color: #fff;
   border-radius: 3px;
-  background-color: #000;
+  background-color: var(--bucket-color, #000);
+}
+
+.heatmap-row__bucket--empty {
+  background-color: #ebedf0;
 }
 </style>
