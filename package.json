@@ -1,6 +1,6 @@
 {
   "name": "@prefecthq/vue-charts",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "private": false,
   "keywords": [
     "vue3",
@@ -41,6 +41,6 @@
     "lodash.debounce": "4.0.8"
   },
   "peerDependencies": {
-    "vue": "3.2.33"
+    "vue": "^3.2.33"
   }
 }
