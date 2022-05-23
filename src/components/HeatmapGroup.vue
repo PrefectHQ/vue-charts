@@ -69,15 +69,15 @@
     })
 
     items.value.forEach((item: { date: Date, id: string, itemClass?: string | undefined }) => {
-      const ms = item.date.getTime()
+      const milliseconds = item.date.getTime()
       const group = itemGroups.value.find((group, index) => {
         const isLastGroup = index == itemGroups.value.length - 1
 
         if (isLastGroup) {
-          return group.start <= ms && group.end >= ms
+          return group.start <= milliseconds && group.end >= milliseconds
         }
 
-        return group.start <= ms && group.end > ms
+        return group.start <= milliseconds && group.end > milliseconds
       })
 
       if (group !== undefined) {

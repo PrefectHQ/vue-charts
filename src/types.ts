@@ -55,4 +55,4 @@ export type HeatmapGroup = {
   items: HeatmapItem[],
 }
 
-export type DateExtentAccessor<T> = (item: T) => T[keyof T] & Date
+export type DateExtentAccessor<T> = (item: T) => Date

@@ -8,13 +8,13 @@ export type TimeIntervals = {
 export type TimeIntervalRankingValue = 0 | 1 | 2 | 3 | 4
 
 // Seconds in a year
-const _y = 31536000
+export const secondsInYear = 31536000
 // Seconds in a day
-const _d = 86400
+export const secondsInDay = 86400
 // Seconds in an hour
-const _h = 3600
+export const secondsInHour = 3600
 // Seconds in a minute
-const _m = 60
+export const secondsInMinute = 60
 
 export const TimeIntervalRanking: { [K in TimeIntervalKey]: TimeIntervalRankingValue } = {
   'years': 4,
@@ -33,20 +33,20 @@ export const TimeIntervalReverseRanking: { [K in TimeIntervalRankingValue]: Time
 }
 
 const aggregateSeconds = (value: number): TimeIntervals => {
-  const years = Math.floor(value / _y)
-  const days = Math.floor(value % _y / _d)
-  const hours = Math.floor(value % _y % _d / _h)
-  const minutes = Math.floor(value % _y % _d % _h / _m)
-  const seconds = Math.ceil(value % _y % _d % _h % _m)
+  const years = Math.floor(value / secondsInYear)
+  const days = Math.floor(value % secondsInYear / secondsInDay)
+  const hours = Math.floor(value % secondsInYear % secondsInDay / secondsInHour)
+  const minutes = Math.floor(value % secondsInYear % secondsInDay % secondsInHour / secondsInMinute)
+  const seconds = Math.ceil(value % secondsInYear % secondsInDay % secondsInHour % secondsInMinute)
 
   return { years, days, hours, minutes, seconds }
 }
 
 const intervalSeconds = (value: number): TimeIntervals => {
-  const years = Math.floor(value / _y)
-  const days = Math.floor(value / _d)
-  const hours = Math.floor(value / _h)
-  const minutes = Math.floor(value / _m)
+  const years = Math.floor(value / secondsInYear)
+  const days = Math.floor(value / secondsInDay)
+  const hours = Math.floor(value / secondsInHour)
+  const minutes = Math.floor(value / secondsInMinute)
   const seconds = value
 
   return { years, days, hours, minutes, seconds }
@@ -160,8 +160,6 @@ const getMinInterval = (start: Date, end: Date, min: number = 5): TimeIntervalKe
   if (_s[_t] < min) {
     _temp = getNextLowestInterval(_t)
   }
-
-  console.log(start.toLocaleTimeString(), end.toLocaleTimeString(), _temp)
 
   return _temp
 }

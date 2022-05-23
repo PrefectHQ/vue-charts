@@ -37,6 +37,7 @@
   import { getDateExtent } from '@/utilities/extent'
   import { formatLabel } from '@/utilities/formatLabel'
   import { areHeatmapGroups } from '@/utilities/heatmap'
+  import { secondsInDay } from '@/utilities/time'
 
   const props = withDefaults(defineProps<{
     items: HeatmapItem[] | HeatmapGroup[],
@@ -103,7 +104,7 @@
   const ticks = computed(() => {
     const [start, end] = extent.value
     const intervalInMs = end.getTime() - start.getTime()
-    const days = intervalInMs / (60*60*24*1000)
+    const days = intervalInMs / (secondsInDay * 1000)
     const ticks = Math.floor(days * (baseChart.width.value / (days * 100)))
 
     if (isNaN(ticks) || ticks < 2) {
