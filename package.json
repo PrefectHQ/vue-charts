@@ -41,6 +41,6 @@
     "lodash.debounce": "4.0.8"
   },
   "peerDependencies": {
-    "vue": "3.2.33"
+    "vue": "^3.2.33"
   }
 }
