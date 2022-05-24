@@ -161,8 +161,6 @@ const getMinInterval = (start: Date, end: Date, min: number = 5): TimeIntervalKe
     _temp = getNextLowestInterval(_t)
   }
 
-  console.log(start.toLocaleTimeString(), end.toLocaleTimeString(), _temp)
-
   return _temp
 }
 
