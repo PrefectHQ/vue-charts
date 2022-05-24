@@ -65,13 +65,8 @@
   let xAxisGroup: GroupSelection | undefined
 
   const xTicks = computed(() => {
-    if (!props.items.length) {
-      return 5
-    }
-
     const tickWidth = 100
     const ticks = (baseChart.width.value - baseChart.paddingX) / tickWidth
-
 
     return Math.max(2, Math.ceil(ticks))
   })
