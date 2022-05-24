@@ -19,12 +19,12 @@
 
 <script lang="ts" setup>
   import * as d3 from 'd3'
-  import { NumberValue } from 'd3'
   import { ref, computed, onMounted, watch, CSSProperties, withDefaults } from 'vue'
   import { useBaseChart } from './Base'
   import { GroupSelection, TransitionSelection, ScatterPlotItem } from '@/types'
   import { extentUndefined } from '@/utilities/extent'
   import { formatLabel } from '@/utilities/formatLabel'
+  import { formatTime } from '@/utilities/formatTime'
 
   const props = withDefaults(defineProps<{
     items: ScatterPlotItem[],
@@ -43,14 +43,13 @@
     endDate: null,
     dotDiameter: 14,
     chartPadding: () => {
-      return { top: 30, left: 70, bottom: 50, right: 20 }
+      return { top: 16, left: 74, bottom: 48, right: 16 }
     },
-
   })
 
   const container = ref<HTMLElement>()
   const xScale = ref(d3.scaleTime())
-  const yScale = ref(d3.scaleLog())
+  const yScale = ref(d3.scaleLinear())
 
   const items = computed(() => props.items)
 
@@ -69,8 +68,13 @@
     if (!props.items.length) {
       return 5
     }
-    const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
-    return Math.max(ticks, 1)
+
+    const tickWidth = 100
+    const ticks = (baseChart.width.value - baseChart.paddingX) / tickWidth
+
+    // const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
+
+    return Math.max(2, Math.ceil(ticks))
   })
 
   const xAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
@@ -85,26 +89,11 @@
   // yAXIS
   let yAxisGroup: GroupSelection | undefined
 
-  const formatYAxis = (value: NumberValue): string => {
-    if (typeof value !== 'number') {
-      return `${value.valueOf()}`
-    }
-
-    const formatter = d3.format('.0f')
-    const decimalFormat = d3.format('.2f')
-
-    if (value < 1) {
-      return `${decimalFormat(value)}s`
-    }
-
-    return `${formatter(value)}s`
-  }
-
   const yAxis = (groupSelection: GroupSelection): GroupSelection | TransitionSelection => groupSelection
     .call(d3.axisLeft(yScale.value)
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
-      .tickFormat(domain => formatYAxis(domain))
+      .tickFormat(formatTime)
       .tickValues(yScale.value.ticks()),
     )
 
@@ -165,23 +154,20 @@
 
     if (xAxisGroup) {
       xAxisGroup.call(xAxis)
-      xAxisGroup
-        .attr('transform', `translate(${props.dotDiameter}, ${baseChart.height.value - baseChart.padding.bottom + props.dotDiameter})`)
-        .attr('font-family', 'input-sans')
-        .attr('font-size', '11')
-      xAxisGroup.select('.domain').style('opacity', '0')
+      xAxisGroup.attr('transform', `translate(${props.dotDiameter}, ${baseChart.height.value - baseChart.padding.bottom + props.dotDiameter})`)
 
+      xAxisGroup.selectAll('.tick text').attr('class', 'scatter-plot__tick-label scatter-plot__tick-label--x')
+      xAxisGroup.select('.domain').remove()
     }
 
     if (yAxisGroup) {
       yAxisGroup.call(yAxis)
       yAxisGroup
         .attr('transform', `translate(${baseChart.padding.left}, ${baseChart.padding.top})`)
-        .attr('font-family', 'input-sans')
-        .attr('font-size', '11')
 
-      yAxisGroup.selectAll('.tick line').style('stroke', '#cacccf')
-      yAxisGroup.select('.domain').style('opacity', 0)
+      yAxisGroup.selectAll('.tick text').attr('class', 'scatter-plot__tick-label scatter-plot__tick-label--y')
+      yAxisGroup.selectAll('.tick line').attr('class', 'scatter-plot__tick-line')
+      yAxisGroup.select('.domain').remove()
     }
   }
 
@@ -198,22 +184,21 @@
     let extentY = d3.extent(items.value, yAccessor)
 
     if (extentUndefined(extentY)) {
-      extentY = [0.1, 20]
+      extentY = [0, 20]
     }
 
-    extentY[0] = extentY[0] * 0.95
-    extentY[1] = extentY[1] * 1.05
+    extentY[0] = 0
+    extentY[1] = extentY[1] * 1.1
 
     if (extentY.every(extent => extent === 0)) {
-      extentY = [0.1, 20]
+      extentY = [0, 20]
     }
 
     yScale.value = d3
-      .scaleLog()
+      .scaleLinear()
       .domain(extentY)
       .range([baseChart.height.value - baseChart.paddingY, 0])
       .clamp(true)
-      .base(2)
   }
 
   onMounted(() => {
@@ -287,5 +272,14 @@
   border-radius: 50%;
   background-color: rgba(0, 0, 0, 0.5);
   z-index: 2;
+}
+
+.scatter-plot__tick-line {
+  stroke: #cacccf
+}
+
+.scatter-plot__tick-label {
+  color: rgb(107 114 128);
+  font-size: 12px;
 }
 </style>
