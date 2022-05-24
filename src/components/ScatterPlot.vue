@@ -72,7 +72,6 @@
     const tickWidth = 100
     const ticks = (baseChart.width.value - baseChart.paddingX) / tickWidth
 
-    // const ticks = Math.floor(props.items.length * ((baseChart.width.value - baseChart.paddingX) / (props.items.length * 150)))
 
     return Math.max(2, Math.ceil(ticks))
   })
