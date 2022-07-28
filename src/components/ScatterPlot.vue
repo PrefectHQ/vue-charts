@@ -88,7 +88,7 @@
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
       .tickFormat(formatTime)
-      .tickValues(yScale.value.ticks()),
+      .tickValues(getYTicks()),
     )
 
   const xAccessor = (item: ScatterPlotItem): Date => item.x
@@ -161,7 +161,7 @@
 
       yAxisGroup.selectAll('.tick text').attr('class', 'scatter-plot__tick-label scatter-plot__tick-label--y')
       yAxisGroup.selectAll('.tick line').attr('class', 'scatter-plot__tick-line')
-      yAxisGroup.select('.domain').remove()
+      // yAxisGroup.select('.domain').remove()
     }
   }
 
@@ -175,24 +175,37 @@
   }
 
   const updateYScale = (): void => {
-    let extentY = d3.extent(items.value, yAccessor)
-
-    if (extentUndefined(extentY)) {
-      extentY = [0, 20]
-    }
-
-    extentY[0] = 0
-    extentY[1] = extentY[1] * 1.1
-
-    if (extentY.every(extent => extent === 0)) {
-      extentY = [0, 20]
-    }
-
     yScale.value = d3
       .scaleLinear()
-      .domain(extentY)
+      .domain(getExtent())
       .range([baseChart.height.value - baseChart.paddingY, 0])
-      .clamp(true)
+  }
+
+  const getYTicks = (): number[] => {
+    const [bottom, top] = getExtent()
+    const interval = top / 4
+    const ticks = [bottom]
+
+    for (let next = interval; next <= top; next += interval) {
+      ticks.push(next)
+    }
+    console.log(ticks)
+    return ticks
+  }
+
+  const getExtent = (): [number, number] => {
+    const bottom = 0
+    let [, top = 0] = d3.extent(items.value, yAccessor)
+
+    top = Math.max(top, 20)
+
+    while (top % 4 > 0) {
+      top++
+    }
+
+    console.log(top, bottom)
+
+    return [bottom, top]
   }
 
   onMounted(() => {
