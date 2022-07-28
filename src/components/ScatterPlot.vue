@@ -161,7 +161,7 @@
 
       yAxisGroup.selectAll('.tick text').attr('class', 'scatter-plot__tick-label scatter-plot__tick-label--y')
       yAxisGroup.selectAll('.tick line').attr('class', 'scatter-plot__tick-line')
-      // yAxisGroup.select('.domain').remove()
+      yAxisGroup.select('.domain').remove()
     }
   }
 
@@ -197,7 +197,7 @@
     const bottom = 0
     let [, top = 0] = d3.extent(items.value, yAccessor)
 
-    top = Math.max(top, 20)
+    top = Math.max(top, 2)
 
     while (top % 4 > 0) {
       top++
