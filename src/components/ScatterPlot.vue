@@ -28,6 +28,7 @@
 
   const props = withDefaults(defineProps<{
     items: ScatterPlotItem[],
+    yTicks?: number,
     startDate?: Date | null,
     endDate?: Date | null,
     showNowLine?: boolean,
@@ -39,6 +40,7 @@
       right?: number,
     },
   }>(), {
+    yTicks: 5,
     startDate: null,
     endDate: null,
     dotDiameter: 14,
@@ -187,9 +189,8 @@
   }
 
   const getYTicks = (): number[] => {
-    const step = 5
     const [min, max] = yScale.value.domain()
-    const stepValue = (max - min) / (step - 1)
+    const stepValue = (max - min) / (props.yTicks - 1)
     const tickValues = d3.range(min, max + stepValue, stepValue)
     return tickValues
   }
