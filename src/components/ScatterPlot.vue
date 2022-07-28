@@ -67,7 +67,8 @@
   let xAxisGroup: GroupSelection | undefined
 
   const xTicks = computed(() => {
-    const tickWidth = 100
+    // this number is responsible for amount of ticks rendered on x axis. The bigger the number, the less ticks will be rendered.
+    const tickWidth = 150
     const ticks = (baseChart.width.value - baseChart.paddingX) / tickWidth
 
     return Math.max(2, Math.ceil(ticks))
