@@ -28,6 +28,7 @@
 
   const props = withDefaults(defineProps<{
     items: ScatterPlotItem[],
+    yTicks?: number,
     startDate?: Date | null,
     endDate?: Date | null,
     showNowLine?: boolean,
@@ -39,11 +40,12 @@
       right?: number,
     },
   }>(), {
+    yTicks: 5,
     startDate: null,
     endDate: null,
     dotDiameter: 14,
     chartPadding: () => {
-      return { top: 16, left: 74, bottom: 48, right: 16 }
+      return { top: 16, left: 40, bottom: 48, right: 0 }
     },
   })
 
@@ -65,7 +67,8 @@
   let xAxisGroup: GroupSelection | undefined
 
   const xTicks = computed(() => {
-    const tickWidth = 100
+    // this number is responsible for amount of ticks rendered on x axis. The bigger the number, the less ticks will be rendered.
+    const tickWidth = 150
     const ticks = (baseChart.width.value - baseChart.paddingX) / tickWidth
 
     return Math.max(2, Math.ceil(ticks))
@@ -88,7 +91,7 @@
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
       .tickFormat(formatTime)
-      .tickValues(yScale.value.ticks()),
+      .tickValues(getYTicks()),
     )
 
   const xAccessor = (item: ScatterPlotItem): Date => item.x
@@ -175,24 +178,23 @@
   }
 
   const updateYScale = (): void => {
-    let extentY = d3.extent(items.value, yAccessor)
+    const bottom = 0
+    let [, top = 0] = d3.extent(items.value, yAccessor)
 
-    if (extentUndefined(extentY)) {
-      extentY = [0, 20]
-    }
-
-    extentY[0] = 0
-    extentY[1] = extentY[1] * 1.1
-
-    if (extentY.every(extent => extent === 0)) {
-      extentY = [0, 20]
-    }
+    top = Math.max(top, 1)
 
     yScale.value = d3
       .scaleLinear()
-      .domain(extentY)
+      .domain([bottom, top])
       .range([baseChart.height.value - baseChart.paddingY, 0])
-      .clamp(true)
+  }
+
+  const getYTicks = (): number[] => {
+    const [min, max] = yScale.value.domain()
+    const stepValue = (max - min) / (props.yTicks - 1)
+    const tickValues = d3.range(min, max + stepValue, stepValue)
+
+    return tickValues
   }
 
   onMounted(() => {
