@@ -190,7 +190,7 @@
     const step = 5
     const min = 0
     const [, max] = yScale.value.domain()
-    const stepValue = (max-min) / (step - 1)
+    const stepValue = (max - min) / (step - 1)
     const tickValues = d3.range(min, max + stepValue, stepValue)
     return tickValues
   }
