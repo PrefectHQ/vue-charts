@@ -43,7 +43,7 @@
     endDate: null,
     dotDiameter: 14,
     chartPadding: () => {
-      return { top: 16, left: 74, bottom: 48, right: 16 }
+      return { top: 16, left: 30, bottom: 48, right: 0 }
     },
   })
 
@@ -88,7 +88,8 @@
       .tickPadding(10)
       .tickSizeInner(-(baseChart.width.value - baseChart.paddingX))
       .tickFormat(formatTime)
-      .tickValues(getYTicks()),
+      .ticks(5),
+      // .tickValues(getYTicks()),
     )
 
   const xAccessor = (item: ScatterPlotItem): Date => item.x
@@ -175,37 +176,20 @@
   }
 
   const updateYScale = (): void => {
-    yScale.value = d3
-      .scaleLinear()
-      .domain(getExtent())
-      .range([baseChart.height.value - baseChart.paddingY, 0])
-  }
-
-  const getYTicks = (): number[] => {
-    const [bottom, top] = getExtent()
-    const interval = top / 4
-    const ticks = [bottom]
-
-    for (let next = interval; next <= top; next += interval) {
-      ticks.push(next)
-    }
-    console.log(ticks)
-    return ticks
-  }
-
-  const getExtent = (): [number, number] => {
     const bottom = 0
     let [, top = 0] = d3.extent(items.value, yAccessor)
+    console.log(d3.extent(items.value, yAccessor))
 
-    top = Math.max(top, 2)
+    top = top + .5
 
-    while (top % 4 > 0) {
-      top++
-    }
+    yScale.value = d3
+      .scaleLinear()
+      .domain([bottom, top])
+      .nice()
+      .range([baseChart.height.value - baseChart.paddingY, 0])
+      .clamp(true)
 
-    console.log(top, bottom)
-
-    return [bottom, top]
+    console.log(yScale.value.ticks())
   }
 
   onMounted(() => {
