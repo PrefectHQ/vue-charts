@@ -14,7 +14,7 @@ export const formatTime = (value: AxisDomain): string => {
     return `${value.valueOf()}`
   }
 
-  const formatter = format('.0f')
+  const formatter = format('.1f')
   const decimalFormat = format('.2f')
 
   if (value === 0) {

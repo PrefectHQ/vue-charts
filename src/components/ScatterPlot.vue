@@ -178,7 +178,7 @@
     const bottom = 0
     let [, top = 0] = d3.extent(items.value, yAccessor)
 
-    top = top + .5
+    top = Math.max(top, 1)
 
     yScale.value = d3
       .scaleLinear()
