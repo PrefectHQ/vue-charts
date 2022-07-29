@@ -68,7 +68,7 @@
 
   const xTicks = computed(() => {
     // this number is responsible for amount of ticks rendered on x axis. The bigger the number, the less ticks will be rendered.
-    const tickWidth = 150
+    const tickWidth = 100
     const ticks = (baseChart.width.value - baseChart.paddingX) / tickWidth
 
     return Math.max(2, Math.ceil(ticks))
