@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 
+export type IntervalTypesShort = 'y'|'d'|'h'|'m'|'s'
 export type TimeIntervalKey = 'years' | 'days' | 'hours' | 'minutes' | 'seconds'
 export type TimeIntervals = {
   [k in TimeIntervalKey]: number
@@ -164,6 +165,44 @@ const getMinInterval = (start: Date, end: Date, min: number = 5): TimeIntervalKe
   return _temp
 }
 
+function intervalStringSeconds(seconds: number, showOnes = true): string {
+  return `${seconds === 1 && !showOnes ? '' : seconds}`
+}
+
+function intervalStringSecondsIntervalTypeShort(type: IntervalTypesShort, seconds: number, showOnes = true): string {
+  return `${intervalStringSeconds(seconds, showOnes)}${type}`
+}
+
+function secondsToApproximateString(input: number, showOnes = true): string {
+  const { years, days, hours, minutes, seconds } = aggregateSeconds(input)
+  const year = intervalStringSecondsIntervalTypeShort('y', years, showOnes)
+  const day = intervalStringSecondsIntervalTypeShort('d', days, showOnes)
+  const hour = intervalStringSecondsIntervalTypeShort('h', hours, showOnes)
+  const minute = intervalStringSecondsIntervalTypeShort('m', minutes, showOnes)
+  const second = intervalStringSecondsIntervalTypeShort('s', seconds, showOnes)
+
+  switch (true) {
+    case years > 0 && days == 0:
+      return year
+    case years > 0 && days > 0:
+      return `${year } ${ day}`
+    case days > 0 && hours == 0:
+      return day
+    case days > 0 && hours > 0:
+      return `${day } ${ hour}`
+    case hours > 0 && minutes == 0:
+      return `${hour } ${ minute}`
+    case hours > 0 && minutes > 0:
+      return `${hour } ${ minute}`
+    case minutes > 0 && seconds == 0:
+      return minute
+    case minutes > 0 && seconds > 0:
+      return `${minute } ${ second}`
+    default:
+      return second
+  }
+}
+
 export {
-  getD3IntervalMethod, getNextLowestInterval, getNextHighestInterval, getMinInterval, getLargestInterval, aggregateSeconds, getSmallestInterval, intervalSeconds
+  getD3IntervalMethod, getNextLowestInterval, getNextHighestInterval, getMinInterval, getLargestInterval, aggregateSeconds, getSmallestInterval, intervalSeconds, secondsToApproximateString
 }

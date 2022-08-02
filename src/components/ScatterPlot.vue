@@ -45,7 +45,7 @@
     endDate: null,
     dotDiameter: 14,
     chartPadding: () => {
-      return { top: 16, left: 40, bottom: 48, right: 0 }
+      return { top: 16, left: 60, bottom: 48, right: 0 }
     },
   })
 
