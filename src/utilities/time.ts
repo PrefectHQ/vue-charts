@@ -182,22 +182,14 @@ function secondsToApproximateString(input: number, showOnes = true): string {
   const second = intervalStringSecondsIntervalTypeShort('s', seconds, showOnes)
 
   switch (true) {
-    case years > 0 && days == 0:
+    case years > 0:
       return year
-    case years > 0 && days > 0:
-      return `${year } ${ day}`
-    case days > 0 && hours == 0:
+    case days > 0:
       return day
-    case days > 0 && hours > 0:
-      return `${day } ${ hour}`
-    case hours > 0 && minutes == 0:
-      return `${hour } ${ minute}`
-    case hours > 0 && minutes > 0:
-      return `${hour } ${ minute}`
-    case minutes > 0 && seconds == 0:
+    case hours > 0:
+      return hour
+    case minutes > 0:
       return minute
-    case minutes > 0 && seconds > 0:
-      return `${minute } ${ second}`
     default:
       return second
   }
