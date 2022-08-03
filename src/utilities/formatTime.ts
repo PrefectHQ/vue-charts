@@ -1,4 +1,5 @@
 import { AxisDomain, timeFormat, format } from 'd3'
+import { secondsToApproximateString } from './time'
 
 const formatMillisecond = timeFormat('.%L')
 const formatSecond = timeFormat(':%S')
@@ -14,7 +15,6 @@ export const formatTime = (value: AxisDomain): string => {
     return `${value.valueOf()}`
   }
 
-  const formatter = format('.0f')
   const decimalFormat = format('.2f')
 
   if (value === 0) {
@@ -25,7 +25,7 @@ export const formatTime = (value: AxisDomain): string => {
     return `${decimalFormat(value)}s`
   }
 
-  return `${formatter(value)}s`
+  return `${secondsToApproximateString(value)}`
 }
 
 export {
