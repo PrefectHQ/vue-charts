@@ -16,6 +16,9 @@
     "paths": {
       "@/*": [
         "src/*"
+      ],
+      "@/demo/*": [
+        "./demo/*"
       ]
     },
     "lib": [
@@ -29,6 +32,8 @@
     "**/*.ts",
     "**/*.d.ts",
     "**/*.vue",
+    "./**/postcss.config.js",
+    "./**/tailwind.config.js"
   ],
   "exclude": [
     "node_modules",

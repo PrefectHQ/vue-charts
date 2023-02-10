@@ -1,85 +1,72 @@
 <template>
   <main class="bar-chart-view">
-    <m-tabs v-model="tab">
-      <m-tab href="chart">
-        Chart
-      </m-tab>
-      <m-tab href="data">
-        Data
-      </m-tab>
-    </m-tabs>
+    <p-tabs :tabs="['chart', 'data']">
+      <template #chart>
+        <BarChart
+          :items="data.items"
+          :interval-start="data.intervalStart"
+          :interval-end="data.intervalEnd"
+          :chart-padding="{ bottom: 20 }"
+          :axis-padding="10"
+        >
+          <template #default="{ item }">
+            <p-pop-over class="bar-chart-view__bar">
+              <template #target="{ open, close }">
+                <div
+                  class="bar-chart-view__bar"
+                  :style="{ 'background-color': item.data?.color }"
+                  tabindex="0"
+                  @focusin="open"
+                  @focusout="close"
+                  @mouseenter="open"
+                  @mouseleave="close"
+                />
+              </template>
 
-    <div v-if="tab == 'chart'" class="bar-chart-view__chart">
-      <BarChart
-        :items="data.items"
-        :interval-start="data.intervalStart"
-        :interval-end="data.intervalEnd"
-        :chart-padding="{ bottom: 20 }"
-        :axis-padding="10"
-      >
-        <template #default="{ item }">
-          <m-popover class="bar-chart-view__bar" :placement="['top', 'right', 'bottom', 'left']">
-            <template #trigger="{ open, close }">
-              <div
-                class="bar-chart-view__bar"
-                :style="{ 'background-color': item.data?.color }"
-                tabindex="0"
-                @focusin="open"
-                @focusout="close"
-                @mouseenter="open"
-                @mouseleave="close"
-              />
-            </template>
+              <div class="bar-chart-view__popover">
+                <p-key-value label="Start" :value="item.intervalStart.toLocaleTimeString()" />
+                <p-key-value label="End" :value="item.intervalEnd.toLocaleTimeString()" />
+                <p-key-value label="Value" :value="item.value" />
+              </div>
+            </p-pop-over>
+          </template>
 
-            <div>
-              <strong>Start</strong>
-              : {{ item.intervalStart.toLocaleTimeString() }}
-              <br>
-              <strong>End</strong>
-              : {{ item.intervalEnd.toLocaleTimeString() }}
-              <br>
-              <strong>Value</strong>
-              : {{ item.value }}
-            </div>
-          </m-popover>
-        </template>
-
-        <template #axis>
-          <div class="bar-chart-view__axis" />
-        </template>
-      </BarChart>
-    </div>
-
-    <div v-if="tab == 'data'" class="bar-chart-view__data">
-      <m-data-table :columns="columns" :rows="data.items">
-        <template #column-color="{ row }">
-          {{ row.data?.color }}
-        </template>
-        <template #column-start="{ row }">
-          {{ row.intervalStart.toLocaleTimeString() }}
-        </template>
-        <template #column-end="{ row }">
-          {{ row.intervalEnd.toLocaleTimeString() }}
-        </template>
-      </m-data-table>
-    </div>
+          <template #axis>
+            <div class="bar-chart-view__axis" />
+          </template>
+        </BarChart>
+      </template>
+      <template #data>
+        <p-table :columns="columns" :data="data.items">
+          <template #color="{ row }">
+            {{ row.data?.color }}
+          </template>
+          <template #start="{ row }">
+            {{ row.intervalStart.toLocaleTimeString() }}
+          </template>
+          <template #end="{ row }">
+            {{ row.intervalEnd.toLocaleTimeString() }}
+          </template>
+        </p-table>
+      </template>
+    </p-tabs>
   </main>
 </template>
 
 <script lang="ts" setup>
+  import { TableColumn } from '@prefecthq/prefect-design'
   import { computed, ref } from 'vue'
   import { generateBarChartData } from '../data'
   import BarChart from '@/components/BarChart.vue'
 
   const start = ref(new Date())
-  const tab = ref('chart')
   const data = computed(() => generateBarChartData({ intervalStart: start.value, buckets: 50 }))
 
-  const columns = [
-    { label: 'Start', value: 'start' },
-    { label: 'End', value: 'end' },
-    { label: 'Color', value: 'color' },
-    { label: 'Value', value: 'value' },
+  const columns: TableColumn[] = [
+    { label: 'Start', property: 'start' },
+    { label: 'End', property: 'end' },
+    { label: 'Color', property: 'color' },
+    { label: 'Value', property: 'value' },
   ]
 </script>
 
@@ -109,5 +96,19 @@
     background-color: #ebeef7;
     width: 100%;
   }
+}
+
+.bar-chart-view__popover { @apply
+  p-3
+  grid
+  gap-1
+  bg-background
+  border
+  dark:border-background-600
+  rounded
+  max-w-xs
+  w-screen
+  shadow-md
+  text-foreground
 }
 </style>
