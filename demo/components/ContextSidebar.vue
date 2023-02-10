@@ -11,6 +11,7 @@
 
     <p-context-nav-item title="Bar Chart" to="/bar-chart" />
     <p-context-nav-item title="Diverging Bar Chart" to="/diverging-bar-chart" />
+    <p-context-nav-item title="Timeline" to="/timeline" />
 
     <template #footer>
       <div class="context-sidebar__footer">
