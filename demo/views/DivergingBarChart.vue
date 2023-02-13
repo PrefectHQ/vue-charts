@@ -1,123 +1,110 @@
 <template>
   <main class="diverging-bar-chart-view">
-    <div class="mb-2 d-flex align-center justify-start">
-      <div class="mr-2">
-        <m-select v-model="skew" :options="skewOptions" />
-        <m-slider v-model="multiplier" :min="0" :max="10" label="Skew Multiplier" />
+    <p-content class="mr-2">
+      <div class="gap-2 flex">
+        <p-label label="Skew">
+          <p-select v-model="skew" :options="skewOptions" />
+        </p-label>
+        <p-label label="Skew Multiplier">
+          <p-number-input v-model="multiplier" :min="0" :max="10" />
+        </p-label>
+        <p-label label="Median Padding">
+          <p-number-input v-model="medianPadding" :min="0" :max="128" :step="4" />
+        </p-label>
+        <p-label label="Buckets">
+          <p-number-input v-model="buckets" :min="1" :max="100" />
+        </p-label>
+        <p-label label="Keys">
+          <p-number-input v-model="keys" :min="1" :max="30" />
+        </p-label>
       </div>
 
-      <div class="mr-2">
-        <div>
-          <m-slider v-model="buckets" :min="1" :max="100" label="Buckets" />
-        </div>
-        <div>
-          <m-slider v-model="keys" :min="1" :max="30" label="Keys" />
-        </div>
+      <div class="flex gap-2">
+        <p-checkbox v-model="staticMedian" label="Static median" />
+        <p-checkbox v-model="showAxis" label="Show Axis" />
       </div>
+    </p-content>
 
-      <div class="mr-2">
-        <m-number-input v-model="medianPadding" :min="0" :max="128" :step="4">
-          Median Padding
-        </m-number-input>
-
-        <m-checkbox v-model="staticMedian">
-          Static median
-        </m-checkbox>
-      </div>
-      <m-checkbox v-model="showAxis">
-        Show Axis
-      </m-checkbox>
-    </div>
-
-    <m-tabs v-model="tab">
-      <m-tab href="chart">
-        Chart
-      </m-tab>
-      <m-tab href="data">
-        Data
-      </m-tab>
-    </m-tabs>
-
-    <div v-if="tab == 'chart'" class="diverging-bar-chart-view__chart">
-      <DivergingBarChart
-        :items="data.data"
-        :interval-start="data.intervalStart"
-        :interval-end="data.intervalEnd"
-        :interval-seconds="data.intervalSeconds"
-        :positive-sentiment-keys="data.positiveSentimentKeys"
-        :negative-sentiment-keys="data.negativeSentimentKeys"
-        :static-median="staticMedian"
-        axis-class="caption"
-        :show-axis="showAxis"
-        :chart-padding="{ middle: medianPadding, top: 48, bottom: 48 }"
-      >
-        <template #default="point">
-          <m-popover
-            v-if="point.value !== 0"
-            class="diverging-bar-chart-view__bar-container"
-            :placement="['top', 'right', 'bottom', 'left']"
-          >
-            <template #trigger="{ open, close }">
-              <div
-                class="diverging-bar-chart-view__bar-container"
-                tabindex="0"
-                @focusin="open"
-                @focusout="close"
-                @mouseenter="open"
-                @mouseleave="close"
-              >
-                <div class="diverging-bar-chart-view__bar" />
-              </div>
-            </template>
-
-            <template #header>
-              <strong>{{ point.key }}</strong>
-            </template>
-
-            <div>{{ point.value }}</div>
-          </m-popover>
-        </template>
-
-        <template #median>
-          <div class="diverging-bar-chart-view__median" />
-        </template>
-      </DivergingBarChart>
-    </div>
-
-    <div v-if="tab == 'data'" class="diverging-bar-chart-view__data">
-      <div class="my-2">
-        <h3>Positive Keys:</h3>
-        {{ data.positiveSentimentKeys }}
-        <h3>Negative Keys:</h3>
-        {{ data.negativeSentimentKeys }}
-      </div>
-
-      <m-data-table :columns="columns" :rows="data.data">
-        <template #column-start="{ row }">
-          {{ row.intervalStart.toLocaleTimeString() }}
-        </template>
-        <template #column-end="{ row }">
-          {{ row.intervalEnd.toLocaleTimeString() }}
-        </template>
-        <template
-          v-for="key in data.keys"
-          :key="key"
-          #[getColumnKey(key)]="{ row }"
+    <p-tabs :tabs="['Chart', 'Data']">
+      <template #chart>
+        <DivergingBarChart
+          class="diverging-bar-chart-view__chart"
+          :items="data.data"
+          :interval-start="data.intervalStart"
+          :interval-end="data.intervalEnd"
+          :interval-seconds="data.intervalSeconds"
+          :positive-sentiment-keys="data.positiveSentimentKeys"
+          :negative-sentiment-keys="data.negativeSentimentKeys"
+          :static-median="staticMedian"
+          axis-class="caption"
+          :show-axis="showAxis"
+          :chart-padding="{ middle: medianPadding, top: 48, bottom: 48 }"
         >
-          {{ row.data[key].toLocaleString() }}
-        </template>
-      </m-data-table>
-    </div>
+          <template #default="point">
+            <p-pop-over
+              v-if="point.value !== 0"
+              class="diverging-bar-chart-view__bar-container"
+            >
+              <template #target="{ open, close }">
+                <div
+                  class="diverging-bar-chart-view__bar-container"
+                  tabindex="0"
+                  @focusin="open"
+                  @focusout="close"
+                  @mouseenter="open"
+                  @mouseleave="close"
+                >
+                  <div class="diverging-bar-chart-view__bar" />
+                </div>
+              </template>
+
+              <div class="diverging-bar-chart-view__popover">
+                <p-key-value :label="point.key" :value="point.value" />
+              </div>
+            </p-pop-over>
+          </template>
+
+          <template #median>
+            <div class="diverging-bar-chart-view__median" />
+          </template>
+        </DivergingBarChart>
+      </template>
+
+      <template #data>
+        <div class="my-2">
+          <h3>Positive Keys:</h3>
+          {{ data.positiveSentimentKeys }}
+          <h3>Negative Keys:</h3>
+          {{ data.negativeSentimentKeys }}
+        </div>
+
+        <p-table :columns="columns" :data="data.data">
+          <template #start="{ row }">
+            {{ row.intervalStart.toLocaleTimeString() }}
+          </template>
+          <template #end="{ row }">
+            {{ row.intervalEnd.toLocaleTimeString() }}
+          </template>
+          <template
+            v-for="key in data.keys"
+            :key="key"
+            #[getColumnKey(key)]="{ row }"
+          >
+            {{ row.data[key] }}
+          </template>
+        </p-table>
+      </template>
+    </p-tabs>
   </main>
 </template>
 
 <script lang="ts" setup>
+  import { TableColumn } from '@prefecthq/prefect-design'
   import { computed, ref } from 'vue'
   import { generateSentimentData } from '../data'
   import DivergingBarChart from '@/components/DivergingBarChart.vue'
 
   const start = ref(new Date())
-  const tab = ref('chart')
 
   const skew = ref('none')
   const skewOptions = [
@@ -128,27 +115,27 @@
 
   const staticMedian = ref(false)
   const showAxis = ref(false)
-  const multiplier = ref('2')
-  const buckets = ref('10')
-  const keys = ref('8')
+  const multiplier = ref(2)
+  const buckets = ref(10)
+  const keys = ref(8)
   const medianPadding = ref(24)
 
   const data = computed(() => generateSentimentData({
     intervalStart: start.value,
-    buckets: parseInt(buckets.value),
-    keys: parseInt(keys.value),
+    buckets: buckets.value,
+    keys: keys.value,
     skew: skew.value == 'none' ? undefined : skew.value as 'positive' | 'negative',
-    skewMultiplier: parseInt(multiplier.value),
+    skewMultiplier: multiplier.value,
   }))
 
-  const getColumnKey = (key: string): string => `column-${key.replace(' ', '-').toLowerCase()}`
+  const getColumnKey = (key: string): string => `${key.replace(' ', '-').toLowerCase()}`
 
-  const columns = computed(() => {
+  const columns = computed<TableColumn[]>(() => {
     return [
-      { label: 'Start', value: 'start' },
-      { label: 'End', value: 'end' },
+      { label: 'Start', property: 'start' },
+      { label: 'End', property: 'end' },
       ...data.value.keys.map(key => {
-        return { label: key, value: key }
+        return { label: key, property: key.toLowerCase() }
       }),
     ]
   })
@@ -197,5 +184,19 @@
       }
     }
   }
+}
+
+.diverging-bar-chart-view__popover { @apply
+  p-3
+  grid
+  gap-1
+  bg-background
+  border
+  dark:border-background-600
+  rounded
+  max-w-xs
+  w-screen
+  shadow-md
+  text-foreground
 }
 </style>

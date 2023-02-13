@@ -25,10 +25,12 @@
     "datetime",
     "emperical",
     "esbuild",
+    "fontsource",
     "idempotency",
     "pinia",
     "prefecthq",
     "scripthost",
+    "tailwindcss",
     "vite",
     "vitejs"
   ],
@@ -36,4 +38,7 @@
       "node_modules": true,
       "dist": true
   },
+  "css.customData": [
+      "./.vscode/css-data.json"
+  ]
 }

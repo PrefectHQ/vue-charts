@@ -1,52 +1,77 @@
 <template>
-  <div class="app">
-    <nav class="app__nav">
-      <router-link to="/bar-chart">
-        Bar Chart
-      </router-link>
-      <router-link to="/diverging-bar-chart">
-        Diverging Bar Chart
-      </router-link>
-      <router-link to="/timeline">
-        Timeline
-      </router-link>
-      <router-link to="/scatter-plot">
-        Scatter Plot
-      </router-link>
-    </nav>
-    <main class="app__main">
-      <router-view />
-    </main>
+  <div class="max-w-full min-h-full app">
+    <template v-if="!media.lg">
+      <p-global-sidebar class="app__mobile-menu">
+        <template #upper-links>
+          <p-icon icon="PrefectGradient" class="app__prefect-icon" />
+          <span class="text-slate-200">Prefect</span>
+        </template>
+        <template #bottom-links>
+          <PIcon icon="MenuIcon" class="app__menu-icon" @click="toggle" />
+        </template>
+      </p-global-sidebar>
+    </template>
+    <ContextSidebar v-if="showMenu" class="app__sidebar" />
+    <router-view class="w-full mx-auto py-10 px-6 lg:px-8" />
   </div>
 </template>
 
-<style lang="scss">
-.app {
-  display: grid;
-  grid-template-areas:
-    "nav"
-    "main";
-  grid-template-columns: 1fr;
-  grid-template-rows: 48px 1fr;
-  min-height: 100vh;
-  width: 100vw;
+<script lang="ts" setup>
+  import { media, PGlobalSidebar, PIcon, useColorTheme } from '@prefecthq/prefect-design'
+  import { computed, watchEffect } from 'vue'
+  import { RouterView } from 'vue-router'
+  import ContextSidebar from '@/demo/components/ContextSidebar.vue'
+  import { mobileMenuOpen, toggle } from '@/demo/router/menu'
 
-  &__nav {
-    grid-area: "nav";
-    display: flex;
-    align-items: center;
-    justify-content: start;
-    padding: 0 8px;
-    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.06), 0px 1px 3px rgba(0, 0, 0, 0.1);
+  const showMenu = computed(() => media.lg || mobileMenuOpen.value)
 
-    >* {
-      margin-right: 32px;
-    }
-  }
+  watchEffect(() => document.body.classList.toggle('body-scrolling-disabled', showMenu.value && !media.lg))
 
-  &__main {
-    grid-area: "main";
-    width: inherit;
+  useColorTheme()
+</script>
+
+<style>
+.body-scrolling-disabled { @apply
+  overflow-hidden
+}
+
+.app { @apply
+  text-foreground
+  bg-background
+  dark:bg-background-400
+}
+
+.app__prefect-icon { @apply
+  w-6
+  h-6
+}
+
+.app__menu-icon { @apply
+  text-foreground
+  w-6
+  h-6
+  cursor-pointer
+}
+
+.app__router-view { @apply
+  relative
+  z-0
+}
+
+.app__router-view-fade-enter-active,
+.app__router-view-fade-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.app__router-view-fade-enter-from,
+.app__router-view-fade-leave-to {
+  opacity: 0;
+}
+
+@screen lg {
+  .app {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
   }
 }
 </style>

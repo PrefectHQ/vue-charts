@@ -1,18 +1,16 @@
 <template>
   <main class="timeline-view">
-    <div class="mb-2 d-flex align-center justify-start">
-      <m-checkbox v-model="live">
-        Live
-      </m-checkbox>
-      <m-checkbox v-model="hideAxis">
-        Hide Axis
-      </m-checkbox>
-      <m-button class="ml-4" @click="reset">
-        Reset
-      </m-button>
-      <m-button class="ml-4" @click="generateFull">
-        Generate Full Dataset
-      </m-button>
+    <p-content>
+      <div class="flex items-center gap-2">
+        <p-checkbox v-model="live" label="Live" />
+        <p-checkbox v-model="hideAxis" label="Hide Axis" />
+        <p-button size="sm" primary @click="reset">
+          Reset
+        </p-button>
+        <p-button size="sm" primary @click="generateFull">
+          Generate Full Dataset
+        </p-button>
+      </div>
 
       <div class="ml-2">
         <div>
@@ -24,76 +22,58 @@
           <strong>{{ data.end?.toLocaleString() }}</strong>
         </div>
       </div>
-    </div>
+    </p-content>
 
-    <m-tabs v-model="tab">
-      <m-tab href="chart">
-        Chart
-      </m-tab>
-      <m-tab href="data">
-        Data
-      </m-tab>
-    </m-tabs>
+    <p-tabs :tabs="['Chart', 'Data']">
+      <template #chart>
+        <div class="timeline-view__chart">
+          <Timeline
+            :items="data?.data ?? []"
+            :start="data?.start"
+            :end="data?.end"
+            :hide-axis="hideAxis"
+            axis-class="caption"
+            grid-line-class="timeline-view__grid-line"
+            :node-min-width="28"
+            :chart-padding="{ left: 28, right: 28 }"
+          >
+            <template #default="{ node }">
+              <p-pop-over class="timeline-view__node">
+                <template #target="{ open, close }">
+                  <div
+                    class="timeline-view__node"
+                    :style="{ 'background-color': node.data.color }"
+                    tabindex="0"
+                    @focusin="open"
+                    @focusout="close"
+                    @mouseenter="open"
+                    @mouseleave="close"
+                  />
+                </template>
 
-    <div v-if="tab == 'chart'" class="timeline-view__chart mt-2">
-      <Timeline
-        :items="data?.data ?? []"
-        :start="data?.start"
-        :end="data?.end"
-        :hide-axis="hideAxis"
-        axis-class="caption"
-        grid-line-class="timeline-view__grid-line"
-        :node-min-width="28"
-        :chart-padding="{ left: 28, right: 28 }"
-      >
-        <!-- axis-teleport-target="#teleport-target" -->
-
-        <template #default="{ node }">
-          <m-popover class="timeline-view__node" :placement="['top', 'bottom', 'right', 'left']">
-            <template #trigger="{ open, close }">
-              <div
-                class="timeline-view__node"
-                :style="{ 'background-color': node.data.color }"
-                tabindex="0"
-                @focusin="open"
-                @focusout="close"
-                @mouseenter="open"
-                @mouseleave="close"
-              />
+                <div class="timeline__popover">
+                  <p-key-value label="Start" :value="node.start.toLocaleTimeString()" />
+                  <p-key-value label="End" :value="node.end?.toLocaleTimeString()" />
+                </div>
+              </p-pop-over>
             </template>
-
-            <template #header>
-              <strong>{{ node.id }}</strong>
-            </template>
-
-            <div>
-              <strong>Start:</strong>
-              {{ node.start?.toLocaleTimeString() }}
-            </div>
-            <div>
-              <strong>End:</strong>
-              {{ node.end?.toLocaleTimeString() }}
-            </div>
-          </m-popover>
-        </template>
-      </Timeline>
-    </div>
-
-    <div id="teleport-target" />
-
-    <div v-if="tab == 'data'" class="timeline-view__data">
-      <m-data-table :columns="columns" :rows="data?.data ?? []">
-        <template #column-color="{ row }">
-          {{ row.data?.color }}
-        </template>
-        <template #column-start="{ row }">
-          {{ row.start.toLocaleTimeString() }}
-        </template>
-        <template #column-end="{ row }">
-          {{ row.end.toLocaleTimeString() }}
-        </template>
-      </m-data-table>
-    </div>
+          </Timeline>
+        </div>
+      </template>
+      <template #data>
+        <p-table :columns="columns" :data="data?.data ?? []">
+          <template #color="{ row }">
+            {{ row.data?.color }}
+          </template>
+          <template #start="{ row }">
+            {{ row.start.toLocaleTimeString() }}
+          </template>
+          <template #end="{ row }">
+            {{ row.end.toLocaleTimeString() }}
+          </template>
+        </p-table>
+      </template>
+    </p-tabs>
   </main>
 </template>
 
@@ -106,7 +86,6 @@
 
   const live = ref(false)
   const hideAxis = ref(false)
-  const tab = ref('chart')
   const data = ref<TimelineData>(generateInitialTimelineData())
 
   const reset = (): void => {
@@ -120,9 +99,9 @@
   }
 
   const columns = [
-    { label: 'Start', value: 'start' },
-    { label: 'End', value: 'end' },
-    { label: 'Color', value: 'color' },
+    { label: 'Start', property: 'start' },
+    { label: 'End', property: 'end' },
+    { label: 'Color', property: 'color' },
   ]
 
   const generateFull = (): void => {
@@ -163,13 +142,10 @@
 
 <style lang="scss">
 .timeline-view {
-  padding: 24px;
-  width: inherit;
 
   &__chart {
     border-radius: 8px;
     border: 2px solid #465968;
-    background-color: #f7f8fa;
     height: 400px;
     max-height: 100vh;
     min-height: 200px;
@@ -177,6 +153,9 @@
     min-width: 400px;
     overflow: auto;
     resize: both;
+
+    @apply
+    bg-background
   }
 
   &__node {
@@ -192,7 +171,17 @@
   stroke-opacity: 0.5;
 }
 
-#teleport-target {
-  max-width: 100%;
+.timeline__popover { @apply
+  p-3
+  grid
+  gap-1
+  bg-background
+  border
+  dark:border-background-600
+  rounded
+  max-w-xs
+  w-screen
+  shadow-md
+  text-foreground
 }
 </style>

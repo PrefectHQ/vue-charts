@@ -36,10 +36,14 @@
   }
 </script>
 
-<style lang="scss" scoped>
+<style>
 .container {
-  max-width: 90vw;
-  max-height: 90vh;
-  margin: 20px auto;
+  padding: 24px;
+  height: 400px;
+}
+
+.scatter-plot__dot { @apply
+  bg-background-200
+  dark:bg-background-800
 }
 </style>
