@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
       sourcemap: true,
       lib: {
         entry: resolve(__dirname, 'src/index.ts'),
-        name: 'prefect-ui-library',
+        name: 'vue-charts',
       },
       rollupOptions: {
         external: ['vue', '@prefecthq/prefect-design'],
