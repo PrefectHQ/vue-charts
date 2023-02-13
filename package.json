@@ -8,8 +8,9 @@
     "d3"
   ],
   "scripts": {
-    "serve": "vite",
+    "serve": "vite --host --mode=demo",
     "dev": "vue-tsc -w & tsc-alias -w & vite build -w",
+    "build:demo": "vite build --mode=demo",
     "build": "vue-tsc && tsc-alias && vite build",
     "lint": "eslint src && eslint demo",
     "lint:fix": "eslint src --fix && eslint demo --fix",
