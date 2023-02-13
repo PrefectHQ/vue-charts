@@ -123,7 +123,7 @@
   })
 </script>
 
-<style lang="scss">
+<style>
 .bar-chart {
   height: 100%;
   position: relative;
@@ -166,11 +166,11 @@
   transition: all 150ms;
   width: inherit;
   z-index: 1;
+}
 
-  &:hover,
-  &:focus {
-    background-color: #0035b0;
-  }
+.bar-chart__bucket:hover,
+.bar-chart__bucket:focus {
+  background-color: #0035b0;
 }
 
 .bar-chart__axis {

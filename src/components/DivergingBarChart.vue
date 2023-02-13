@@ -259,7 +259,7 @@
   })
 </script>
 
-<style lang="scss">
+<style>
 .diverging-bar-chart {
   box-sizing: border-box;
   height: 100%;
@@ -315,11 +315,11 @@
   height: inherit;
   transition: all 150ms;
   width: inherit;
+}
 
-  &:hover,
-  &:focus {
-    background-color: #0035b0;
-  }
+.diverging-bar-chart__series-bar:hover,
+.diverging-bar-chart__series-bar:focus {
+  background-color: #0035b0;
 }
 
 .diverging-bar-chart__empty {

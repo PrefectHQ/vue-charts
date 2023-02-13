@@ -388,7 +388,7 @@
   })
 </script>
 
-<style lang="scss">
+<style>
 .timeline {
   height: 100%;
   min-width: inherit;
@@ -410,12 +410,12 @@
   max-width: 100%;
   overflow: auto;
   overscroll-behavior: contain;
-
   scrollbar-width: none;
-  &::-webkit-scrollbar {
-    width: 0;
-    height: 0;
-  }
+}
+
+.timeline__nav::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 .timeline__axis-mini {
@@ -430,10 +430,8 @@
   height: 24px;
 }
 
-.timeline__axis-group {
-  line {
-    opacity: 0;
-  }
+.timeline__axis-group line {
+  opacity: 0;
 }
 
 .timeline__grid {

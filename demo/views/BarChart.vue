@@ -70,32 +70,32 @@
   ]
 </script>
 
-<style lang="scss">
+<style>
 .bar-chart-view {
   padding: 24px;
+}
 
-  &__chart {
-    background-color: #f7f8fa;
-    height: 400px;
-    max-height: 100vh;
-    min-height: 200px;
-    max-width: calc(100vw - 48px);
-    min-width: 400px;
-    overflow: auto;
-    resize: both;
-  }
+.bar-chart-view__chart {
+  background-color: #f7f8fa;
+  height: 400px;
+  max-height: 100vh;
+  min-height: 200px;
+  max-width: calc(100vw - 48px);
+  min-width: 400px;
+  overflow: auto;
+  resize: both;
+}
 
-  &__bar {
-    border-radius: 9999px;
-    height: 100%;
-    width: 100%;
-  }
+.bar-chart-view__bar {
+  border-radius: 9999px;
+  height: 100%;
+  width: 100%;
+}
 
-  &__axis {
-    height: 2px;
-    background-color: #ebeef7;
-    width: 100%;
-  }
+.bar-chart-view__axis {
+  height: 2px;
+  background-color: #ebeef7;
+  width: 100%;
 }
 
 .bar-chart-view__popover { @apply
