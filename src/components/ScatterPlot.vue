@@ -212,7 +212,7 @@
   watch(() => props.items, () => updateScales())
 </script>
 
-<style lang="scss">
+<style>
 .scatter-plot {
   box-sizing: border-box;
   height: 100%;
@@ -237,29 +237,29 @@
   user-select: none;
   pointer-events: none;
   z-index: 1;
+}
 
-  &::before {
-    content: 'Now';
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    font-family: var(--font-secondary);
-    font-size: 11px;
-    color: var(--grey-80);
-    letter-spacing: -0.09;
-  }
+.scatter-plot__now::before {
+  content: 'Now';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-secondary);
+  font-size: 11px;
+  color: var(--grey-80);
+  letter-spacing: -0.09;
+}
 
-  &::after {
-    content: '';
-    display: block;
-    position: absolute;
-    top: 20px;
-    bottom: 35px;
-    width: 1px;
-    background-color: #465968;
-  }
+.scatter-plot__now::after {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 20px;
+  bottom: 35px;
+  width: 1px;
+  background-color: #465968;
 }
 
 .scatter-plot__dot {

@@ -141,49 +141,51 @@
   })
 </script>
 
-<style lang="scss">
+<style >
 .diverging-bar-chart-view {
   padding: 24px;
+}
 
-  &__chart {
-    background-color: #f7f8fa;
-    height: 800px;
-    max-height: 100vh;
-    min-height: 200px;
-    max-width: calc(100vw - 48px);
-    min-width: 400px;
-    margin: 24px 0;
-    overflow: auto;
-    resize: both;
-  }
+.diverging-bar-chart-view__chart {
+  background-color: #f7f8fa;
+  height: 800px;
+  max-height: 100vh;
+  min-height: 200px;
+  max-width: calc(100vw - 48px);
+  min-width: 400px;
+  margin: 24px 0;
+  overflow: auto;
+  resize: both;
+}
 
-  &__bar {
-    height: 100%;
-    width: 35%;
-    max-width: 50px;
-    margin: auto;
-    background-color: #6680ee;
-  }
+.diverging-bar-chart-view__bar {
+  height: 100%;
+  width: 35%;
+  max-width: 50px;
+  margin: auto;
+  background-color: #6680ee;
+}
 
-  &__median {
-    height: 4px;
-    background-color: #ebeef7;
-    width: 100%;
-  }
+.diverging-bar-chart-view__median {
+  height: 4px;
+  background-color: #ebeef7;
+  width: 100%;
+}
 
-  &__bar-container {
-    height: 100%;
-    width: 100%;
+.diverging-bar-chart-view__bar-container {
+  height: 100%;
+  width: 100%;
+}
 
-    &:focus,
-    &:hover {
-      outline: none;
+.diverging-bar-chart-view__bar-container:focus,
+.diverging-bar-chart-view__bar-container:hover {
+  outline: none;
+}
 
-      .diverging-bar-chart-view__bar {
-        background-color: #0035b0;
-      }
-    }
-  }
+
+.diverging-bar-chart-view__bar-container:focus .diverging-bar-chart-view__bar,
+.diverging-bar-chart-view__bar-container:hover .diverging-bar-chart-view__bar {
+  background-color: #0035b0;
 }
 
 .diverging-bar-chart-view__popover { @apply

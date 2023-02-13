@@ -140,30 +140,27 @@
   })
 </script>
 
-<style lang="scss">
-.timeline-view {
+<style>
+.timeline-view__chart {
+  border-radius: 8px;
+  border: 2px solid #465968;
+  height: 400px;
+  max-height: 100vh;
+  min-height: 200px;
+  max-width: calc(100vw - 48px);
+  min-width: 400px;
+  overflow: auto;
+  resize: both;
 
-  &__chart {
-    border-radius: 8px;
-    border: 2px solid #465968;
-    height: 400px;
-    max-height: 100vh;
-    min-height: 200px;
-    max-width: calc(100vw - 48px);
-    min-width: 400px;
-    overflow: auto;
-    resize: both;
+  @apply
+  bg-background
+}
 
-    @apply
-    bg-background
-  }
-
-  &__node {
-    background-color: #6680ee;
-    border-radius: 9px;
-    height: 12px;
-    width: 100%;
-  }
+.timeline-view__node {
+  background-color: #6680ee;
+  border-radius: 9px;
+  height: 12px;
+  width: 100%;
 }
 
 .timeline-view__grid-line {
