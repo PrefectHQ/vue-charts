@@ -29,7 +29,7 @@
     "@types/node": "18.11.19",
     "@vitejs/plugin-vue": "4.0.0",
     "autoprefixer": "^10.4.13",
-    "eslint": "8.33.0",
+    "eslint": "8.34.0",
     "sass": "1.52.1",
     "tailwind": "^4.0.0",
     "tsc-alias": "1.8.2",
