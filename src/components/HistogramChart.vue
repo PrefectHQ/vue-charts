@@ -69,6 +69,7 @@
   export type HistogramChartOptions = {
     showXAxis?: boolean,
     showYAxis?: boolean,
+    curve?: d3.CurveFactory,
   }
 
   type PointBar = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
@@ -82,6 +83,7 @@
 
   const showXAxis = computed(() => props.options?.showXAxis ?? true)
   const showYAxis = computed(() => props.options?.showYAxis ?? true)
+  const curve = computed(() => props.options?.curve ?? d3.curveCatmullRom)
 
   const chart = ref<HTMLDivElement>()
   const { width: chartWidth, height: chartHeight } = useElementRect(chart)
@@ -139,7 +141,7 @@
     const firstPoint: PointPosition = [0, firstY]
     const lastPoint: PointPosition = [chartWidth.value, lastY]
 
-    //
+    // offset by 1 to make sure stroke isn't visible because of curving
     const bottomLeftCorner: PointPosition = [-1, chartHeight.value + 1]
     const bottomRightCorner: PointPosition = [chartWidth.value + 1, chartHeight.value + 1]
 
@@ -155,7 +157,7 @@
   const path = computed(() => {
     const line = d3.line()
 
-    line.curve(d3.curveCatmullRom)
+    line.curve(curve.value)
 
     return line(positions.value)
   })
