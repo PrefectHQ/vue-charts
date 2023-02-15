@@ -17,6 +17,7 @@
 </template>
 
 <script lang="ts" setup>
+  import { BooleanRouteParam, NumberRouteParam, useRouteQueryParam } from '@prefecthq/vue-compositions'
   import { endOfWeek, startOfWeek } from 'date-fns'
   import { ref, watch } from 'vue'
   import { generateBarChartData } from '../data'
@@ -25,8 +26,8 @@
   const today = new Date()
   const start = ref(startOfWeek(today))
   const end = ref(endOfWeek(today))
-  const smooth = ref(false)
-  const buckets = ref(20)
+  const smooth = useRouteQueryParam('smooth', BooleanRouteParam, false)
+  const buckets = useRouteQueryParam('buckets', NumberRouteParam, 20)
 
   const data = ref<HistogramData>([])
 
