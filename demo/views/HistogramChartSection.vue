@@ -9,9 +9,13 @@
           </div>
         </p-label>
       </div>
-      <p-checkbox v-model="smooth" label="Smooth" />
+      <div class="flex gap-2">
+        <p-checkbox v-model="smooth" label="Smooth" />
+        <p-checkbox v-model="showXAxis" label="Show X Axis" />
+        <p-checkbox v-model="showYAxis" label="Show Y Axis" />
+      </div>
 
-      <Histogram :data="data" :smooth="smooth" />
+      <Histogram :data="data" :smooth="smooth" :options="{ showXAxis, showYAxis }" />
     </p-content>
   </p-layout-default>
 </template>
@@ -27,6 +31,8 @@
   const start = ref(startOfWeek(today))
   const end = ref(endOfWeek(today))
   const smooth = useRouteQueryParam('smooth', BooleanRouteParam, false)
+  const showXAxis = useRouteQueryParam('showXAxis', BooleanRouteParam, true)
+  const showYAxis = useRouteQueryParam('showYAxis', BooleanRouteParam, true)
   const buckets = useRouteQueryParam('buckets', NumberRouteParam, 20)
 
   const data = ref<HistogramData>([])
