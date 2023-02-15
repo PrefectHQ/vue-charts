@@ -21,6 +21,7 @@
   "typescript.tsdk": "node_modules/typescript/lib",
   "cSpell.words": [
     "backoff",
+    "Catmull",
     "composables",
     "datetime",
     "emperical",

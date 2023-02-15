@@ -3,6 +3,10 @@
     <template v-for="(bar, index) in bars" :key="index">
       <div class="histogram-chart__bar" :style="bar" />
     </template>
+
+    <svg class="histogram-chart__svg" :width="width" :height="height" :viewbox="`0 0 ${width} ${height}`">
+      <path class="histogram-chart__path" :d="path!" />
+    </svg>
   </div>
 
   width: {{ width }}<br>
@@ -27,7 +31,7 @@
   }
 
   type PointBar = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
-  type PointPosition = { left: Pixels, top: Pixels }
+  type PointPosition = [x: number, y: number]
 
   const props = defineProps<{
     data: HistogramData,
@@ -80,7 +84,32 @@
   })
 
   const bars = computed(() => props.data.map(point => getPointBar(point)))
-  // const positions = computed(() => props.data.map(point => getPointPosition(point)))
+  const positions = computed<PointPosition[]>(() => {
+    const points = props.data.map(point => getPointPosition(point))
+    // const [, firstY] = points.shift()!
+    // const [, lastY] = points.pop()!
+    // const firstPoint: PointPosition = [0, firstY]
+    // const lastPoint: PointPosition = [width.value, lastY]
+
+    const bottomLeftCorner: PointPosition = [0, height.value]
+    const bottomRightCorner: PointPosition = [width.value, height.value]
+
+    return [
+      bottomLeftCorner,
+      // firstPoint,
+      ...points,
+      // lastPoint,
+      bottomRightCorner,
+    ]
+  })
+
+  const path = computed(() => {
+    const line = d3.line()
+
+    line.curve(d3.curveCatmullRom)
+
+    return line(positions.value)
+  })
 
   function getPointBar(point: HistogramDataPoint): PointBar {
     const top = yScale.value(point.value)
@@ -99,16 +128,13 @@
     return bar
   }
 
-  // function getPointPosition(point: HistogramDataPoint): PointPosition {
-  //   const middle = new Date((point.intervalStart.getTime() + point.intervalEnd.getTime()) / 2)
-  //   const top = yScale.value(point.value)
-  //   const left = xScale.value(middle)
+  function getPointPosition(point: HistogramDataPoint): PointPosition {
+    const middle = new Date((point.intervalStart.getTime() + point.intervalEnd.getTime()) / 2)
+    const x = xScale.value(middle)
+    const y = height.value - yScale.value(point.value)
 
-  //   return {
-  //     top: `${top}px`,
-  //     left: `${left}px`,
-  //   }
-  // }
+    return [x, y]
+  }
 </script>
 
 <style>
@@ -128,5 +154,22 @@
   border-prefect-50
   transition-all
   /* min-h-[5px] */
+}
+
+.histogram-chart__svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.histogram-chart__path {
+  fill: green;
+  stroke: green;
+  stroke-width: 5px;
+
+  @apply
+  transition-all
 }
 </style>

@@ -2,25 +2,22 @@
   <p-layout-default>
     <p-content class="histogram-chart-section">
       <div class="histogram-chart-section__controls">
-        <p-label label="Start Date">
-          <p-date-input v-model="start" />
-        </p-label>
-        <p-label label="End Date">
-          <p-date-input v-model="end" />
-        </p-label>
         <p-label label="Buckets">
-          <p-number-input v-model="buckets" />
+          <div class="flex gap-2">
+            <p-number-input v-model="buckets" />
+            <p-button primary icon="RefreshIcon" @click="getData" />
+          </div>
         </p-label>
       </div>
 
-      <Histogram :data="data.items" />
+      <Histogram :data="data" />
     </p-content>
   </p-layout-default>
 </template>
 
 <script lang="ts" setup>
   import { endOfWeek, startOfWeek } from 'date-fns'
-  import { computed, ref } from 'vue'
+  import { ref, watch } from 'vue'
   import { generateBarChartData } from '../data'
   import Histogram, { HistogramData } from '@/components/HistogramChart.vue'
 
@@ -29,11 +26,21 @@
   const end = ref(endOfWeek(today))
   const buckets = ref(20)
 
-  const data = computed(() => generateBarChartData({
-    buckets: buckets.value,
-    intervalStart: start.value,
-    intervalEnd: end.value,
-  }))
+  const data = ref<HistogramData>([])
+
+  watch([start, end, buckets], () => {
+    getData()
+  }, { immediate: true })
+
+  function getData(): void {
+    const { items } = generateBarChartData({
+      buckets: buckets.value,
+      intervalEnd: end.value,
+      intervalStart: start.value,
+    })
+
+    data.value = items
+  }
 </script>
 
 <style>
