@@ -1,16 +1,21 @@
 <template>
-  <div ref="chart" class="histogram-chart">
-    <template v-if="smooth">
-      <svg class="histogram-chart__svg" :width="width" :height="height" :viewbox="`0 0 ${width} ${height}`">
-        <path class="histogram-chart__path" :d="path!" />
-      </svg>
-    </template>
-
-    <template v-else>
-      <template v-for="(bar, index) in bars" :key="index">
-        <div class="histogram-chart__bar" :style="bar" />
+  <div class="histogram-chart">
+    <div ref="chart" class="histogram-chart__chart">
+      <template v-if="smooth">
+        <svg class="histogram-chart__svg" :width="width" :height="height" :viewbox="`0 0 ${width} ${height}`">
+          <path class="histogram-chart__path" :d="path!" />
+        </svg>
       </template>
-    </template>
+
+      <template v-else>
+        <template v-for="(bar, index) in bars" :key="index">
+          <slot name="bar" v-bind="{ bar }">
+            <div class="histogram-chart__bar" :style="bar" />
+          </slot>
+        </template>
+      </template>
+    </div>
+    <div class="histogram-chart__value" />
   </div>
 
   width: {{ width }}<br>
@@ -82,7 +87,7 @@
   const yScale = computed(() => {
     const scale = d3.scaleLinear()
     // this will need to be more intelligent.
-    const domainMax = maxValue.value * 1.02
+    const domainMax = maxValue.value * 1.1
     scale.domain([0, domainMax])
     scale.range([0, height.value])
 
@@ -144,9 +149,7 @@
 </script>
 
 <style>
-.histogram-chart { @apply
-  /* border */
-  /* border-foreground-500 */
+.histogram-chart__chart { @apply
   w-full
   h-60
   relative
@@ -159,7 +162,6 @@
   border
   border-prefect-300
   transition-all
-  /* min-h-[5px] */
 }
 
 .histogram-chart__svg {
