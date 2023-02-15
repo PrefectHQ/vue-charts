@@ -9,8 +9,9 @@
           </div>
         </p-label>
       </div>
+      <p-checkbox v-model="smooth" label="Smooth" />
 
-      <Histogram :data="data" />
+      <Histogram :data="data" :smooth="smooth" />
     </p-content>
   </p-layout-default>
 </template>
@@ -24,6 +25,7 @@
   const today = new Date()
   const start = ref(startOfWeek(today))
   const end = ref(endOfWeek(today))
+  const smooth = ref(false)
   const buckets = ref(20)
 
   const data = ref<HistogramData>([])

@@ -1,12 +1,16 @@
 <template>
   <div ref="chart" class="histogram-chart">
-    <template v-for="(bar, index) in bars" :key="index">
-      <div class="histogram-chart__bar" :style="bar" />
+    <template v-if="smooth">
+      <svg class="histogram-chart__svg" :width="width" :height="height" :viewbox="`0 0 ${width} ${height}`">
+        <path class="histogram-chart__path" :d="path!" />
+      </svg>
     </template>
 
-    <svg class="histogram-chart__svg" :width="width" :height="height" :viewbox="`0 0 ${width} ${height}`">
-      <path class="histogram-chart__path" :d="path!" />
-    </svg>
+    <template v-else>
+      <template v-for="(bar, index) in bars" :key="index">
+        <div class="histogram-chart__bar" :style="bar" />
+      </template>
+    </template>
   </div>
 
   width: {{ width }}<br>
@@ -35,6 +39,7 @@
 
   const props = defineProps<{
     data: HistogramData,
+    smooth?: boolean,
   }>()
 
   const chart = ref<HTMLDivElement>()
@@ -76,8 +81,9 @@
 
   const yScale = computed(() => {
     const scale = d3.scaleLinear()
-
-    scale.domain([0, maxValue.value])
+    // this will need to be more intelligent.
+    const domainMax = maxValue.value * 1.02
+    scale.domain([0, domainMax])
     scale.range([0, height.value])
 
     return scale
@@ -86,19 +92,19 @@
   const bars = computed(() => props.data.map(point => getPointBar(point)))
   const positions = computed<PointPosition[]>(() => {
     const points = props.data.map(point => getPointPosition(point))
-    // const [, firstY] = points.shift()!
-    // const [, lastY] = points.pop()!
-    // const firstPoint: PointPosition = [0, firstY]
-    // const lastPoint: PointPosition = [width.value, lastY]
+    const [, firstY] = points.shift()!
+    const [, lastY] = points.pop()!
+    const firstPoint: PointPosition = [0, firstY]
+    const lastPoint: PointPosition = [width.value, lastY]
 
     const bottomLeftCorner: PointPosition = [0, height.value]
     const bottomRightCorner: PointPosition = [width.value, height.value]
 
     return [
       bottomLeftCorner,
-      // firstPoint,
+      firstPoint,
       ...points,
-      // lastPoint,
+      lastPoint,
       bottomRightCorner,
     ]
   })
@@ -151,7 +157,7 @@
   block
   bg-prefect-500
   border
-  border-prefect-50
+  border-prefect-300
   transition-all
   /* min-h-[5px] */
 }
@@ -165,11 +171,9 @@
 }
 
 .histogram-chart__path {
-  fill: green;
-  stroke: green;
-  stroke-width: 5px;
-
   @apply
   transition-all
+  fill-prefect-500
+  stroke-prefect-300
 }
 </style>
