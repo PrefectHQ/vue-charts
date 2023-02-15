@@ -13,6 +13,7 @@
     <p-context-nav-item title="Diverging Bar Chart" to="/diverging-bar-chart" />
     <p-context-nav-item title="Timeline" to="/timeline" />
     <p-context-nav-item title="Scatter Plot" to="/scatter-plot" />
+    <p-context-nav-item title="Histogram Chart" to="/histogram-chart" />
 
     <template #footer>
       <div class="context-sidebar__footer">
