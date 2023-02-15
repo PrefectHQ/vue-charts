@@ -48,12 +48,6 @@
       </div>
     </template>
   </div>
-  width: {{ chartWidth }}<br>
-  height: {{ chartHeight }}<br>
-  minIntervalStart: {{ minIntervalStart }}<br>
-  maxIntervalEnd: {{ maxIntervalEnd }}<br>
-  maxValue: {{ maxValue }}<br>
-  maxScale: {{ roundUpToIncrement(maxValue) }}
 </template>
 
 <script lang="ts" setup>
