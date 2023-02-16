@@ -229,13 +229,13 @@
   grid
   gap-2;
   grid-template-columns: min-content 1fr;
+  grid-template-rows: minmax(56px, 1fr) min-content;
   grid-template-areas: "yAxis chart"
                        ".     xAxis";
 }
 
 .histogram-chart__chart { @apply
   w-full
-  h-60
   relative;
   grid-area: chart
 }
