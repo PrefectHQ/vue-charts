@@ -1,5 +1,5 @@
 <template>
-  <div class="histogram-chart">
+  <div v-if="data.length" class="histogram-chart">
     <div ref="chart" class="histogram-chart__chart">
       <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
         <path ref="path" class="histogram-chart__path" :class="classes.path" :d="pathData!" />
