@@ -15,7 +15,7 @@
         <p-checkbox v-model="showYAxis" label="Show Y Axis" />
       </div>
 
-      <Histogram :data="data" :smooth="smooth" :options="{ showXAxis, showYAxis }" />
+      <HistogramChart :data="data" :smooth="smooth" :options="{ showXAxis, showYAxis }" />
     </p-content>
   </p-layout-default>
 </template>
@@ -25,7 +25,7 @@
   import { endOfWeek, startOfWeek } from 'date-fns'
   import { ref, watch } from 'vue'
   import { generateBarChartData } from '../data'
-  import Histogram, { HistogramData } from '@/components/HistogramChart.vue'
+  import { HistogramChart, HistogramData } from '@/components/HistogramChart'
 
   const today = new Date()
   const start = ref(startOfWeek(today))
