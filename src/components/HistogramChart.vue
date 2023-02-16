@@ -1,18 +1,14 @@
 <template>
   <div class="histogram-chart">
     <div ref="chart" class="histogram-chart__chart">
-      <template v-if="smooth">
-        <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
-          <path class="histogram-chart__path" :d="path!" />
-        </svg>
-      </template>
+      <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
+        <path ref="path" class="histogram-chart__path" :class="classes.path" :d="pathData!" />
+      </svg>
 
-      <template v-else>
-        <template v-for="(bar, index) in bars" :key="index">
-          <div class="histogram-chart__bar" :style="bar">
-            <slot name="bar" v-bind="{ bar }" />
-          </div>
-        </template>
+      <template v-for="(bar, index) in bars" :key="index">
+        <div class="histogram-chart__bar" :class="classes.bar" :style="bar">
+          <slot name="bar" v-bind="{ bar }" />
+        </div>
       </template>
     </div>
 
@@ -55,7 +51,7 @@
   import { useElementRect } from '@prefecthq/vue-compositions'
   import * as d3 from 'd3'
   import { format } from 'date-fns'
-  import { computed, ref } from 'vue'
+  import { computed, ref, watch } from 'vue'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
 
   export type HistogramData<T = unknown> = HistogramDataPoint<T>[]
@@ -70,6 +66,8 @@
     showXAxis?: boolean,
     showYAxis?: boolean,
     curve?: d3.CurveFactory,
+    transition?: boolean,
+    transitionDuration?: number,
   }
 
   type PointBar = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
@@ -84,9 +82,25 @@
   const showXAxis = computed(() => props.options?.showXAxis ?? true)
   const showYAxis = computed(() => props.options?.showYAxis ?? true)
   const curve = computed(() => props.options?.curve ?? d3.curveCatmullRom)
+  const transition = computed(() => props.options?.transition ?? true)
+  const transitionDuration = computed(() => props.options?.transitionDuration ?? 250)
+  const transitionDurationString = computed(() => `${transitionDuration.value}ms`)
+  const showBars = computed(() => !props.smooth)
+  const showSmooth = computed(() => props.smooth)
+  const loaded = ref(false)
+
+  const path = ref<SVGElement>()
+  const { width: pathWidth } = useElementRect(path)
 
   const chart = ref<HTMLDivElement>()
   const { width: chartWidth, height: chartHeight } = useElementRect(chart)
+
+  const unwatch = watch(pathWidth, width => {
+    if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
+      loaded.value = true
+      unwatch()
+    }
+  })
 
   const minIntervalStart = computed<Date>(() => {
     const allStartDateTimes = props.data.map(point => point.intervalStart.getTime())
@@ -133,7 +147,16 @@
     return scale
   })
 
-  const bars = computed(() => props.data.map(point => getPointBar(point)))
+  const bars = computed(() => {
+    const bars = props.data.map(point => getPointBar(point))
+
+    if (!loaded.value || !showBars.value) {
+      return bars.map(bar => ({ ...bar, height: '0px' }))
+    }
+
+    return bars
+  })
+
   const positions = computed<PointPosition[]>(() => {
     const points = props.data.map(point => getPointPosition(point))
     const [, firstY] = points.shift()!
@@ -145,22 +168,42 @@
     const bottomLeftCorner: PointPosition = [-1, chartHeight.value + 1]
     const bottomRightCorner: PointPosition = [chartWidth.value + 1, chartHeight.value + 1]
 
-    return [
+    const positions: PointPosition[] = [
       bottomLeftCorner,
       firstPoint,
       ...points,
       lastPoint,
       bottomRightCorner,
     ]
+
+    if (!loaded.value || !showSmooth.value) {
+      const [[x], ...positionsAllAtBottom]: PointPosition[] = positions.map(([x]) => [x, chartHeight.value])
+      const firstPosition: PointPosition = [x, chartHeight.value]
+
+      return [firstPosition, ...positionsAllAtBottom]
+    }
+
+    return positions
   })
 
-  const path = computed(() => {
+  const pathData = computed(() => {
     const line = d3.line()
 
     line.curve(curve.value)
 
     return line(positions.value)
   })
+
+  const classes = computed(() => ({
+    bar: {
+      'histogram-chart__bar--transitioned': transition.value,
+      'histogram-chart__bar--visible': loaded.value && showBars.value,
+    },
+    path: {
+      'histogram-chart__path--transitioned': transition.value,
+      'histogram-chart__path--visible': loaded.value && showSmooth.value,
+    },
+  }))
 
   function getPointBar(point: HistogramDataPoint): PointBar {
     const top = yScale.value(point.value)
@@ -218,7 +261,18 @@
   bg-prefect-500
   border
   border-prefect-300
-  transition-all
+  opacity-0
+}
+
+.histogram-chart__bar--transitioned { @apply
+  transition-all;
+
+  transition-property: height, opacity;
+  transition-duration: v-bind(transitionDurationString);
+}
+
+.histogram-chart__bar--visible { @apply
+  opacity-100
 }
 
 .histogram-chart__svg {
@@ -229,11 +283,27 @@
   bottom: 0;
 }
 
-.histogram-chart__path {
-  @apply
-  transition-all
+.histogram-chart__smooth {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.histogram-chart__path { @apply
   fill-prefect-500
   stroke-prefect-300
+  opacity-0
+}
+
+.histogram-chart__path--transitioned { @apply
+  transition-all;
+  transition-duration: v-bind(transitionDurationString);
+}
+
+.histogram-chart__path--visible { @apply
+  opacity-100
 }
 
 .histogram-chart__axis-x { @apply
