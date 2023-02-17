@@ -90,10 +90,9 @@
   const { width: pathWidth } = useElementRect(path)
 
   const chart = ref<HTMLDivElement>()
-  const { width: chartWidth, height: chartHeight } = useElementRect(chart)
+  const { width: chartWidth, height: chartHeight, x: chartX } = useElementRect(chart)
 
   const selection = ref<HTMLDivElement>()
-  const { width: selectionWidth, x: selectionX } = useElementRect(chart)
 
   const unwatch = watch(pathWidth, width => {
     if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
@@ -120,11 +119,11 @@
   }
 
   function moveSelection(event: { dx: number, sourceEvent: MouseEvent }): void {
-    const selectionXLeft = selectionX.value
-    const selectionXRight = selectionX.value + selectionWidth.value
+    const chartXLeft = chartX.value
+    const chartXRight = chartX.value + chartWidth.value
     const mouseX = event.sourceEvent.clientX
 
-    if (selectionXLeft > mouseX || selectionXRight < mouseX) {
+    if (chartXLeft >= mouseX || chartXRight <= mouseX) {
       return
     }
 
