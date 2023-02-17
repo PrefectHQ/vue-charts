@@ -2,7 +2,10 @@
   <div v-if="data.length" class="histogram-chart">
     <div ref="chart" class="histogram-chart__chart">
       <template v-if="showSelection">
-        <div ref="selection" class="histogram-chart__selection" :class="classes.selection" :style="selectionStyles" />
+        <div ref="selection" class="histogram-chart__selection" :class="classes.selection" :style="selectionStyles">
+          <div ref="selectionLeft" class="histogram-chart__selection-resize histogram-chart__selection-resize--left" />
+          <div ref="selectionRight" class="histogram-chart__selection-resize histogram-chart__selection-resize--right" />
+        </div>
       </template>
 
       <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
@@ -98,6 +101,8 @@
   const { width: chartWidth, height: chartHeight, x: chartX } = useElementRect(chart)
 
   const selection = ref<HTMLDivElement>()
+  const selectionLeft = ref<HTMLDivElement>()
+  const selectionRight = ref<HTMLDivElement>()
 
   const drag = d3.drag()
     .on('start', selectionDragStart)
@@ -370,19 +375,43 @@
   cursor-move
   block
   absolute
-  opacity-25
-  border-2
+  opacity-50
+  border
   border-white
   bg-slate-500
   transition-opacity
   top-0
   bottom-0
+  rounded-sm
   z-10
-  hover:opacity-50
+  hover:opacity-60
+}
+
+.histogram-chart__selection-resize { @apply
+  block
+  absolute
+  w-2
+  h-8
+  border
+  border-white
+  bg-slate-500
+  rounded-sm
+  cursor-col-resize;
+  top: 50%;
+}
+
+.histogram-chart__selection-resize--left { @apply
+  left-0;
+  transform: translate(-50%, -50%)
+}
+
+.histogram-chart__selection-resize--right { @apply
+  right-0;
+  transform: translate(50%, -50%)
 }
 
 .histogram-chart__selection--moving { @apply
-  opacity-50
+  !opacity-70
 }
 
 .histogram-chart__bar { @apply
