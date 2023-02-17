@@ -95,10 +95,10 @@
   })
 
   const maxIntervalEnd = computed<Date>(() => {
-    const allStartDateTimes = props.data.map(point => point.intervalEnd.getTime())
-    const minStartDateTime = Math.max(...allStartDateTimes)
+    const allEndDateTimes = props.data.map(point => point.intervalEnd.getTime())
+    const maxEndDateTime = Math.max(...allEndDateTimes)
 
-    return new Date(minStartDateTime)
+    return new Date(maxEndDateTime)
   })
 
   const maxValue = computed<number>(() => {
