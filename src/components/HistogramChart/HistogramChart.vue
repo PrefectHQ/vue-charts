@@ -2,7 +2,7 @@
   <div v-if="data.length" class="histogram-chart">
     <div ref="chart" class="histogram-chart__chart">
       <template v-if="showSelection">
-        <div ref="selection" class="histogram-chart__selection" :style="selectionStyles" />
+        <div ref="selection" class="histogram-chart__selection" :class="classes.selection" :style="selectionStyles" />
       </template>
 
       <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
