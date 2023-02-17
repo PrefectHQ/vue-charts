@@ -75,6 +75,10 @@
     (event: 'update:selectionStart' | 'update:selectionEnd', value: Date): void,
   }>()
 
+  onMounted(() => {
+    initSelectionDrag()
+  })
+
   const showXAxis = computed(() => props.options?.showXAxis ?? true)
   const showYAxis = computed(() => props.options?.showYAxis ?? true)
   const curve = computed(() => props.options?.curve ?? d3.curveCatmullRom)
@@ -84,7 +88,8 @@
   const showBars = computed(() => !props.smooth)
   const showSmooth = computed(() => props.smooth)
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
-  const loaded = ref(false)
+  const movingSelection = ref(false)
+  const pathRendered = ref(false)
 
   const path = ref<SVGElement>()
   const { width: pathWidth } = useElementRect(path)
@@ -94,58 +99,19 @@
 
   const selection = ref<HTMLDivElement>()
 
-  const unwatch = watch(pathWidth, width => {
-    if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
-      loaded.value = true
-      unwatch()
-    }
-  })
-
-  const movingSelection = ref(false)
-
-  watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
-
   const drag = d3.drag()
     .on('start', selectionDragStart)
     .on('drag', selectionDrag)
     .on('end', selectionDragEnd)
 
-  function selectionDragStart(): void {
-    movingSelection.value = true
-  }
-
-  function selectionDragEnd(): void {
-    movingSelection.value = false
-  }
-
-  function selectionDrag(event: { x: number, dx: number, sourceEvent: MouseEvent }): void {
-    const difference = event.dx
-    const chartXLeft = chartX.value
-    const chartXRight = chartX.value + chartWidth.value
-    const mouseX = event.sourceEvent.clientX
-    const previousMouseX = mouseX - difference
-    const mouseEnteredChartFromLeft = chartXLeft >= previousMouseX
-    const mouseEnteredChartFromRight = chartXRight <= previousMouseX
-
-    if (mouseEnteredChartFromLeft || mouseEnteredChartFromRight) {
-      return
+  const unwatch = watch(pathWidth, width => {
+    if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
+      pathRendered.value = true
+      unwatch()
     }
-
-    const startDateValue = xScale.value(props.selectionStart!)
-    const endDateValue = xScale.value(props.selectionEnd!)
-    const newStartDate = xScale.value.invert(startDateValue + difference)
-    const newEndDate = xScale.value.invert(endDateValue + difference)
-    const { start, end } = keepSelectionInRange(newStartDate, newEndDate)
-
-    emit('update:selectionStart', start)
-    emit('update:selectionEnd', end)
-  }
-
-  onMounted(() => {
-    const element = d3.select(selection.value!) as any
-
-    drag(element)
   })
+
+  watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
 
   const minIntervalStart = computed<Date>(() => {
     const allStartDateTimes = props.data.map(point => point.intervalStart.getTime())
@@ -195,7 +161,7 @@
   const bars = computed(() => {
     const bars = props.data.map(point => getPointBar(point))
 
-    if (!loaded.value || !showBars.value) {
+    if (!pathRendered.value || !showBars.value) {
       return bars.map(bar => ({ ...bar, height: '0px' }))
     }
 
@@ -221,7 +187,7 @@
       bottomRightCorner,
     ]
 
-    if (!loaded.value || !showSmooth.value) {
+    if (!pathRendered.value || !showSmooth.value) {
       const [[x], ...positionsAllAtBottom]: PointPosition[] = positions.map(([x]) => [x, chartHeight.value])
       const firstPosition: PointPosition = [x, chartHeight.value]
 
@@ -262,11 +228,11 @@
     },
     bar: {
       'histogram-chart__bar--transitioned': transition.value,
-      'histogram-chart__bar--visible': loaded.value && showBars.value,
+      'histogram-chart__bar--visible': pathRendered.value && showBars.value,
     },
     path: {
       'histogram-chart__path--transitioned': transition.value,
-      'histogram-chart__path--visible': loaded.value && showSmooth.value,
+      'histogram-chart__path--visible': pathRendered.value && showSmooth.value,
     },
   }))
 
@@ -327,6 +293,45 @@
     }
 
     return { start, end }
+  }
+
+  function selectionDragStart(): void {
+    movingSelection.value = true
+  }
+
+  function selectionDragEnd(): void {
+    movingSelection.value = false
+  }
+
+  function selectionDrag(event: { x: number, dx: number, sourceEvent: MouseEvent }): void {
+    const difference = event.dx
+    const chartXLeft = chartX.value
+    const chartXRight = chartX.value + chartWidth.value
+    const mouseX = event.sourceEvent.clientX
+    const previousMouseX = mouseX - difference
+    const mouseEnteredChartFromLeft = chartXLeft >= previousMouseX
+    const mouseEnteredChartFromRight = chartXRight <= previousMouseX
+
+    if (mouseEnteredChartFromLeft || mouseEnteredChartFromRight) {
+      return
+    }
+
+    const startDateValue = xScale.value(props.selectionStart!)
+    const endDateValue = xScale.value(props.selectionEnd!)
+    const newStartDate = xScale.value.invert(startDateValue + difference)
+    const newEndDate = xScale.value.invert(endDateValue + difference)
+    const { start, end } = keepSelectionInRange(newStartDate, newEndDate)
+
+    emit('update:selectionStart', start)
+    emit('update:selectionEnd', end)
+  }
+
+  function initSelectionDrag(): void {
+    // d3's types seem a little off
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const element = d3.select(selection.value!) as any
+
+    drag(element)
   }
 </script>
 
