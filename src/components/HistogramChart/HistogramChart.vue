@@ -51,10 +51,10 @@
 </template>
 
 <script lang="ts" setup>
-  import { isDateInRange, Pixels } from '@prefecthq/prefect-design'
+  import { Pixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
   import * as d3 from 'd3'
-  import { format } from 'date-fns'
+  import { addSeconds, differenceInSeconds, format, isAfter, isBefore, subSeconds } from 'date-fns'
   import { computed, onMounted, ref, watch, watchEffect } from 'vue'
   import { HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
@@ -93,6 +93,7 @@
   const { width: chartWidth, height: chartHeight } = useElementRect(chart)
 
   const selection = ref<HTMLDivElement>()
+  const { width: selectionWidth, x: selectionX } = useElementRect(chart)
 
   const unwatch = watch(pathWidth, width => {
     if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
@@ -118,24 +119,29 @@
     movingSelection.value = false
   }
 
-  function moveSelection(event: { dx: number }): void {
+  function moveSelection(event: { dx: number, sourceEvent: MouseEvent }): void {
+    const selectionXLeft = selectionX.value
+    const selectionXRight = selectionX.value + selectionWidth.value
+    const mouseX = event.sourceEvent.clientX
+
+    if (selectionXLeft > mouseX || selectionXRight < mouseX) {
+      return
+    }
+
     const difference = event.dx
     const startDateValue = xScale.value(props.selectionStart!)
     const endDateValue = xScale.value(props.selectionEnd!)
     const newStartDate = xScale.value.invert(startDateValue + difference)
     const newEndDate = xScale.value.invert(endDateValue + difference)
+    const { start, end } = keepSelectionInRange(newStartDate, newEndDate)
 
-    if (!isInRange(newStartDate) || !isInRange(newEndDate)) {
-      return
-    }
-
-    emit('update:selectionStart', newStartDate)
-    emit('update:selectionEnd', newEndDate)
+    emit('update:selectionStart', start)
+    emit('update:selectionEnd', end)
   }
 
 
   onMounted(() => {
-    const element = d3.select(selection.value!)
+    const element = d3.select(selection.value!) as any
 
     drag(element)
   })
@@ -296,8 +302,30 @@
     return format(value, 'hh:mm a')
   }
 
-  function isInRange(value: Date): boolean {
-    return isDateInRange(value, { min: minIntervalStart.value, max: maxIntervalEnd.value })
+  function keepSelectionInRange(start: Date, end: Date): { start: Date, end: Date } {
+    const min = minIntervalStart.value
+    const max = maxIntervalEnd.value
+    const difference = differenceInSeconds(end, start)
+
+    const startBeforeMin = isBefore(start, min)
+
+    if (startBeforeMin) {
+      return {
+        start: min,
+        end: addSeconds(min, difference),
+      }
+    }
+
+    const endAfterMax = isAfter(end, max)
+
+    if (endAfterMax) {
+      return {
+        start: subSeconds(max, difference),
+        end: max,
+      }
+    }
+
+    return { start, end }
   }
 </script>
 
