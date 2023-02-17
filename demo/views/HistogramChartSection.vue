@@ -21,17 +21,24 @@
       </p-content>
     </template>
 
-    <HistogramChart class="h-60" :data="data" :smooth="smooth" :options="{ showXAxis, showYAxis }" />
+    <HistogramChart class="h-60" v-bind="{ data, smooth }" :options="{ showXAxis, showYAxis }" />
 
     <template #mini-map>
-      <HistogramChart :data="data" :smooth="smooth" :options="{ showXAxis, showYAxis }" />
+      <HistogramChart
+        v-bind="{ data, smooth }"
+        v-model:selection-start="selectionStart"
+        v-model:selection-end="selectionEnd"
+        :options="{ showXAxis, showYAxis }"
+      />
+      <p-key-value label="Selection Start" :value="selectionStart" />
+      <p-key-value label="Selection End" :value="selectionEnd" />
     </template>
   </ComponentPage>
 </template>
 
 <script lang="ts" setup>
   import { BooleanRouteParam, NumberRouteParam, useRouteQueryParam } from '@prefecthq/vue-compositions'
-  import { endOfWeek, startOfWeek } from 'date-fns'
+  import { endOfWeek, startOfWeek, subDays } from 'date-fns'
   import { ref, watch } from 'vue'
   import ComponentPage from '../components/ComponentPage.vue'
   import { generateBarChartData } from '../data'
@@ -44,6 +51,8 @@
   const showXAxis = useRouteQueryParam('showXAxis', BooleanRouteParam, true)
   const showYAxis = useRouteQueryParam('showYAxis', BooleanRouteParam, true)
   const buckets = useRouteQueryParam('buckets', NumberRouteParam, 20)
+  const selectionEnd = ref(end.value)
+  const selectionStart = ref(subDays(selectionEnd.value, 1))
 
   const data = ref<HistogramData>([])
 

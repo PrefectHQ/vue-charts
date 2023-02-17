@@ -1,6 +1,10 @@
 <template>
   <div v-if="data.length" class="histogram-chart">
     <div ref="chart" class="histogram-chart__chart">
+      <template v-if="showSelection">
+        <div ref="selection" class="histogram-chart__selection" :style="selectionStyles" />
+      </template>
+
       <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
         <path ref="path" class="histogram-chart__path" :class="classes.path" :d="pathData!" />
       </svg>
@@ -47,21 +51,28 @@
 </template>
 
 <script lang="ts" setup>
-  import { Pixels } from '@prefecthq/prefect-design'
+  import { isDateInRange, Pixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
   import * as d3 from 'd3'
   import { format } from 'date-fns'
-  import { computed, ref, watch } from 'vue'
+  import { computed, onMounted, ref, watch, watchEffect } from 'vue'
   import { HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
 
   type PointBar = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
   type PointPosition = [x: number, y: number]
+  type Selection = { left: Pixels, width: Pixels }
 
   const props = defineProps<{
     data: HistogramData,
     smooth?: boolean,
     options?: HistogramChartOptions,
+    selectionStart?: Date,
+    selectionEnd?: Date,
+  }>()
+
+  const emit = defineEmits<{
+    (event: 'update:selectionStart' | 'update:selectionEnd', value: Date): void,
   }>()
 
   const showXAxis = computed(() => props.options?.showXAxis ?? true)
@@ -72,6 +83,7 @@
   const transitionDurationString = computed(() => `${transitionDuration.value}ms`)
   const showBars = computed(() => !props.smooth)
   const showSmooth = computed(() => props.smooth)
+  const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const loaded = ref(false)
 
   const path = ref<SVGElement>()
@@ -80,11 +92,52 @@
   const chart = ref<HTMLDivElement>()
   const { width: chartWidth, height: chartHeight } = useElementRect(chart)
 
+  const selection = ref<HTMLDivElement>()
+
   const unwatch = watch(pathWidth, width => {
     if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
       loaded.value = true
       unwatch()
     }
+  })
+
+  const movingSelection = ref(false)
+
+  watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
+
+  const drag = d3.drag()
+    .on('start', moveSelectionStart)
+    .on('drag', moveSelection)
+    .on('end', moveSelectionEnd)
+
+  function moveSelectionStart(): void {
+    movingSelection.value = true
+  }
+
+  function moveSelectionEnd(): void {
+    movingSelection.value = false
+  }
+
+  function moveSelection(event: { dx: number }): void {
+    const difference = event.dx
+    const startDateValue = xScale.value(props.selectionStart!)
+    const endDateValue = xScale.value(props.selectionEnd!)
+    const newStartDate = xScale.value.invert(startDateValue + difference)
+    const newEndDate = xScale.value.invert(endDateValue + difference)
+
+    if (!isInRange(newStartDate) || !isInRange(newEndDate)) {
+      return
+    }
+
+    emit('update:selectionStart', newStartDate)
+    emit('update:selectionEnd', newEndDate)
+  }
+
+
+  onMounted(() => {
+    const element = d3.select(selection.value!)
+
+    drag(element)
   })
 
   const minIntervalStart = computed<Date>(() => {
@@ -179,7 +232,27 @@
     return line(positions.value)
   })
 
+  const selectionStyles = computed<Selection | undefined>(() => {
+    const { selectionStart: start, selectionEnd: end } = props
+
+    if (!start || !end) {
+      return undefined
+    }
+
+    const left = xScale.value(start)
+    const right = xScale.value(end)
+    const width = right - left
+
+    return {
+      left: `${left}px`,
+      width: `${width}px`,
+    }
+  })
+
   const classes = computed(() => ({
+    selection: {
+      'histogram-chart__selection--moving': movingSelection.value,
+    },
     bar: {
       'histogram-chart__bar--transitioned': transition.value,
       'histogram-chart__bar--visible': loaded.value && showBars.value,
@@ -222,9 +295,17 @@
   function formatTimeLabel(value: Date): string {
     return format(value, 'hh:mm a')
   }
+
+  function isInRange(value: Date): boolean {
+    return isDateInRange(value, { min: minIntervalStart.value, max: maxIntervalEnd.value })
+  }
 </script>
 
 <style>
+.histogram-chart--dragging { @apply
+  cursor-move
+}
+
 .histogram-chart { @apply
   grid
   gap-2;
@@ -238,6 +319,36 @@
   w-full
   relative;
   grid-area: chart
+}
+
+.histogram-chart__drag { @apply
+  absolute
+  top-0
+  bottom-0
+  z-20
+  block
+  opacity-5
+  cursor-move
+  bg-danger
+}
+
+.histogram-chart__selection { @apply
+  cursor-move
+  block
+  absolute
+  opacity-25
+  border-2
+  border-white
+  bg-slate-500
+  transition-opacity
+  top-0
+  bottom-0
+  z-10
+  hover:opacity-50
+}
+
+.histogram-chart__selection--moving { @apply
+  opacity-50
 }
 
 .histogram-chart__bar { @apply
