@@ -106,28 +106,31 @@
   watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
 
   const drag = d3.drag()
-    .on('start', moveSelectionStart)
-    .on('drag', moveSelection)
-    .on('end', moveSelectionEnd)
+    .on('start', selectionDragStart)
+    .on('drag', selectionDrag)
+    .on('end', selectionDragEnd)
 
-  function moveSelectionStart(): void {
+  function selectionDragStart(): void {
     movingSelection.value = true
   }
 
-  function moveSelectionEnd(): void {
+  function selectionDragEnd(): void {
     movingSelection.value = false
   }
 
-  function moveSelection(event: { dx: number, sourceEvent: MouseEvent }): void {
+  function selectionDrag(event: { x: number, dx: number, sourceEvent: MouseEvent }): void {
+    const difference = event.dx
     const chartXLeft = chartX.value
     const chartXRight = chartX.value + chartWidth.value
     const mouseX = event.sourceEvent.clientX
+    const previousMouseX = mouseX - difference
+    const mouseEnteredChartFromLeft = chartXLeft >= previousMouseX
+    const mouseEnteredChartFromRight = chartXRight <= previousMouseX
 
-    if (chartXLeft >= mouseX || chartXRight <= mouseX) {
+    if (mouseEnteredChartFromLeft || mouseEnteredChartFromRight) {
       return
     }
 
-    const difference = event.dx
     const startDateValue = xScale.value(props.selectionStart!)
     const endDateValue = xScale.value(props.selectionEnd!)
     const newStartDate = xScale.value.invert(startDateValue + difference)
@@ -137,7 +140,6 @@
     emit('update:selectionStart', start)
     emit('update:selectionEnd', end)
   }
-
 
   onMounted(() => {
     const element = d3.select(selection.value!) as any
