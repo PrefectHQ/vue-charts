@@ -3,12 +3,12 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 export const routes: RouteRecordRaw[] = [
   {
     path: '/bar-chart',
-    name: 'BarChart',
+    name: 'Bar Chart',
     component: () => import('../views/BarChart.vue'),
   },
   {
     path: '/diverging-bar-chart',
-    name: 'DivergingBarChart',
+    name: 'Diverging Bar Chart',
     component: () => import('../views/DivergingBarChart.vue'),
   },
   {
@@ -20,6 +20,11 @@ export const routes: RouteRecordRaw[] = [
     path: '/scatter-plot',
     name: 'Scatter Plot',
     component: () => import('../views/ScatterPlot.vue'),
+  },
+  {
+    path: '/histogram-chart',
+    name: 'Histogram',
+    component: () => import('../views/HistogramChartSection.vue'),
   },
   {
     path: '/',
