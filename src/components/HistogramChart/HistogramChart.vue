@@ -64,7 +64,8 @@
 
   type PointBar = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
   type PointPosition = [x: number, y: number]
-  type Selection = { left: Pixels, width: Pixels }
+  type Selection = { left: Pixels, right: Pixels }
+  type DragEvent = { x: number, dx: number, sourceEvent: MouseEvent }
 
   const props = defineProps<{
     data: HistogramData,
@@ -104,9 +105,19 @@
   const selectionLeft = ref<HTMLDivElement>()
   const selectionRight = ref<HTMLDivElement>()
 
-  const drag = d3.drag()
+  const dragSelection = d3.drag()
     .on('start', selectionDragStart)
     .on('drag', selectionDrag)
+    .on('end', selectionDragEnd)
+
+  const dragSelectionLeft = d3.drag()
+    .on('start', selectionDragStart)
+    .on('drag', selectionLeftDrag)
+    .on('end', selectionDragEnd)
+
+  const dragSelectionRight = d3.drag()
+    .on('start', selectionDragStart)
+    .on('drag', selectionRightDrag)
     .on('end', selectionDragEnd)
 
   const unwatch = watch(pathWidth, width => {
@@ -218,12 +229,11 @@
     }
 
     const left = xScale.value(start)
-    const right = xScale.value(end)
-    const width = right - left
+    const right = chartWidth.value - xScale.value(end)
 
     return {
       left: `${left}px`,
-      width: `${width}px`,
+      right: `${right}px`,
     }
   })
 
@@ -308,7 +318,61 @@
     movingSelection.value = false
   }
 
-  function selectionDrag(event: { x: number, dx: number, sourceEvent: MouseEvent }): void {
+  function getNewSelectionForEvent({ dx: difference }: DragEvent): { selectionStart: Date, selectionEnd: Date } {
+    const startDateValue = xScale.value(props.selectionStart!)
+    const endDateValue = xScale.value(props.selectionEnd!)
+    const selectionStart = xScale.value.invert(startDateValue + difference)
+    const selectionEnd = xScale.value.invert(endDateValue + difference)
+
+    return {
+      selectionStart,
+      selectionEnd,
+    }
+  }
+
+  function selectionDrag(event: DragEvent): void {
+    if (dragEnteredChart(event)) {
+      return
+    }
+
+    const selection = getNewSelectionForEvent(event)
+
+    updateSelection(selection)
+  }
+
+  function selectionLeftDrag(event: DragEvent): void {
+    if (dragEnteredChart(event)) {
+      return
+    }
+
+    const { selectionStart } = getNewSelectionForEvent(event)
+
+    if (isBefore(selectionStart, minIntervalStart.value)) {
+      return
+    }
+
+    updateSelection({
+      selectionStart,
+    })
+  }
+
+  function selectionRightDrag(event: DragEvent): void {
+    if (dragEnteredChart(event)) {
+      return
+    }
+
+    const { selectionEnd } = getNewSelectionForEvent(event)
+
+    if (isAfter(selectionEnd, maxIntervalEnd.value)) {
+      return
+    }
+
+    updateSelection({
+      selectionEnd,
+    })
+  }
+
+  function dragEnteredChart(event: DragEvent): boolean {
     const difference = event.dx
     const chartXLeft = chartX.value
     const chartXRight = chartX.value + chartWidth.value
@@ -318,14 +382,14 @@
     const mouseEnteredChartFromRight = chartXRight <= previousMouseX
 
     if (mouseEnteredChartFromLeft || mouseEnteredChartFromRight) {
-      return
+      return true
     }
 
-    const startDateValue = xScale.value(props.selectionStart!)
-    const endDateValue = xScale.value(props.selectionEnd!)
-    const newStartDate = xScale.value.invert(startDateValue + difference)
-    const newEndDate = xScale.value.invert(endDateValue + difference)
-    const { start, end } = keepSelectionInRange(newStartDate, newEndDate)
+    return false
+  }
+
+  function updateSelection({ selectionStart = props.selectionStart!, selectionEnd = props.selectionEnd! }: { selectionStart?: Date, selectionEnd?: Date } = {}): void {
+    const { start, end } = keepSelectionInRange(selectionStart, selectionEnd)
 
     emit('update:selectionStart', start)
     emit('update:selectionEnd', end)
@@ -334,9 +398,15 @@
   function initSelectionDrag(): void {
     // d3's types seem a little off
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const element = d3.select(selection.value!) as any
+    dragSelection(d3.select(selection.value!) as any)
 
-    drag(element)
+    // d3's types seem a little off
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dragSelectionLeft(d3.select(selectionLeft.value! as any))
+
+    // d3's types seem a little off
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dragSelectionRight(d3.select(selectionRight.value! as any))
   }
 </script>
 
