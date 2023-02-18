@@ -62,10 +62,12 @@
   import { HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
 
-  type PointBar = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
+  type PointBarStyles = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
   type PointPosition = [x: number, y: number]
-  type Selection = { left: Pixels, right: Pixels }
-  type DragEvent = { x: number, dx: number, sourceEvent: MouseEvent }
+  type SelectionStyles = { left: Pixels, right: Pixels }
+  type Selection = { selectionStart: Date, selectionEnd: Date }
+  type DragEvent = { x: number, dx: number, sourceEvent: HTMLMouseEvent }
+  type HTMLMouseEvent = MouseEvent & { target: HTMLElement }
 
   const props = defineProps<{
     data: HistogramData,
@@ -76,7 +78,7 @@
   }>()
 
   const emit = defineEmits<{
-    (event: 'update:selectionStart' | 'update:selectionEnd', value: Date): void,
+    (event: 'update:selectionStart' | 'update:selectionEnd', value: Date | undefined): void,
   }>()
 
   onMounted(() => {
@@ -111,11 +113,13 @@
     .on('end', selectionDragEnd)
 
   const dragSelectionLeft = d3.drag()
+    .container(chart.value as any)
     .on('start', selectionDragStart)
     .on('drag', selectionLeftDrag)
     .on('end', selectionDragEnd)
 
   const dragSelectionRight = d3.drag()
+    .container(chart.value as any)
     .on('start', selectionDragStart)
     .on('drag', selectionRightDrag)
     .on('end', selectionDragEnd)
@@ -221,7 +225,7 @@
     return line(positions.value)
   })
 
-  const selectionStyles = computed<Selection | undefined>(() => {
+  const selectionStyles = computed<SelectionStyles | undefined>(() => {
     const { selectionStart: start, selectionEnd: end } = props
 
     if (!start || !end) {
@@ -251,14 +255,14 @@
     },
   }))
 
-  function getPointBar(point: HistogramDataPoint): PointBar {
+  function getPointBar(point: HistogramDataPoint): PointBarStyles {
     const top = yScale.value(point.value)
     const left = xScale.value(point.intervalStart)
     const right = xScale.value(point.intervalEnd)
     const width = right - left
     const height = top
 
-    const bar: PointBar = {
+    const bar: PointBarStyles = {
       left: `${left}px`,
       width: `${width}px`,
       height: `${height}px`,
@@ -284,30 +288,30 @@
     return format(value, 'hh:mm a')
   }
 
-  function keepSelectionInRange(start: Date, end: Date): { start: Date, end: Date } {
+  function keepSelectionInRange({ selectionStart, selectionEnd }: Selection): Selection {
     const min = minIntervalStart.value
     const max = maxIntervalEnd.value
-    const difference = differenceInSeconds(end, start)
+    const difference = differenceInSeconds(selectionEnd, selectionStart)
 
-    const startBeforeMin = isBefore(start, min)
+    const startBeforeMin = isBefore(selectionStart, min)
 
     if (startBeforeMin) {
       return {
-        start: min,
-        end: addSeconds(min, difference),
+        selectionStart: min,
+        selectionEnd: addSeconds(min, difference),
       }
     }
 
-    const endAfterMax = isAfter(end, max)
+    const endAfterMax = isAfter(selectionEnd, max)
 
     if (endAfterMax) {
       return {
-        start: subSeconds(max, difference),
-        end: max,
+        selectionStart: subSeconds(max, difference),
+        selectionEnd: max,
       }
     }
 
-    return { start, end }
+    return { selectionStart, selectionEnd }
   }
 
   function selectionDragStart(): void {
@@ -324,10 +328,7 @@
     const selectionStart = xScale.value.invert(startDateValue + difference)
     const selectionEnd = xScale.value.invert(endDateValue + difference)
 
-    return {
-      selectionStart,
-      selectionEnd,
-    }
+    return { selectionStart, selectionEnd }
   }
 
   function selectionDrag(event: DragEvent): void {
@@ -336,8 +337,9 @@
     }
 
     const selection = getNewSelectionForEvent(event)
+    const selectionInRange = keepSelectionInRange(selection)
 
-    updateSelection(selection)
+    updateSelection(selectionInRange)
   }
 
   function selectionLeftDrag(event: DragEvent): void {
@@ -345,10 +347,10 @@
       return
     }
 
-    const { selectionStart } = getNewSelectionForEvent(event)
+    let { selectionStart } = getNewSelectionForEvent(event)
 
     if (isBefore(selectionStart, minIntervalStart.value)) {
-      return
+      selectionStart = minIntervalStart.value
     }
 
     updateSelection({
@@ -361,10 +363,10 @@
       return
     }
 
-    const { selectionEnd } = getNewSelectionForEvent(event)
+    let { selectionEnd } = getNewSelectionForEvent(event)
 
     if (isAfter(selectionEnd, maxIntervalEnd.value)) {
-      return
+      selectionEnd = maxIntervalEnd.value
     }
 
     updateSelection({
@@ -388,11 +390,14 @@
     return false
   }
 
-  function updateSelection({ selectionStart = props.selectionStart!, selectionEnd = props.selectionEnd! }: { selectionStart?: Date, selectionEnd?: Date } = {}): void {
-    const { start, end } = keepSelectionInRange(selectionStart, selectionEnd)
+  function updateSelection({ selectionStart, selectionEnd }: Partial<Selection>): void {
+    if (selectionStart) {
+      emit('update:selectionStart', selectionStart)
+    }
 
-    emit('update:selectionStart', start)
-    emit('update:selectionEnd', end)
+    if (selectionEnd) {
+      emit('update:selectionEnd', selectionEnd)
+    }
   }
 
   function initSelectionDrag(): void {
