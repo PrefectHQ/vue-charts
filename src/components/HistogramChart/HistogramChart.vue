@@ -462,6 +462,11 @@
   hover:opacity-60
 }
 
+.histogram-chart__selection--moving .histogram-chart__selection-resize,
+.histogram-chart__selection:hover .histogram-chart__selection-resize { @apply
+  opacity-100
+}
+
 .histogram-chart__selection-resize { @apply
   block
   absolute
@@ -471,6 +476,7 @@
   border-white
   bg-slate-500
   rounded-sm
+  opacity-0
   cursor-col-resize;
   top: 50%;
 }
