@@ -28,7 +28,7 @@
         v-bind="{ data, smooth }"
         v-model:selection-start="selectionStart"
         v-model:selection-end="selectionEnd"
-        :options="{ showXAxis, showYAxis, selectionMinimumSeconds }"
+        :options="{ showXAxis, showYAxis, selectionMinimumSeconds, selectionMaximumSeconds }"
       />
       <p-key-value label="Selection Start" :value="selectionStart" />
       <p-key-value label="Selection End" :value="selectionEnd" />
@@ -54,6 +54,7 @@
   const selectionEnd = ref(end.value)
   const selectionStart = ref(subDays(selectionEnd.value, 1))
   const selectionMinimumSeconds = hoursToSeconds(6)
+  const selectionMaximumSeconds = hoursToSeconds(24)
 
   const data = ref<HistogramData>([])
 

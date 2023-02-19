@@ -15,4 +15,5 @@ export type HistogramChartOptions = {
   transition?: boolean,
   transitionDuration?: number,
   selectionMinimumSeconds?: number,
+  selectionMaximumSeconds?: number,
 }

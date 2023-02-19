@@ -57,7 +57,7 @@
   import { Pixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
   import * as d3 from 'd3'
-  import { addHours, addSeconds, differenceInSeconds, format, isAfter, isBefore, subHours, subSeconds } from 'date-fns'
+  import { addSeconds, differenceInSeconds, format, isAfter, isBefore, subSeconds } from 'date-fns'
   import { computed, onMounted, ref, watch, watchEffect } from 'vue'
   import { HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
@@ -92,6 +92,7 @@
   const transitionDuration = computed(() => props.options?.transitionDuration ?? 250)
   const transitionDurationString = computed(() => `${transitionDuration.value}ms`)
   const selectionMinimumSeconds = computed(() => props.options?.selectionMinimumSeconds ?? 0)
+  const selectionMaximumSeconds = computed(() => props.options?.selectionMaximumSeconds ?? Infinity)
   const showBars = computed(() => !props.smooth)
   const showSmooth = computed(() => props.smooth)
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
@@ -359,6 +360,12 @@
       selectionStart = minIntervalStart.value
     }
 
+    const maximum = subSeconds(props.selectionEnd!, selectionMaximumSeconds.value)
+
+    if (isBefore(selectionStart, maximum)) {
+      selectionStart = maximum
+    }
+
     const minimum = subSeconds(props.selectionEnd!, selectionMinimumSeconds.value)
 
     if (isAfter(selectionStart, minimum)) {
@@ -380,6 +387,12 @@
 
     if (isAfter(selectionEnd, maxIntervalEnd.value)) {
       selectionEnd = maxIntervalEnd.value
+    }
+
+    const maximum = addSeconds(props.selectionStart!, selectionMaximumSeconds.value)
+
+    if (isAfter(selectionEnd, maximum)) {
+      selectionEnd = maximum
     }
 
     const minimum = addSeconds(props.selectionStart!, selectionMinimumSeconds.value)
