@@ -1,5 +1,5 @@
 <template>
-  <div v-if="data.length" class="histogram-chart">
+  <div v-if="data.length" class="histogram-chart" :class="classes.root">
     <div ref="chart" class="histogram-chart__chart">
       <template v-if="showSelection">
         <div ref="selection" class="histogram-chart__selection" :class="classes.selection" :style="selectionStyles">
@@ -242,6 +242,10 @@
   })
 
   const classes = computed(() => ({
+    root: {
+      'histogram-chart--x-axis': showXAxis.value,
+      'histogram-chart--y-axis': showYAxis.value,
+    },
     selection: {
       'histogram-chart__selection--moving': movingSelection.value,
     },
@@ -423,8 +427,22 @@
 .histogram-chart { @apply
   grid
   gap-2;
-  grid-template-columns: min-content 1fr;
+  grid-template-rows: minmax(56px, 1fr);
+  grid-template-areas: "chart";
+}
+
+.histogram-chart--x-axis {
   grid-template-rows: minmax(56px, 1fr) min-content;
+  grid-template-areas: "chart"
+  "xAxis";
+}
+
+.histogram-chart--y-axis {
+  grid-template-columns: min-content 1fr;
+  grid-template-areas: "yAxis chart";
+}
+
+.histogram-chart--x-axis.histogram-chart--y-axis {
   grid-template-areas: "yAxis chart"
                        ".     xAxis";
 }
