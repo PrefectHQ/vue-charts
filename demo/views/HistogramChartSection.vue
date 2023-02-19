@@ -28,7 +28,7 @@
         v-bind="{ data, smooth }"
         v-model:selection-start="selectionStart"
         v-model:selection-end="selectionEnd"
-        :options="{ showXAxis, showYAxis }"
+        :options="{ showXAxis, showYAxis, selectionMinimumSeconds }"
       />
       <p-key-value label="Selection Start" :value="selectionStart" />
       <p-key-value label="Selection End" :value="selectionEnd" />
@@ -38,7 +38,7 @@
 
 <script lang="ts" setup>
   import { BooleanRouteParam, NumberRouteParam, useRouteQueryParam } from '@prefecthq/vue-compositions'
-  import { endOfWeek, startOfWeek, subDays } from 'date-fns'
+  import { endOfWeek, hoursToSeconds, startOfWeek, subDays } from 'date-fns'
   import { ref, watch } from 'vue'
   import ComponentPage from '../components/ComponentPage.vue'
   import { generateBarChartData } from '../data'
@@ -53,6 +53,7 @@
   const buckets = useRouteQueryParam('buckets', NumberRouteParam, 20)
   const selectionEnd = ref(end.value)
   const selectionStart = ref(subDays(selectionEnd.value, 1))
+  const selectionMinimumSeconds = hoursToSeconds(6)
 
   const data = ref<HistogramData>([])
 

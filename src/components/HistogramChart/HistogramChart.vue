@@ -57,7 +57,7 @@
   import { Pixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
   import * as d3 from 'd3'
-  import { addSeconds, differenceInSeconds, format, isAfter, isBefore, subSeconds } from 'date-fns'
+  import { addHours, addSeconds, differenceInSeconds, format, isAfter, isBefore, subHours, subSeconds } from 'date-fns'
   import { computed, onMounted, ref, watch, watchEffect } from 'vue'
   import { HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
@@ -91,6 +91,7 @@
   const transition = computed(() => props.options?.transition ?? true)
   const transitionDuration = computed(() => props.options?.transitionDuration ?? 250)
   const transitionDurationString = computed(() => `${transitionDuration.value}ms`)
+  const selectionMinimumSeconds = computed(() => props.options?.selectionMinimumSeconds ?? 0)
   const showBars = computed(() => !props.smooth)
   const showSmooth = computed(() => props.smooth)
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
@@ -351,10 +352,17 @@
       return
     }
 
-    let { selectionStart } = getNewSelectionForEvent(event)
+    const [mouseX] = d3.pointer(event, chart.value)
+    let selectionStart = xScale.value.invert(mouseX)
 
     if (isBefore(selectionStart, minIntervalStart.value)) {
       selectionStart = minIntervalStart.value
+    }
+
+    const minimum = subSeconds(props.selectionEnd!, selectionMinimumSeconds.value)
+
+    if (isAfter(selectionStart, minimum)) {
+      selectionStart = minimum
     }
 
     updateSelection({
@@ -367,10 +375,17 @@
       return
     }
 
-    let { selectionEnd } = getNewSelectionForEvent(event)
+    const [mouseX] = d3.pointer(event, chart.value)
+    let selectionEnd = xScale.value.invert(mouseX)
 
     if (isAfter(selectionEnd, maxIntervalEnd.value)) {
       selectionEnd = maxIntervalEnd.value
+    }
+
+    const minimum = addSeconds(props.selectionStart!, selectionMinimumSeconds.value)
+
+    if (isBefore(selectionEnd, minimum)) {
+      selectionEnd = minimum
     }
 
     updateSelection({
