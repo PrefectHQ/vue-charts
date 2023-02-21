@@ -80,10 +80,6 @@
     (event: 'update:selectionStart' | 'update:selectionEnd', value: Date | undefined): void,
   }>()
 
-  onMounted(() => {
-    initSelectionDrag()
-  })
-
   const showXAxis = computed(() => props.options?.showXAxis ?? true)
   const showYAxis = computed(() => props.options?.showYAxis ?? true)
   const curve = computed(() => props.options?.curve ?? d3.curveCatmullRom)
@@ -92,60 +88,57 @@
   const transitionDurationString = computed(() => `${transitionDuration.value}ms`)
   const selectionMinimumSeconds = computed(() => props.options?.selectionMinimumSeconds ?? 0)
   const selectionMaximumSeconds = computed(() => props.options?.selectionMaximumSeconds ?? Infinity)
+
   const showBars = computed(() => !props.smooth)
   const showSmooth = computed(() => props.smooth)
-  const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const movingSelection = ref(false)
   const pathRendered = ref(false)
+
+  const showSelection = computed(() => props.selectionEnd && props.selectionStart)
+
+  const unwatchShowSelection = watch(showSelection, show => {
+    if (show) {
+      initSelectionDrag()
+      unwatchShowSelection()
+    }
+  })
+
+  onMounted(() => {
+    if (showSelection.value) {
+      unwatchShowSelection()
+      initSelectionDrag()
+    }
+  })
 
   const path = ref<SVGElement>()
   const { width: pathWidth } = useElementRect(path)
 
-  const chart = ref<HTMLDivElement>()
+  const chart = ref<Element>()
   const { width: chartWidth, height: chartHeight, x: chartX } = useElementRect(chart)
 
-  const selection = ref<HTMLDivElement>()
-  const selectionLeft = ref<HTMLDivElement>()
-  const selectionRight = ref<HTMLDivElement>()
+  const selection = ref<Element>()
+  const selectionLeft = ref<Element>()
+  const selectionRight = ref<Element>()
 
-  const dragSelection = d3.drag()
-    .on('start', selectionDragStart)
-    .on('drag', selectionDrag)
-    .on('end', selectionDragEnd)
-
-  const dragSelectionLeft = d3.drag()
-    .container(chart.value as any)
-    .on('start', selectionDragStart)
-    .on('drag', selectionLeftDrag)
-    .on('end', selectionDragEnd)
-
-  const dragSelectionRight = d3.drag()
-    .container(chart.value as any)
-    .on('start', selectionDragStart)
-    .on('drag', selectionRightDrag)
-    .on('end', selectionDragEnd)
-
-  const unwatch = watch(pathWidth, width => {
+  const unwatchPathWidth = watch(pathWidth, width => {
     if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
       pathRendered.value = true
-      unwatch()
+      unwatchPathWidth()
     }
   })
 
   watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
 
   const minIntervalStart = computed<Date>(() => {
-    const allStartDateTimes = props.data.map(point => point.intervalStart.getTime())
-    const minStartDateTime = Math.min(...allStartDateTimes)
+    const allStartTimes = props.data.map(point => point.intervalStart)
 
-    return new Date(minStartDateTime)
+    return d3.min(allStartTimes)!
   })
 
   const maxIntervalEnd = computed<Date>(() => {
-    const allEndDateTimes = props.data.map(point => point.intervalEnd.getTime())
-    const maxEndDateTime = Math.max(...allEndDateTimes)
+    const allEndDateTimes = props.data.map(point => point.intervalEnd)
 
-    return new Date(maxEndDateTime)
+    return d3.max(allEndDateTimes)!
   })
 
   const maxValue = computed<number>(() => {
@@ -271,7 +264,6 @@
   }
 
   function getPointPosition(point: HistogramDataPoint): PointPosition {
-    // write a util for middle of two dates
     const middle = new Date((point.intervalStart.getTime() + point.intervalEnd.getTime()) / 2)
     const x = xScale.value(middle)
 
@@ -428,17 +420,34 @@
   }
 
   function initSelectionDrag(): void {
-    // d3's types seem a little off
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dragSelection(d3.select(selection.value!) as any)
+    if (!chart.value || !selection.value || !selectionLeft.value || !selectionRight.value) {
+      return
+    }
 
-    // d3's types seem a little off
+    // d3s types are a little wonky
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dragSelectionLeft(d3.select(selectionLeft.value! as any))
+    const chartSelection = d3.select(chart.value) as any
 
-    // d3's types seem a little off
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    dragSelectionRight(d3.select(selectionRight.value! as any))
+    const dragSelection = d3.drag()
+      .on('start', selectionDragStart)
+      .on('drag', selectionDrag)
+      .on('end', selectionDragEnd)
+
+    const dragSelectionLeft = d3.drag()
+      .container(chartSelection)
+      .on('start', selectionDragStart)
+      .on('drag', selectionLeftDrag)
+      .on('end', selectionDragEnd)
+
+    const dragSelectionRight = d3.drag()
+      .container(chartSelection)
+      .on('start', selectionDragStart)
+      .on('drag', selectionRightDrag)
+      .on('end', selectionDragEnd)
+
+    d3.select(selection.value).call(dragSelection)
+    d3.select(selectionLeft.value).call(dragSelectionLeft)
+    d3.select(selectionRight.value).call(dragSelectionRight)
   }
 </script>
 
