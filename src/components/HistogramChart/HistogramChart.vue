@@ -209,10 +209,7 @@
     ]
 
     if (!pathRendered.value || !showSmooth.value) {
-      const [[x], ...positionsAllAtBottom]: PointPosition[] = positions.map(([x]) => [x, chartHeight.value])
-      const firstPosition: PointPosition = [x, chartHeight.value]
-
-      return [firstPosition, ...positionsAllAtBottom]
+      return positions.map(([x]) => [x, chartHeight.value])
     }
 
     return positions
@@ -340,7 +337,7 @@
   }
 
   function selectionDrag(event: DragEvent): void {
-    if (dragEnteredChart(event)) {
+    if (dragReenteredChart(event)) {
       return
     }
 
@@ -351,7 +348,7 @@
   }
 
   function selectionLeftDrag(event: DragEvent): void {
-    if (dragEnteredChart(event)) {
+    if (dragReenteredChart(event)) {
       return
     }
 
@@ -380,7 +377,7 @@
   }
 
   function selectionRightDrag(event: DragEvent): void {
-    if (dragEnteredChart(event)) {
+    if (dragReenteredChart(event)) {
       return
     }
 
@@ -408,7 +405,7 @@
     })
   }
 
-  function dragEnteredChart(event: DragEvent): boolean {
+  function dragReenteredChart(event: DragEvent): boolean {
     const difference = event.dx
     const chartXLeft = chartX.value
     const chartXRight = chartX.value + chartWidth.value
@@ -452,6 +449,7 @@
 <style>
 .histogram-chart--dragging { @apply
   cursor-move
+  select-none
 }
 
 .histogram-chart { @apply
