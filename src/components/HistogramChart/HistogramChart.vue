@@ -179,15 +179,7 @@
     return scale
   })
 
-  const bars = computed(() => {
-    const bars = props.data.map(point => getBar(point))
-
-    if (!pathRendered.value || !showBars.value) {
-      return bars.map(bar => ({ ...bar, height: '0px' }))
-    }
-
-    return bars
-  })
+  const bars = computed(() => props.data.map(point => getBar(point)))
 
   const positions = computed<PointPosition[]>(() => {
     const points = props.data.map(point => getPointPosition(point))
@@ -269,6 +261,10 @@
       width: toPixels(width),
       height: toPixels(height),
       bottom: toPixels(0),
+    }
+
+    if (!pathRendered.value || !showBars.value) {
+      styles.height = toPixels(0)
     }
 
     return { ...point, styles }
