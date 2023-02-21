@@ -14,4 +14,6 @@ export type HistogramChartOptions = {
   curve?: d3.CurveFactory,
   transition?: boolean,
   transitionDuration?: number,
+  selectionMinimumSeconds?: number,
+  selectionMaximumSeconds?: number,
 }

@@ -1,8 +1,11 @@
 <template>
-  <div v-if="data.length" class="histogram-chart">
+  <div v-if="data.length" class="histogram-chart" :class="classes.root">
     <div ref="chart" class="histogram-chart__chart">
       <template v-if="showSelection">
-        <div ref="selection" class="histogram-chart__selection" :class="classes.selection" :style="selectionStyles" />
+        <div ref="selection" class="histogram-chart__selection" :class="classes.selection" :style="selectionStyles">
+          <div ref="selectionLeft" class="histogram-chart__selection-resize histogram-chart__selection-resize--left" />
+          <div ref="selectionRight" class="histogram-chart__selection-resize histogram-chart__selection-resize--right" />
+        </div>
       </template>
 
       <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
@@ -59,9 +62,12 @@
   import { HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
 
-  type PointBar = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
+  type PointBarStyles = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
   type PointPosition = [x: number, y: number]
-  type Selection = { left: Pixels, width: Pixels }
+  type SelectionStyles = { left: Pixels, right: Pixels }
+  type Selection = { selectionStart: Date, selectionEnd: Date }
+  type DragEvent = { x: number, dx: number, sourceEvent: HTMLMouseEvent }
+  type HTMLMouseEvent = MouseEvent & { target: HTMLElement }
 
   const props = defineProps<{
     data: HistogramData,
@@ -72,7 +78,7 @@
   }>()
 
   const emit = defineEmits<{
-    (event: 'update:selectionStart' | 'update:selectionEnd', value: Date): void,
+    (event: 'update:selectionStart' | 'update:selectionEnd', value: Date | undefined): void,
   }>()
 
   onMounted(() => {
@@ -85,6 +91,8 @@
   const transition = computed(() => props.options?.transition ?? true)
   const transitionDuration = computed(() => props.options?.transitionDuration ?? 250)
   const transitionDurationString = computed(() => `${transitionDuration.value}ms`)
+  const selectionMinimumSeconds = computed(() => props.options?.selectionMinimumSeconds ?? 0)
+  const selectionMaximumSeconds = computed(() => props.options?.selectionMaximumSeconds ?? Infinity)
   const showBars = computed(() => !props.smooth)
   const showSmooth = computed(() => props.smooth)
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
@@ -98,10 +106,24 @@
   const { width: chartWidth, height: chartHeight, x: chartX } = useElementRect(chart)
 
   const selection = ref<HTMLDivElement>()
+  const selectionLeft = ref<HTMLDivElement>()
+  const selectionRight = ref<HTMLDivElement>()
 
-  const drag = d3.drag()
+  const dragSelection = d3.drag()
     .on('start', selectionDragStart)
     .on('drag', selectionDrag)
+    .on('end', selectionDragEnd)
+
+  const dragSelectionLeft = d3.drag()
+    .container(chart.value as any)
+    .on('start', selectionDragStart)
+    .on('drag', selectionLeftDrag)
+    .on('end', selectionDragEnd)
+
+  const dragSelectionRight = d3.drag()
+    .container(chart.value as any)
+    .on('start', selectionDragStart)
+    .on('drag', selectionRightDrag)
     .on('end', selectionDragEnd)
 
   const unwatch = watch(pathWidth, width => {
@@ -205,7 +227,7 @@
     return line(positions.value)
   })
 
-  const selectionStyles = computed<Selection | undefined>(() => {
+  const selectionStyles = computed<SelectionStyles | undefined>(() => {
     const { selectionStart: start, selectionEnd: end } = props
 
     if (!start || !end) {
@@ -213,16 +235,19 @@
     }
 
     const left = xScale.value(start)
-    const right = xScale.value(end)
-    const width = right - left
+    const right = chartWidth.value - xScale.value(end)
 
     return {
       left: `${left}px`,
-      width: `${width}px`,
+      right: `${right}px`,
     }
   })
 
   const classes = computed(() => ({
+    root: {
+      'histogram-chart--x-axis': showXAxis.value,
+      'histogram-chart--y-axis': showYAxis.value,
+    },
     selection: {
       'histogram-chart__selection--moving': movingSelection.value,
     },
@@ -236,14 +261,14 @@
     },
   }))
 
-  function getPointBar(point: HistogramDataPoint): PointBar {
+  function getPointBar(point: HistogramDataPoint): PointBarStyles {
     const top = yScale.value(point.value)
     const left = xScale.value(point.intervalStart)
     const right = xScale.value(point.intervalEnd)
     const width = right - left
     const height = top
 
-    const bar: PointBar = {
+    const bar: PointBarStyles = {
       left: `${left}px`,
       width: `${width}px`,
       height: `${height}px`,
@@ -269,30 +294,30 @@
     return format(value, 'hh:mm a')
   }
 
-  function keepSelectionInRange(start: Date, end: Date): { start: Date, end: Date } {
+  function keepSelectionInRange({ selectionStart, selectionEnd }: Selection): Selection {
     const min = minIntervalStart.value
     const max = maxIntervalEnd.value
-    const difference = differenceInSeconds(end, start)
+    const difference = differenceInSeconds(selectionEnd, selectionStart)
 
-    const startBeforeMin = isBefore(start, min)
+    const startBeforeMin = isBefore(selectionStart, min)
 
     if (startBeforeMin) {
       return {
-        start: min,
-        end: addSeconds(min, difference),
+        selectionStart: min,
+        selectionEnd: addSeconds(min, difference),
       }
     }
 
-    const endAfterMax = isAfter(end, max)
+    const endAfterMax = isAfter(selectionEnd, max)
 
     if (endAfterMax) {
       return {
-        start: subSeconds(max, difference),
-        end: max,
+        selectionStart: subSeconds(max, difference),
+        selectionEnd: max,
       }
     }
 
-    return { start, end }
+    return { selectionStart, selectionEnd }
   }
 
   function selectionDragStart(): void {
@@ -303,7 +328,85 @@
     movingSelection.value = false
   }
 
-  function selectionDrag(event: { x: number, dx: number, sourceEvent: MouseEvent }): void {
+  function getNewSelectionForEvent({ dx: difference }: DragEvent): { selectionStart: Date, selectionEnd: Date } {
+    const startDateValue = xScale.value(props.selectionStart!)
+    const endDateValue = xScale.value(props.selectionEnd!)
+    const selectionStart = xScale.value.invert(startDateValue + difference)
+    const selectionEnd = xScale.value.invert(endDateValue + difference)
+
+    return { selectionStart, selectionEnd }
+  }
+
+  function selectionDrag(event: DragEvent): void {
+    if (dragEnteredChart(event)) {
+      return
+    }
+
+    const selection = getNewSelectionForEvent(event)
+    const selectionInRange = keepSelectionInRange(selection)
+
+    updateSelection(selectionInRange)
+  }
+
+  function selectionLeftDrag(event: DragEvent): void {
+    if (dragEnteredChart(event)) {
+      return
+    }
+
+    const [mouseX] = d3.pointer(event, chart.value)
+    let selectionStart = xScale.value.invert(mouseX)
+
+    if (isBefore(selectionStart, minIntervalStart.value)) {
+      selectionStart = minIntervalStart.value
+    }
+
+    const maximum = subSeconds(props.selectionEnd!, selectionMaximumSeconds.value)
+
+    if (isBefore(selectionStart, maximum)) {
+      selectionStart = maximum
+    }
+
+    const minimum = subSeconds(props.selectionEnd!, selectionMinimumSeconds.value)
+
+    if (isAfter(selectionStart, minimum)) {
+      selectionStart = minimum
+    }
+
+    updateSelection({
+      selectionStart,
+    })
+  }
+
+  function selectionRightDrag(event: DragEvent): void {
+    if (dragEnteredChart(event)) {
+      return
+    }
+
+    const [mouseX] = d3.pointer(event, chart.value)
+    let selectionEnd = xScale.value.invert(mouseX)
+
+    if (isAfter(selectionEnd, maxIntervalEnd.value)) {
+      selectionEnd = maxIntervalEnd.value
+    }
+
+    const maximum = addSeconds(props.selectionStart!, selectionMaximumSeconds.value)
+
+    if (isAfter(selectionEnd, maximum)) {
+      selectionEnd = maximum
+    }
+
+    const minimum = addSeconds(props.selectionStart!, selectionMinimumSeconds.value)
+
+    if (isBefore(selectionEnd, minimum)) {
+      selectionEnd = minimum
+    }
+
+    updateSelection({
+      selectionEnd,
+    })
+  }
+
+  function dragEnteredChart(event: DragEvent): boolean {
     const difference = event.dx
     const chartXLeft = chartX.value
     const chartXRight = chartX.value + chartWidth.value
@@ -313,25 +416,34 @@
     const mouseEnteredChartFromRight = chartXRight <= previousMouseX
 
     if (mouseEnteredChartFromLeft || mouseEnteredChartFromRight) {
-      return
+      return true
     }
 
-    const startDateValue = xScale.value(props.selectionStart!)
-    const endDateValue = xScale.value(props.selectionEnd!)
-    const newStartDate = xScale.value.invert(startDateValue + difference)
-    const newEndDate = xScale.value.invert(endDateValue + difference)
-    const { start, end } = keepSelectionInRange(newStartDate, newEndDate)
+    return false
+  }
 
-    emit('update:selectionStart', start)
-    emit('update:selectionEnd', end)
+  function updateSelection({ selectionStart, selectionEnd }: Partial<Selection>): void {
+    if (selectionStart) {
+      emit('update:selectionStart', selectionStart)
+    }
+
+    if (selectionEnd) {
+      emit('update:selectionEnd', selectionEnd)
+    }
   }
 
   function initSelectionDrag(): void {
     // d3's types seem a little off
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const element = d3.select(selection.value!) as any
+    dragSelection(d3.select(selection.value!) as any)
 
-    drag(element)
+    // d3's types seem a little off
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dragSelectionLeft(d3.select(selectionLeft.value! as any))
+
+    // d3's types seem a little off
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    dragSelectionRight(d3.select(selectionRight.value! as any))
   }
 </script>
 
@@ -343,8 +455,22 @@
 .histogram-chart { @apply
   grid
   gap-2;
-  grid-template-columns: min-content 1fr;
+  grid-template-rows: minmax(56px, 1fr);
+  grid-template-areas: "chart";
+}
+
+.histogram-chart--x-axis {
   grid-template-rows: minmax(56px, 1fr) min-content;
+  grid-template-areas: "chart"
+  "xAxis";
+}
+
+.histogram-chart--y-axis {
+  grid-template-columns: min-content 1fr;
+  grid-template-areas: "yAxis chart";
+}
+
+.histogram-chart--x-axis.histogram-chart--y-axis {
   grid-template-areas: "yAxis chart"
                        ".     xAxis";
 }
@@ -370,19 +496,49 @@
   cursor-move
   block
   absolute
-  opacity-25
-  border-2
+  opacity-50
+  border
   border-white
   bg-slate-500
   transition-opacity
   top-0
   bottom-0
+  rounded-sm
   z-10
-  hover:opacity-50
+  hover:opacity-60
+}
+
+.histogram-chart__selection--moving .histogram-chart__selection-resize,
+.histogram-chart__selection:hover .histogram-chart__selection-resize { @apply
+  opacity-100
+}
+
+.histogram-chart__selection-resize { @apply
+  block
+  absolute
+  w-2
+  h-8
+  border
+  border-white
+  bg-slate-500
+  rounded-sm
+  opacity-0
+  cursor-col-resize;
+  top: 50%;
+}
+
+.histogram-chart__selection-resize--left { @apply
+  left-0;
+  transform: translate(-50%, -50%)
+}
+
+.histogram-chart__selection-resize--right { @apply
+  right-0;
+  transform: translate(50%, -50%)
 }
 
 .histogram-chart__selection--moving { @apply
-  opacity-50
+  !opacity-70
 }
 
 .histogram-chart__bar { @apply
