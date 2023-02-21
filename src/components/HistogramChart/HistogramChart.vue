@@ -13,9 +13,9 @@
       </svg>
 
       <template v-for="(bar, index) in bars" :key="index">
-        <div class="histogram-chart__bar" :class="classes.bar" :style="bar">
-          <slot name="bar" v-bind="{ bar }" />
-        </div>
+        <slot name="bar" v-bind="bar">
+          <div class="histogram-chart__bar" :class="classes.bar" :style="bar.styles" />
+        </slot>
       </template>
     </div>
 
@@ -54,15 +54,14 @@
 </template>
 
 <script lang="ts" setup>
-  import { Pixels } from '@prefecthq/prefect-design'
+  import { Pixels, toPixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
   import * as d3 from 'd3'
   import { addSeconds, differenceInSeconds, format, isAfter, isBefore, subSeconds } from 'date-fns'
   import { computed, onMounted, ref, watch, watchEffect } from 'vue'
-  import { HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
+  import { HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
 
-  type PointBarStyles = { left: Pixels, bottom: Pixels, width: Pixels, height: Pixels }
   type PointPosition = [x: number, y: number]
   type SelectionStyles = { left: Pixels, right: Pixels }
   type Selection = { selectionStart: Date, selectionEnd: Date }
@@ -181,7 +180,7 @@
   })
 
   const bars = computed(() => {
-    const bars = props.data.map(point => getPointBar(point))
+    const bars = props.data.map(point => getBar(point))
 
     if (!pathRendered.value || !showBars.value) {
       return bars.map(bar => ({ ...bar, height: '0px' }))
@@ -261,26 +260,29 @@
     },
   }))
 
-  function getPointBar(point: HistogramDataPoint): PointBarStyles {
+  function getBar(point: HistogramDataPoint): HistogramBar {
     const top = yScale.value(point.value)
     const left = xScale.value(point.intervalStart)
     const right = xScale.value(point.intervalEnd)
     const width = right - left
     const height = top
 
-    const bar: PointBarStyles = {
-      left: `${left}px`,
-      width: `${width}px`,
-      height: `${height}px`,
-      bottom: '0px',
+    const styles: HistogramBarStyles = {
+      left: toPixels(left),
+      width: toPixels(width),
+      height: toPixels(height),
+      bottom: toPixels(0),
     }
 
-    return bar
+    return { ...point, styles }
   }
 
   function getPointPosition(point: HistogramDataPoint): PointPosition {
+    // write a util for middle of two dates
     const middle = new Date((point.intervalStart.getTime() + point.intervalEnd.getTime()) / 2)
     const x = xScale.value(middle)
+
+    // explain this
     const y = chartHeight.value - yScale.value(point.value)
 
     return [x, y]
