@@ -1,3 +1,4 @@
+import { Pixels } from '@prefecthq/prefect-design'
 import * as d3 from 'd3'
 
 export type HistogramData<T = unknown> = HistogramDataPoint<T>[]
@@ -14,4 +15,17 @@ export type HistogramChartOptions = {
   curve?: d3.CurveFactory,
   transition?: boolean,
   transitionDuration?: number,
+  selectionMinimumSeconds?: number,
+  selectionMaximumSeconds?: number,
+}
+
+export type HistogramBarStyles = {
+  left: Pixels,
+  bottom: Pixels,
+  width: Pixels,
+  height: Pixels,
+}
+
+export type HistogramBar = HistogramDataPoint & {
+  styles: HistogramBarStyles,
 }
