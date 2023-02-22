@@ -78,6 +78,7 @@
 
   const emit = defineEmits<{
     (event: 'update:selectionStart' | 'update:selectionEnd', value: Date | undefined): void,
+    (event: 'selection', value: Selection): void,
   }>()
 
   const showXAxis = computed(() => props.options?.showXAxis ?? true)
@@ -143,7 +144,7 @@
 
   const maxValue = computed<number>(() => {
     const allValues = props.data.map(point => point.value)
-    const max =  Math.max(...allValues)
+    const max = Math.max(...allValues)
 
     if (max <= 0) {
       return 0
@@ -313,6 +314,11 @@
 
   function selectionDragEnd(): void {
     movingSelection.value = false
+
+    emit('selection', {
+      selectionStart: props.selectionStart!,
+      selectionEnd: props.selectionEnd!,
+    })
   }
 
   function getNewSelectionForEvent({ dx: difference }: DragEvent): { selectionStart: Date, selectionEnd: Date } {
