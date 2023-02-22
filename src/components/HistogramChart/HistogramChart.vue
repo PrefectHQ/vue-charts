@@ -177,8 +177,8 @@
 
   const positions = computed<PointPosition[]>(() => {
     const points = props.data.map(point => getPointPosition(point))
-    const [, firstY] = points.shift()!
-    const [, lastY] = points.pop()!
+    const [, firstY = 0] = points.shift() ?? []
+    const [, lastY = firstY] = points.pop() ?? []
     const firstPoint: PointPosition = [0, firstY]
     const lastPoint: PointPosition = [chartWidth.value, lastY]
 
