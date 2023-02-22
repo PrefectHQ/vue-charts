@@ -144,7 +144,7 @@
 
   const maxValue = computed<number>(() => {
     const allValues = props.data.map(point => point.value)
-    const max =  Math.max(...allValues)
+    const max = Math.max(...allValues)
 
     if (max <= 0) {
       return 0
