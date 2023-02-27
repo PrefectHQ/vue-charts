@@ -19,7 +19,7 @@
       </template>
     </div>
 
-    <template v-if="showYAxis">
+    <template v-if="options.showYAxis">
       <div class="histogram-chart__axis-y">
         <div class="histogram-chart__label histogram-chart__label-y histogram-chart__label-y--min">
           <slot name="label-y" :value="maxScaleValue">
@@ -34,18 +34,18 @@
       </div>
     </template>
 
-    <template v-if="showXAxis">
+    <template v-if="options.showXAxis">
       <div class="histogram-chart__axis-x">
         <div class="histogram-chart__label histogram-chart__label-x histogram-chart__label-x--start">
-          <slot name="label-x" :value="minIntervalStart">
-            <span class="histogram-chart__date-label">{{ formatDateLabel(minIntervalStart) }}</span>
-            <span class="histogram-chart__time-label">{{ formatTimeLabel(minIntervalStart) }}</span>
+          <slot name="label-x" :value="startDate">
+            <span class="histogram-chart__date-label">{{ formatDateLabel(startDate) }}</span>
+            <span class="histogram-chart__time-label">{{ formatTimeLabel(startDate) }}</span>
           </slot>
         </div>
         <div class="histogram-chart__label histogram-chart__label-x histogram-chart__label-x--end">
-          <slot name="label-x" :value="maxIntervalEnd">
-            <span class="histogram-chart__date-label">{{ formatDateLabel(maxIntervalEnd) }}</span>
-            <span class="histogram-chart__time-label">{{ formatTimeLabel(maxIntervalEnd) }}</span>
+          <slot name="label-x" :value="endDate">
+            <span class="histogram-chart__date-label">{{ formatDateLabel(endDate) }}</span>
+            <span class="histogram-chart__time-label">{{ formatTimeLabel(endDate) }}</span>
           </slot>
         </div>
       </div>
@@ -59,8 +59,9 @@
   import * as d3 from 'd3'
   import { addSeconds, differenceInSeconds, format, isAfter, isBefore, subSeconds } from 'date-fns'
   import { computed, onMounted, ref, watch, watchEffect } from 'vue'
-  import { HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
+  import { defaultHistogramChartOptions, HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
+  import { sortByDateProperty } from '@/utilities/sortByDate'
 
   type PointPosition = [x: number, y: number]
   type SelectionStyles = { left: Pixels, right: Pixels }
@@ -81,21 +82,18 @@
     (event: 'selection', value: Selection): void,
   }>()
 
-  const showXAxis = computed(() => props.options?.showXAxis ?? true)
-  const showYAxis = computed(() => props.options?.showYAxis ?? true)
-  const curve = computed(() => props.options?.curve ?? d3.curveCatmullRom)
-  const transition = computed(() => props.options?.transition ?? true)
-  const transitionDuration = computed(() => props.options?.transitionDuration ?? 250)
-  const transitionDurationString = computed(() => `${transitionDuration.value}ms`)
-  const selectionMinimumSeconds = computed(() => props.options?.selectionMinimumSeconds ?? 0)
-  const selectionMaximumSeconds = computed(() => props.options?.selectionMaximumSeconds ?? Infinity)
+  const options = computed<Required<HistogramChartOptions>>(() => ({
+    ...defaultHistogramChartOptions,
+    ...props.options,
+  }))
 
+  const data = computed(() => sortByDateProperty(props.data, 'intervalStart'))
+  const transitionDurationString = computed(() => `${options.value.transitionDuration}ms`)
   const showBars = computed(() => !props.smooth)
   const showSmooth = computed(() => props.smooth)
+  const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const movingSelection = ref(false)
   const pathRendered = ref(false)
-
-  const showSelection = computed(() => props.selectionEnd && props.selectionStart)
 
   const unwatchShowSelection = watch(showSelection, show => {
     if (show) {
@@ -130,35 +128,29 @@
 
   watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
 
-  const minIntervalStart = computed<Date>(() => {
-    const allStartTimes = props.data.map(point => point.intervalStart)
+  const startDate = computed<Date>(() => {
+    const firstDataPoint = data.value.at(0)!
 
-    return d3.min(allStartTimes)!
+    return firstDataPoint.intervalStart
   })
 
-  const maxIntervalEnd = computed<Date>(() => {
-    const allEndDateTimes = props.data.map(point => point.intervalEnd)
+  const endDate = computed<Date>(() => {
+    const lastDataPoint = data.value.at(-1)!
 
-    return d3.max(allEndDateTimes)!
+    return lastDataPoint.intervalEnd
   })
 
-  const maxValue = computed<number>(() => {
-    const allValues = props.data.map(point => point.value)
-    const max = Math.max(...allValues)
+  const maxScaleValue = computed<number>(() => {
+    const allValues = data.value.map(point => point.value)
+    const max = Math.max(...allValues, 0)
 
-    if (max <= 0) {
-      return 0
-    }
-
-    return max
+    return roundUpToIncrement(max)
   })
-
-  const maxScaleValue = computed<number>(() => roundUpToIncrement(maxValue.value))
 
   const xScale = computed(() => {
     const scale = d3.scaleTime()
 
-    scale.domain([minIntervalStart.value, maxIntervalEnd.value])
+    scale.domain([startDate.value, endDate.value])
     scale.range([0, chartWidth.value])
 
     return scale
@@ -173,10 +165,10 @@
     return scale
   })
 
-  const bars = computed(() => props.data.map(point => getBar(point)))
+  const bars = computed(() => data.value.map(point => getBar(point)))
 
   const positions = computed<PointPosition[]>(() => {
-    const points = props.data.map(point => getPointPosition(point))
+    const points = data.value.map(point => getPointPosition(point))
     const [, firstY = 0] = points.shift() ?? []
     const [, lastY = firstY] = points.pop() ?? []
     const firstPoint: PointPosition = [0, firstY]
@@ -204,7 +196,7 @@
   const pathData = computed(() => {
     const line = d3.line()
 
-    line.curve(curve.value)
+    line.curve(options.value.curve)
 
     return line(positions.value)
   })
@@ -227,18 +219,18 @@
 
   const classes = computed(() => ({
     root: {
-      'histogram-chart--x-axis': showXAxis.value,
-      'histogram-chart--y-axis': showYAxis.value,
+      'histogram-chart--x-axis': options.value.showXAxis,
+      'histogram-chart--y-axis': options.value.showYAxis,
     },
     selection: {
       'histogram-chart__selection--moving': movingSelection.value,
     },
     bar: {
-      'histogram-chart__bar--transitioned': transition.value,
+      'histogram-chart__bar--transitioned': options.value.transition,
       'histogram-chart__bar--visible': pathRendered.value && showBars.value,
     },
     path: {
-      'histogram-chart__path--transitioned': transition.value,
+      'histogram-chart__path--transitioned': options.value.transition,
       'histogram-chart__path--visible': pathRendered.value && showSmooth.value,
     },
   }))
@@ -283,8 +275,8 @@
   }
 
   function keepSelectionInRange({ selectionStart, selectionEnd }: Selection): Selection {
-    const min = minIntervalStart.value
-    const max = maxIntervalEnd.value
+    const min = startDate.value
+    const max = endDate.value
     const difference = differenceInSeconds(selectionEnd, selectionStart)
 
     const startBeforeMin = isBefore(selectionStart, min)
@@ -349,17 +341,17 @@
     const [mouseX] = d3.pointer(event, chart.value)
     let selectionStart = xScale.value.invert(mouseX)
 
-    if (isBefore(selectionStart, minIntervalStart.value)) {
-      selectionStart = minIntervalStart.value
+    if (isBefore(selectionStart, startDate.value)) {
+      selectionStart = startDate.value
     }
 
-    const maximum = subSeconds(props.selectionEnd!, selectionMaximumSeconds.value)
+    const maximum = subSeconds(props.selectionEnd!, options.value.selectionMaximumSeconds)
 
     if (isBefore(selectionStart, maximum)) {
       selectionStart = maximum
     }
 
-    const minimum = subSeconds(props.selectionEnd!, selectionMinimumSeconds.value)
+    const minimum = subSeconds(props.selectionEnd!, options.value.selectionMinimumSeconds)
 
     if (isAfter(selectionStart, minimum)) {
       selectionStart = minimum
@@ -378,17 +370,17 @@
     const [mouseX] = d3.pointer(event, chart.value)
     let selectionEnd = xScale.value.invert(mouseX)
 
-    if (isAfter(selectionEnd, maxIntervalEnd.value)) {
-      selectionEnd = maxIntervalEnd.value
+    if (isAfter(selectionEnd, endDate.value)) {
+      selectionEnd = endDate.value
     }
 
-    const maximum = addSeconds(props.selectionStart!, selectionMaximumSeconds.value)
+    const maximum = addSeconds(props.selectionStart!, options.value.selectionMaximumSeconds)
 
     if (isAfter(selectionEnd, maximum)) {
       selectionEnd = maximum
     }
 
-    const minimum = addSeconds(props.selectionStart!, selectionMinimumSeconds.value)
+    const minimum = addSeconds(props.selectionStart!, options.value.selectionMinimumSeconds)
 
     if (isBefore(selectionEnd, minimum)) {
       selectionEnd = minimum

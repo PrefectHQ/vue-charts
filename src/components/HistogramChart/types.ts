@@ -29,3 +29,13 @@ export type HistogramBarStyles = {
 export type HistogramBar = HistogramDataPoint & {
   styles: HistogramBarStyles,
 }
+
+export const defaultHistogramChartOptions: Required<HistogramChartOptions> = {
+  showXAxis: true,
+  showYAxis: true,
+  curve: d3.curveCatmullRom,
+  transition: true,
+  transitionDuration: 250,
+  selectionMaximumSeconds: Infinity,
+  selectionMinimumSeconds: 0,
+}
