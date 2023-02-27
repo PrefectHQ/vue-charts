@@ -36,6 +36,6 @@ export const defaultHistogramChartOptions: Required<HistogramChartOptions> = {
   curve: d3.curveCatmullRom,
   transition: true,
   transitionDuration: 250,
-  selectionMaximumSeconds: 0,
-  selectionMinimumSeconds: Infinity,
+  selectionMaximumSeconds: Infinity,
+  selectionMinimumSeconds: 0,
 }
