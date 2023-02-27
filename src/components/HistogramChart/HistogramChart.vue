@@ -557,7 +557,7 @@
   transition-all;
 
   transition-property: height, opacity;
-  transition-duration: v-bind('transitionDurationString');
+  transition-duration: v-bind(transitionDurationString);
 }
 
 .histogram-chart__bar--visible { @apply
