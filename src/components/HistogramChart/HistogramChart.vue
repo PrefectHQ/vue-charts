@@ -73,6 +73,8 @@
     data: HistogramData,
     smooth?: boolean,
     options?: HistogramChartOptions,
+    startDate?: Date,
+    endDate?: Date,
     selectionStart?: Date,
     selectionEnd?: Date,
   }>()
@@ -129,12 +131,20 @@
   watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
 
   const startDate = computed<Date>(() => {
+    if (props.startDate) {
+      return props.startDate
+    }
+
     const firstDataPoint = data.value.at(0)!
 
     return firstDataPoint.intervalStart
   })
 
   const endDate = computed<Date>(() => {
+    if (props.endDate) {
+      return props.endDate
+    }
+
     const lastDataPoint = data.value.at(-1)!
 
     return lastDataPoint.intervalEnd
