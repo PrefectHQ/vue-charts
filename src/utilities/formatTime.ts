@@ -1,5 +1,5 @@
 import { AxisDomain, timeFormat, format } from 'd3'
-import { secondsToApproximateString } from './time'
+import { secondsToApproximateString } from '@/utilities/time'
 
 const formatMillisecond = timeFormat('.%L')
 const formatSecond = timeFormat(':%S')

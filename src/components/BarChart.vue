@@ -33,7 +33,7 @@
 <script lang="ts" setup>
   import * as d3 from 'd3'
   import { computed, ref, onMounted, onBeforeUpdate, useSlots, watch, CSSProperties } from 'vue'
-  import { useBaseChart } from './Base'
+  import { useBaseChart } from '@/components/Base'
   import { BarChartItem } from '@/types'
 
   const slots = useSlots()

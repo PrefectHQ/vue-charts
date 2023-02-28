@@ -45,7 +45,7 @@
 <script lang="ts" setup>
   import * as d3 from 'd3'
   import { computed, ref, onMounted, useSlots, watchEffect, StyleValue } from 'vue'
-  import { useBaseChart } from './Base'
+  import { useBaseChart } from '@/components/Base'
   import { DivergingBarChartItem, DivergingBarChartSeriesPoint, DivergingBarChartSeries, GroupSelection, TransitionSelection } from '@/types'
   import { formatLabel } from '@/utilities/formatLabel'
 
@@ -218,7 +218,7 @@
       max = 1
     }
 
-    let scale = d3.scaleLinear()
+    const scale = d3.scaleLinear()
       .range([
         baseChart.padding.top + baseChart.padding.middle / 2,
         baseChart.height.value - baseChart.padding.bottom - baseChart.padding.middle / 2 - axisHeight,

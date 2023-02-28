@@ -20,7 +20,7 @@
 <script lang="ts" setup>
   import * as d3 from 'd3'
   import { ref, computed, onMounted, watch, CSSProperties, withDefaults } from 'vue'
-  import { useBaseChart } from './Base'
+  import { useBaseChart } from '@/components/Base'
   import { GroupSelection, TransitionSelection, ScatterPlotItem } from '@/types'
   import { extentUndefined } from '@/utilities/extent'
   import { formatLabel } from '@/utilities/formatLabel'
@@ -128,9 +128,9 @@
     let extent = d3.extent(items.value, xAccessor)
 
     if (extentUndefined(extent)) {
-      let dateNow = new Date
-      let offset = dateNow.setDate(dateNow.getDate() - 1)
-      let dayAgo = new Date(offset)
+      const dateNow = new Date
+      const offset = dateNow.setDate(dateNow.getDate() - 1)
+      const dayAgo = new Date(offset)
       extent = [dayAgo, dateNow]
     }
 

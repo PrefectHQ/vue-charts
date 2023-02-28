@@ -16,7 +16,7 @@ import {
   formatWeek,
   formatMonth,
   formatYear
-} from './formatTime'
+} from '@/utilities/formatTime'
 
 export const formatLabel = (date: AxisDomain): string => {
   if (!(date instanceof Date)) {
