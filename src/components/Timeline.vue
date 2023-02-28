@@ -35,7 +35,7 @@
   import * as d3 from 'd3'
   import debounce from 'lodash.debounce'
   import { ref, computed, onMounted, watch, nextTick, watchEffect, Teleport, StyleValue } from 'vue'
-  import { useBaseChart } from './Base'
+  import { useBaseChart } from '@/components/Base'
   import { TimelineChartItem, GroupSelection, TransitionSelection } from '@/types'
   import { formatLabel } from '@/utilities/formatLabel'
   import { intervalSeconds, getSmallestInterval, getD3IntervalMethod, TimeIntervalRanking, TimeIntervalReverseRanking, TimeIntervalRankingValue } from '@/utilities/time'

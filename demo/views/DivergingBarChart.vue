@@ -141,7 +141,7 @@
   })
 </script>
 
-<style >
+<style>
 .diverging-bar-chart-view {
   padding: 24px;
 }
