@@ -485,8 +485,8 @@
 
 <style>
 .histogram-chart--dragging { @apply
-  cursor-move
-  select-none
+  !cursor-move
+  !select-none
 }
 
 .histogram-chart { @apply
@@ -532,17 +532,6 @@
   right-0
 }
 
-.histogram-chart__drag { @apply
-  absolute
-  top-0
-  bottom-0
-  z-20
-  block
-  opacity-5
-  cursor-move
-  bg-danger
-}
-
 .histogram-chart__selection { @apply
   cursor-move
   block
@@ -570,28 +559,39 @@
 .histogram-chart__selection-resize { @apply
   block
   absolute
-  w-2
-  h-8
-  border
-  border-white
-  bg-slate-500
-  rounded-sm
+  w-4
+  top-0
+  bottom-0
   cursor-col-resize
   opacity-0
   transition-all;
 
   transition-property: opacity;
+}
+
+.histogram-chart__selection-resize::before { @apply
+  block
+  absolute
+  w-2
+  h-8
+  border
+  border-sky-200
+  bg-slate-500
+  rounded-sm;
   top: 50%;
+  transform: translate(50%, -50%);
+  content: '';
+  pointer-events: none;
 }
 
 .histogram-chart__selection-resize--left { @apply
   left-0;
-  transform: translate(-50%, -50%)
+  transform: translateX(-50%)
 }
 
 .histogram-chart__selection-resize--right { @apply
   right-0;
-  transform: translate(50%, -50%)
+  transform: translateX(50%)
 }
 
 .histogram-chart__selection--moving { @apply
