@@ -20,7 +20,7 @@
           <path class="histogram-chart__fill" :class="classes.path" :d="dataFillPath" />
         </svg>
 
-        <template v-for="bar in bars" :key="bar.intervalStart">
+        <template v-for="bar in bars" :key="bar.intervalStart.getTime()">
           <slot name="bar" v-bind="bar">
             <div class="histogram-chart__bar" :class="classes.bar" :style="bar.styles" />
           </slot>
