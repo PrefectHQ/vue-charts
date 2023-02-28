@@ -11,10 +11,17 @@
       <div class="histogram-chart__chart">
         <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
           <defs>
-            <linearGradient id="histogram-default-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
-              <stop offset="0%" class="histogram-chart__gradient-start" />
-              <stop offset="100%" class="histogram-chart__gradient-stop" />
-            </linearGradient>
+            <slot name="defs">
+              <linearGradient id="histogram-path-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" class="histogram-chart__path--0" />
+                <stop offset="85%" class="histogram-chart__path--85" />
+                <stop offset="100%" class="histogram-chart__path--100" />
+              </linearGradient>
+              <linearGradient id="histogram-fill-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" class="histogram-chart__gradient-start" />
+                <stop offset="100%" class="histogram-chart__gradient-stop" />
+              </linearGradient>
+            </slot>
           </defs>
           <path class="histogram-chart__path" :class="classes.path" :d="dataStrokePath" />
           <path class="histogram-chart__fill" :class="classes.path" :d="dataFillPath" />
@@ -540,16 +547,19 @@
   cursor-move
   block
   absolute
-  opacity-50
   border
-  border-white
-  bg-slate-500
-  transition-opacity
-  top-0
-  bottom-0
+  border-sky-200
+  bg-sky-500
+  -top-1
+  -bottom-1
   rounded-sm
   z-10
-  hover:opacity-60
+  bg-opacity-10
+  border-opacity-20
+  hover:border-opacity-40
+  transition-all;
+
+  transition-property: border;
 }
 
 .histogram-chart__selection--moving .histogram-chart__selection-resize,
@@ -566,8 +576,11 @@
   border-white
   bg-slate-500
   rounded-sm
+  cursor-col-resize
   opacity-0
-  cursor-col-resize;
+  transition-all;
+
+  transition-property: opacity;
   top: 50%;
 }
 
@@ -582,7 +595,7 @@
 }
 
 .histogram-chart__selection--moving { @apply
-  !opacity-70
+  !border-opacity-50
 }
 
 .histogram-chart__bar { @apply
@@ -619,8 +632,8 @@
 }
 
 .histogram-chart__gradient-stop {
-  stop-color: theme('colors.prefect.700');
-  stop-opacity: 0.8;
+  stop-opacity: 0.3;
+  stop-color: theme('colors.prefect.500')
 }
 
 .histogram-chart__smooth { @apply
@@ -632,15 +645,27 @@
 }
 
 .histogram-chart__path { @apply
-  stroke-prefect-700
-  stroke-2
   fill-transparent
   opacity-0;
+  stroke-width: 2px;
+  stroke: url(#histogram-path-gradient)
+}
+
+.histogram-chart__path--0 {
+  stop-color: theme('colors.prefect.700')
+}
+
+.histogram-chart__path--85 {
+  stop-color: theme('colors.prefect.400')
+}
+
+.histogram-chart__path--100 {
+  stop-color: theme('colors.sky.300')
 }
 
 .histogram-chart__fill { @apply
   opacity-0;
-  fill: url(#histogram-default-gradient);
+  fill: url(#histogram-fill-gradient);
 }
 
 .histogram-chart__path--transitioned { @apply
