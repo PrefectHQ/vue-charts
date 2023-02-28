@@ -360,10 +360,6 @@
   }
 
   function selectionLeftDrag(event: DragEvent): void {
-    if (dragReenteredChart(event)) {
-      return
-    }
-
     const [mouseX] = d3.pointer(event, chart.value)
     let selectionStart = xScale.value.invert(mouseX)
 
@@ -389,10 +385,6 @@
   }
 
   function selectionRightDrag(event: DragEvent): void {
-    if (dragReenteredChart(event)) {
-      return
-    }
-
     const [mouseX] = d3.pointer(event, chart.value)
     let selectionEnd = xScale.value.invert(mouseX)
 
