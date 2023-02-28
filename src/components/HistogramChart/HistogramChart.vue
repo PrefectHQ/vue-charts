@@ -682,7 +682,7 @@
 .histogram-chart__label-x { @apply
   flex
   flex-col
-  gap-1
+  gap-0.5
 }
 
 .histogram-chart__label-x--end { @apply
