@@ -1,39 +1,34 @@
 <template>
-  <ComponentPage
-    title="Histogram Chart"
-    :demos="[{ title: 'Mini Map' }]"
-  >
-    <template #description>
-      <p-content class="histogram-chart-section">
-        <div class="histogram-chart-section__controls">
-          <p-label label="Buckets">
-            <div class="flex gap-2">
-              <p-number-input v-model="buckets" />
-              <p-button primary icon="RefreshIcon" @click="getData" />
-            </div>
-          </p-label>
-        </div>
-        <div class="flex gap-2">
-          <p-checkbox v-model="smooth" label="Smooth" />
-          <p-checkbox v-model="showXAxis" label="Show X Axis" />
-          <p-checkbox v-model="showYAxis" label="Show Y Axis" />
-        </div>
-      </p-content>
-    </template>
+  <div>
+    <p-content class="histogram-chart-section">
+      <div class="histogram-chart-section__controls">
+        <p-label label="Buckets">
+          <div class="flex gap-2">
+            <p-number-input v-model="buckets" />
+            <p-button primary icon="RefreshIcon" @click="getData" />
+          </div>
+        </p-label>
+      </div>
+      <div class="flex gap-2">
+        <p-checkbox v-model="smooth" label="Smooth" />
+        <p-checkbox v-model="showXAxis" label="Show X Axis" />
+        <p-checkbox v-model="showYAxis" label="Show Y Axis" />
+      </div>
+      <p-button @click="older">
+        Older
+      </p-button>
+      <HistogramChart class="h-60" v-bind="{ data, smooth, startDate, endDate }" :options="{ showXAxis, showYAxis }" />
 
-    <HistogramChart class="h-60" v-bind="{ data, smooth }" :options="{ showXAxis, showYAxis }" />
-
-    <template #mini-map>
       <HistogramChart
-        v-bind="{ data, smooth }"
+        v-bind="{ data, smooth, startDate, endDate }"
         v-model:selection-start="selectionStart"
         v-model:selection-end="selectionEnd"
         :options="{ showXAxis, showYAxis, selectionMinimumSeconds, selectionMaximumSeconds }"
       />
       <p-key-value label="Selection Start" :value="selectionStart" />
       <p-key-value label="Selection End" :value="selectionEnd" />
-    </template>
-  </ComponentPage>
+    </p-content>
+  </div>
 </template>
 
 <script lang="ts" setup>
@@ -57,6 +52,13 @@
   const selectionMaximumSeconds = hoursToSeconds(24)
 
   const data = ref<HistogramData>([])
+  const startDate = ref(start.value)
+  const endDate = ref(end.value)
+
+  function older(): void {
+    startDate.value = subDays(startDate.value, 1)
+    endDate.value = subDays(endDate.value, 1)
+  }
 
   watch([start, end, buckets], () => {
     getData()
