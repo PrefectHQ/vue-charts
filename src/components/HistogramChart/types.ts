@@ -33,7 +33,7 @@ export type HistogramBar = HistogramDataPoint & {
 export const defaultHistogramChartOptions: Required<HistogramChartOptions> = {
   showXAxis: true,
   showYAxis: true,
-  curve: d3.curveCatmullRom,
+  curve: d3.curveBumpX,
   transition: true,
   transitionDuration: 250,
   selectionMaximumSeconds: Infinity,

@@ -1,6 +1,6 @@
 <template>
   <div v-if="data.length" class="histogram-chart" :class="classes.root">
-    <div ref="chart" class="histogram-chart__chart">
+    <div ref="chart" class="histogram-chart__viewport">
       <template v-if="showSelection">
         <div ref="selection" class="histogram-chart__selection" :class="classes.selection" :style="selectionStyles">
           <div ref="selectionLeft" class="histogram-chart__selection-resize histogram-chart__selection-resize--left" />
@@ -8,15 +8,31 @@
         </div>
       </template>
 
-      <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
-        <path ref="path" class="histogram-chart__path" :class="classes.path" :d="pathData!" />
-      </svg>
+      <div class="histogram-chart__chart">
+        <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
+          <defs>
+            <slot name="defs">
+              <linearGradient id="histogram-path-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" class="histogram-chart__path--0" />
+                <stop offset="85%" class="histogram-chart__path--85" />
+                <stop offset="100%" class="histogram-chart__path--100" />
+              </linearGradient>
+              <linearGradient id="histogram-fill-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" class="histogram-chart__gradient-start" />
+                <stop offset="100%" class="histogram-chart__gradient-stop" />
+              </linearGradient>
+            </slot>
+          </defs>
+          <path class="histogram-chart__path" :class="classes.path" :d="dataStrokePath" />
+          <path class="histogram-chart__fill" :class="classes.path" :d="dataFillPath" />
+        </svg>
 
-      <template v-for="(bar, index) in bars" :key="index">
-        <slot name="bar" v-bind="bar">
-          <div class="histogram-chart__bar" :class="classes.bar" :style="bar.styles" />
-        </slot>
-      </template>
+        <template v-for="bar in bars" :key="bar.intervalStart.getTime()">
+          <slot name="bar" v-bind="bar">
+            <div class="histogram-chart__bar" :class="classes.bar" :style="bar.styles" />
+          </slot>
+        </template>
+      </div>
     </div>
 
     <template v-if="options.showYAxis">
@@ -73,6 +89,8 @@
     data: HistogramData,
     smooth?: boolean,
     options?: HistogramChartOptions,
+    startDate?: Date,
+    endDate?: Date,
     selectionStart?: Date,
     selectionEnd?: Date,
   }>()
@@ -93,7 +111,7 @@
   const showSmooth = computed(() => props.smooth)
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const movingSelection = ref(false)
-  const pathRendered = ref(false)
+  const loading = ref(true)
 
   const unwatchShowSelection = watch(showSelection, show => {
     if (show) {
@@ -107,10 +125,9 @@
       unwatchShowSelection()
       initSelectionDrag()
     }
-  })
 
-  const path = ref<SVGElement>()
-  const { width: pathWidth } = useElementRect(path)
+    loaded()
+  })
 
   const chart = ref<Element>()
   const { width: chartWidth, height: chartHeight, x: chartX } = useElementRect(chart)
@@ -119,25 +136,34 @@
   const selectionLeft = ref<Element>()
   const selectionRight = ref<Element>()
 
-  const unwatchPathWidth = watch(pathWidth, width => {
-    if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
-      pathRendered.value = true
-      unwatchPathWidth()
-    }
-  })
-
   watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
 
-  const startDate = computed<Date>(() => {
+  const minIntervalStart = computed<Date>(() => {
     const firstDataPoint = data.value.at(0)!
 
     return firstDataPoint.intervalStart
   })
 
-  const endDate = computed<Date>(() => {
+  const startDate = computed<Date>(() => {
+    if (props.startDate) {
+      return props.startDate
+    }
+
+    return minIntervalStart.value
+  })
+
+  const maxIntervalEnd = computed<Date>(() => {
     const lastDataPoint = data.value.at(-1)!
 
     return lastDataPoint.intervalEnd
+  })
+
+  const endDate = computed<Date>(() => {
+    if (props.endDate) {
+      return props.endDate
+    }
+
+    return maxIntervalEnd.value
   })
 
   const maxScaleValue = computed<number>(() => {
@@ -168,37 +194,39 @@
   const bars = computed(() => data.value.map(point => getBar(point)))
 
   const positions = computed<PointPosition[]>(() => {
+    const firstDataPoint = data.value.at(0)!
+    const lastDataPoint = data.value.at(-1)!
     const points = data.value.map(point => getPointPosition(point))
     const [, firstY = 0] = points.shift() ?? []
     const [, lastY = firstY] = points.pop() ?? []
-    const firstPoint: PointPosition = [0, firstY]
-    const lastPoint: PointPosition = [chartWidth.value, lastY]
-
-    // offset by 1 to make sure stroke isn't visible because of curving
-    const bottomLeftCorner: PointPosition = [-1, chartHeight.value + 1]
-    const bottomRightCorner: PointPosition = [chartWidth.value + 1, chartHeight.value + 1]
+    const firstX = xScale.value(firstDataPoint.intervalStart)
+    const lastX = xScale.value(lastDataPoint.intervalEnd)
+    const firstPoint: PointPosition = [firstX, firstY]
+    const lastPoint: PointPosition = [lastX, lastY]
 
     const positions: PointPosition[] = [
-      bottomLeftCorner,
       firstPoint,
       ...points,
       lastPoint,
-      bottomRightCorner,
     ]
-
-    if (!pathRendered.value || !showSmooth.value) {
-      return positions.map(([x]) => [x, chartHeight.value])
-    }
 
     return positions
   })
 
-  const pathData = computed(() => {
+  const dataStrokePath = computed<string>(() => {
     const line = d3.line()
 
     line.curve(options.value.curve)
 
-    return line(positions.value)
+    return line(positions.value) ?? ''
+  })
+
+  const dataFillPath = computed<string>(() => {
+    const strokePath = dataStrokePath.value
+    const bottomRight = `L ${xScale.value(maxIntervalEnd.value)},${chartHeight.value}`
+    const bottomLeft = `L ${xScale.value(minIntervalStart.value)},${chartHeight.value}`
+
+    return `${strokePath}${bottomRight}${bottomLeft}Z`
   })
 
   const selectionStyles = computed<SelectionStyles | undefined>(() => {
@@ -219,6 +247,7 @@
 
   const classes = computed(() => ({
     root: {
+      'histogram-chart--loading': loading.value,
       'histogram-chart--x-axis': options.value.showXAxis,
       'histogram-chart--y-axis': options.value.showYAxis,
     },
@@ -227,11 +256,11 @@
     },
     bar: {
       'histogram-chart__bar--transitioned': options.value.transition,
-      'histogram-chart__bar--visible': pathRendered.value && showBars.value,
+      'histogram-chart__bar--visible': showBars.value,
     },
     path: {
       'histogram-chart__path--transitioned': options.value.transition,
-      'histogram-chart__path--visible': pathRendered.value && showSmooth.value,
+      'histogram-chart__path--visible': showSmooth.value,
     },
   }))
 
@@ -249,7 +278,7 @@
       bottom: toPixels(0),
     }
 
-    if (!pathRendered.value || !showBars.value) {
+    if (loading.value || !showBars.value) {
       styles.height = toPixels(0)
     }
 
@@ -262,6 +291,10 @@
 
     // explain this
     const y = chartHeight.value - yScale.value(point.value)
+
+    if (loading.value || !showSmooth.value) {
+      return [x, chartHeight.value]
+    }
 
     return [x, y]
   }
@@ -334,10 +367,6 @@
   }
 
   function selectionLeftDrag(event: DragEvent): void {
-    if (dragReenteredChart(event)) {
-      return
-    }
-
     const [mouseX] = d3.pointer(event, chart.value)
     let selectionStart = xScale.value.invert(mouseX)
 
@@ -363,10 +392,6 @@
   }
 
   function selectionRightDrag(event: DragEvent): void {
-    if (dragReenteredChart(event)) {
-      return
-    }
-
     const [mouseX] = d3.pointer(event, chart.value)
     let selectionEnd = xScale.value.invert(mouseX)
 
@@ -447,68 +472,83 @@
     d3.select(selectionLeft.value).call(dragSelectionLeft)
     d3.select(selectionRight.value).call(dragSelectionRight)
   }
+
+  // onMounted hook seems to run to early. Possibly related to
+  // https://github.com/vuejs/core/issues/5844
+  // https://github.com/nuxt/nuxt/issues/13471
+  function loaded(): void {
+    setTimeout(() => {
+      loading.value = false
+    }, 1)
+  }
 </script>
 
 <style>
 .histogram-chart--dragging { @apply
-  cursor-move
-  select-none
+  !cursor-move
+  !select-none
 }
 
 .histogram-chart { @apply
   grid
   gap-2;
   grid-template-rows: minmax(56px, 1fr);
-  grid-template-areas: "chart";
+  grid-template-areas: "viewport";
+}
+
+.histogram-chart--loading * {
+  transition: none !important
 }
 
 .histogram-chart--x-axis {
   grid-template-rows: minmax(56px, 1fr) min-content;
-  grid-template-areas: "chart"
+  grid-template-areas: "viewport"
   "xAxis";
 }
 
 .histogram-chart--y-axis {
   grid-template-columns: min-content 1fr;
-  grid-template-areas: "yAxis chart";
+  grid-template-areas: "yAxis viewport";
 }
 
 .histogram-chart--x-axis.histogram-chart--y-axis {
-  grid-template-areas: "yAxis chart"
+  grid-template-areas: "yAxis viewport"
                        ".     xAxis";
+}
+
+.histogram-chart__viewport { @apply
+  w-full
+  relative;
+  grid-area: viewport
 }
 
 .histogram-chart__chart { @apply
   w-full
-  relative;
-  grid-area: chart
-}
-
-.histogram-chart__drag { @apply
   absolute
+  overflow-hidden
   top-0
   bottom-0
-  z-20
-  block
-  opacity-5
-  cursor-move
-  bg-danger
+  left-0
+  right-0
 }
 
 .histogram-chart__selection { @apply
   cursor-move
   block
   absolute
-  opacity-50
   border
-  border-white
-  bg-slate-500
-  transition-opacity
-  top-0
-  bottom-0
+  border-sky-200
+  bg-sky-500
+  -top-1
+  -bottom-1
   rounded-sm
   z-10
-  hover:opacity-60
+  bg-opacity-10
+  border-opacity-20
+  hover:border-opacity-40
+  transition-all;
+
+  transition-property: border;
 }
 
 .histogram-chart__selection--moving .histogram-chart__selection-resize,
@@ -519,29 +559,43 @@
 .histogram-chart__selection-resize { @apply
   block
   absolute
+  w-4
+  top-0
+  bottom-0
+  cursor-col-resize
+  opacity-0
+  transition-all;
+
+  transition-property: opacity;
+}
+
+.histogram-chart__selection-resize::before { @apply
+  block
+  absolute
   w-2
   h-8
   border
-  border-white
+  border-sky-200
   bg-slate-500
-  rounded-sm
-  opacity-0
-  cursor-col-resize;
+  rounded-sm;
   top: 50%;
+  transform: translate(50%, -50%);
+  content: '';
+  pointer-events: none;
 }
 
 .histogram-chart__selection-resize--left { @apply
   left-0;
-  transform: translate(-50%, -50%)
+  transform: translateX(-50%)
 }
 
 .histogram-chart__selection-resize--right { @apply
   right-0;
-  transform: translate(50%, -50%)
+  transform: translateX(50%)
 }
 
 .histogram-chart__selection--moving { @apply
-  !opacity-70
+  !border-opacity-50
 }
 
 .histogram-chart__bar { @apply
@@ -556,7 +610,7 @@
 .histogram-chart__bar--transitioned { @apply
   transition-all;
 
-  transition-property: height, opacity;
+  transition-property: height, opacity, left;
   transition-duration: v-bind(transitionDurationString);
 }
 
@@ -564,26 +618,54 @@
   opacity-100
 }
 
-.histogram-chart__svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.histogram-chart__svg { @apply
+  absolute
+  top-0
+  bottom-0
+  left-0
+  right-0
 }
 
-.histogram-chart__smooth {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.histogram-chart__gradient-start {
+  stop-color:rgb(0,0,0);
+  stop-opacity: 0;
+}
+
+.histogram-chart__gradient-stop {
+  stop-opacity: 0.3;
+  stop-color: theme('colors.prefect.500')
+}
+
+.histogram-chart__smooth { @apply
+  absolute
+  top-0
+  bottom-0
+  left-0
+  right-0
 }
 
 .histogram-chart__path { @apply
-  fill-prefect-500
-  stroke-prefect-300
-  opacity-0
+  fill-transparent
+  opacity-0;
+  stroke-width: 2px;
+  stroke: url(#histogram-path-gradient)
+}
+
+.histogram-chart__path--0 {
+  stop-color: theme('colors.prefect.700')
+}
+
+.histogram-chart__path--85 {
+  stop-color: theme('colors.prefect.400')
+}
+
+.histogram-chart__path--100 {
+  stop-color: theme('colors.sky.300')
+}
+
+.histogram-chart__fill { @apply
+  opacity-0;
+  fill: url(#histogram-fill-gradient);
 }
 
 .histogram-chart__path--transitioned { @apply
@@ -617,7 +699,7 @@
 .histogram-chart__label-x { @apply
   flex
   flex-col
-  gap-1
+  gap-0.5
 }
 
 .histogram-chart__label-x--end { @apply
