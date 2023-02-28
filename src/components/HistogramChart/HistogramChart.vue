@@ -16,7 +16,7 @@
               <stop offset="100%" class="histogram-chart__gradient-stop" />
             </linearGradient>
           </defs>
-          <path ref="path" class="histogram-chart__path" :class="classes.path" :d="dataStrokePath" />
+          <path class="histogram-chart__path" :class="classes.path" :d="dataStrokePath" />
           <path class="histogram-chart__fill" :class="classes.path" :d="dataFillPath" />
         </svg>
 
@@ -104,7 +104,7 @@
   const showSmooth = computed(() => props.smooth)
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const movingSelection = ref(false)
-  const pathRendered = ref(true)
+  const loading = ref(true)
 
   const unwatchShowSelection = watch(showSelection, show => {
     if (show) {
@@ -118,10 +118,9 @@
       unwatchShowSelection()
       initSelectionDrag()
     }
-  })
 
-  const path = ref<SVGElement>()
-  const { width: pathWidth } = useElementRect(path)
+    loaded()
+  })
 
   const chart = ref<Element>()
   const { width: chartWidth, height: chartHeight, x: chartX } = useElementRect(chart)
@@ -129,13 +128,6 @@
   const selection = ref<Element>()
   const selectionLeft = ref<Element>()
   const selectionRight = ref<Element>()
-
-  // const unwatchPathWidth = watch(pathWidth, width => {
-  //   if (width > 0 && chartWidth.value > 0 && width >= chartWidth.value) {
-  //     pathRendered.value = true
-  //     unwatchPathWidth()
-  //   }
-  // })
 
   watchEffect(() => document.body.classList.toggle('histogram-chart--dragging', movingSelection.value))
 
@@ -211,10 +203,6 @@
       lastPoint,
     ]
 
-    // if (!pathRendered.value || !showSmooth.value) {
-    //   return positions.map(([x]) => [x, chartHeight.value])
-    // }
-
     return positions
   })
 
@@ -252,6 +240,7 @@
 
   const classes = computed(() => ({
     root: {
+      'histogram-chart--loading': loading.value,
       'histogram-chart--x-axis': options.value.showXAxis,
       'histogram-chart--y-axis': options.value.showYAxis,
     },
@@ -260,11 +249,11 @@
     },
     bar: {
       'histogram-chart__bar--transitioned': options.value.transition,
-      'histogram-chart__bar--visible': pathRendered.value && showBars.value,
+      'histogram-chart__bar--visible': showBars.value,
     },
     path: {
       'histogram-chart__path--transitioned': options.value.transition,
-      'histogram-chart__path--visible': pathRendered.value && showSmooth.value,
+      'histogram-chart__path--visible': showSmooth.value,
     },
   }))
 
@@ -282,7 +271,7 @@
       bottom: toPixels(0),
     }
 
-    if (!pathRendered.value || !showBars.value) {
+    if (loading.value || !showBars.value) {
       styles.height = toPixels(0)
     }
 
@@ -295,6 +284,10 @@
 
     // explain this
     const y = chartHeight.value - yScale.value(point.value)
+
+    if (loading.value || !showSmooth.value) {
+      return [x, chartHeight.value]
+    }
 
     return [x, y]
   }
@@ -480,6 +473,15 @@
     d3.select(selectionLeft.value).call(dragSelectionLeft)
     d3.select(selectionRight.value).call(dragSelectionRight)
   }
+
+  // onMounted hook seems to run to early. Possibly related to
+  // https://github.com/vuejs/core/issues/5844
+  // https://github.com/nuxt/nuxt/issues/13471
+  function loaded(): void {
+    setTimeout(() => {
+      loading.value = false
+    }, 1)
+  }
 </script>
 
 <style>
@@ -493,6 +495,10 @@
   gap-2;
   grid-template-rows: minmax(56px, 1fr);
   grid-template-areas: "chart";
+}
+
+.histogram-chart--loading * {
+  transition: none !important
 }
 
 .histogram-chart--x-axis {
@@ -640,7 +646,8 @@
   opacity-0;
 }
 
-.histogram-chart__fill {
+.histogram-chart__fill { @apply
+  opacity-0;
   fill: url(#histogram-default-gradient);
 }
 
