@@ -509,18 +509,18 @@
 
 .histogram-chart--y-axis {
   grid-template-columns: min-content 1fr;
-  grid-template-areas: "yAxis chart";
+  grid-template-areas: "yAxis viewport";
 }
 
 .histogram-chart--x-axis.histogram-chart--y-axis {
-  grid-template-areas: "yAxis chart"
+  grid-template-areas: "yAxis viewport"
                        ".     xAxis";
 }
 
 .histogram-chart__viewport { @apply
   w-full
   relative;
-  grid-area: chart
+  grid-area: viewport
 }
 
 .histogram-chart__chart { @apply
@@ -613,12 +613,12 @@
   opacity-100
 }
 
-.histogram-chart__svg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.histogram-chart__svg { @apply
+  absolute
+  top-0
+  bottom-0
+  left-0
+  right-0
 }
 
 .histogram-chart__gradient-start {
@@ -631,12 +631,12 @@
   stop-opacity: 0.8;
 }
 
-.histogram-chart__smooth {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.histogram-chart__smooth { @apply
+  absolute
+  top-0
+  bottom-0
+  left-0
+  right-0
 }
 
 .histogram-chart__path { @apply
