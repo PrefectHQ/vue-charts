@@ -486,7 +486,7 @@
   grid
   gap-2;
   grid-template-rows: minmax(56px, 1fr);
-  grid-template-areas: "chart";
+  grid-template-areas: "viewport";
 }
 
 .histogram-chart--loading * {
@@ -495,7 +495,7 @@
 
 .histogram-chart--x-axis {
   grid-template-rows: minmax(56px, 1fr) min-content;
-  grid-template-areas: "chart"
+  grid-template-areas: "viewport"
   "xAxis";
 }
 
