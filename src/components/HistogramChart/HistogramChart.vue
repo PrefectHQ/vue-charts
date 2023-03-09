@@ -12,7 +12,14 @@
         <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
           <defs>
             <slot name="defs">
-              <linearGradient id="histogram-path-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+              <linearGradient
+                :id="pathGradientId"
+                x1="0"
+                :y1="chartHeight"
+                x2="0"
+                y2="0"
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop offset="0%" class="histogram-chart__path--0" />
                 <stop offset="85%" class="histogram-chart__path--85" />
                 <stop offset="100%" class="histogram-chart__path--100" />
@@ -112,6 +119,8 @@
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const movingSelection = ref(false)
   const loading = ref(true)
+  const pathGradientId = computed(() => `histogram-path-gradient-${crypto.randomUUID()}`)
+  const pathGradientIdUrl = computed(() => `url(#${pathGradientId.value})`)
 
   const unwatchShowSelection = watch(showSelection, show => {
     if (show) {
@@ -633,7 +642,7 @@
 
 .histogram-chart__gradient-stop {
   stop-opacity: 0.3;
-  stop-color: theme('colors.prefect.500')
+  stop-color: theme('colors.prefect.500');
 }
 
 .histogram-chart__smooth { @apply
@@ -648,7 +657,7 @@
   fill-transparent
   opacity-0;
   stroke-width: 2px;
-  stroke: url(#histogram-path-gradient)
+  stroke: v-bind(pathGradientIdUrl);
 }
 
 .histogram-chart__path--0 {
