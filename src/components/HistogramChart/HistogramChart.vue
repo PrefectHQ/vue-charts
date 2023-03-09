@@ -635,8 +635,13 @@
   right-0
 }
 
+.dark .histogram-chart__gradient-start {
+  stop-color: #000;
+  stop-opacity: 0;
+}
+
 .histogram-chart__gradient-start {
-  stop-color:rgb(0,0,0);
+  stop-color: #fff;
   stop-opacity: 0;
 }
 
