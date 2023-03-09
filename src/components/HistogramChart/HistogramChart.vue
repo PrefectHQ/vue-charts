@@ -345,6 +345,33 @@
     movingSelection.value = true
   }
 
+  function selectionDragWindowStart(event: DragEvent): void {
+    if (!props.selectionStart || !props.selectionEnd) {
+      return
+    }
+
+    selectionDragStart()
+
+    const [mouse] = d3.pointer(event, chart.value)
+    const start = xScale.value(props.selectionStart)
+    const end = xScale.value(props.selectionEnd)
+
+    if (mouse >= start && mouse <= end) {
+      return
+    }
+
+    const selectionRange = end - start
+    const halfOfSelectionRange = Math.floor(selectionRange / 2)
+    const newSelectionStartValue = mouse - halfOfSelectionRange
+    const newSelectionEndValue = newSelectionStartValue + selectionRange
+    const selectionStart = xScale.value.invert(newSelectionStartValue)
+    const selectionEnd = xScale.value.invert(newSelectionEndValue)
+
+    const selection = keepSelectionInRange({ selectionStart, selectionEnd })
+
+    updateSelection(selection)
+  }
+
   function selectionDragEnd(): void {
     movingSelection.value = false
 
@@ -460,7 +487,7 @@
     const chartSelection = d3.select(chart.value) as any
 
     const dragSelection = d3.drag()
-      .on('start', selectionDragStart)
+      .on('start', selectionDragWindowStart)
       .on('drag', selectionDrag)
       .on('end', selectionDragEnd)
 
@@ -476,7 +503,7 @@
       .on('drag', selectionRightDrag)
       .on('end', selectionDragEnd)
 
-    d3.select(selection.value).call(dragSelection)
+    d3.select(chart.value).call(dragSelection)
     d3.select(selectionLeft.value).call(dragSelectionLeft)
     d3.select(selectionRight.value).call(dragSelectionRight)
   }
