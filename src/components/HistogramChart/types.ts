@@ -30,6 +30,9 @@ export type HistogramBar = HistogramDataPoint & {
   styles: HistogramBarStyles,
 }
 
+
+export type HistogramSelection = { selectionStart: Date, selectionEnd: Date }
+
 export const defaultHistogramChartOptions: Required<HistogramChartOptions> = {
   showXAxis: true,
   showYAxis: true,

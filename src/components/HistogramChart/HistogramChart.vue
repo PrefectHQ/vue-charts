@@ -82,13 +82,12 @@
   import * as d3 from 'd3'
   import { addSeconds, differenceInSeconds, format, isAfter, isBefore, subSeconds } from 'date-fns'
   import { computed, onMounted, ref, watch, watchEffect } from 'vue'
-  import { defaultHistogramChartOptions, HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
+  import { defaultHistogramChartOptions, HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint, HistogramSelection } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
   import { sortByDateProperty } from '@/utilities/sortByDate'
 
   type PointPosition = [x: number, y: number]
   type SelectionStyles = { left: Pixels, right: Pixels }
-  type Selection = { selectionStart: Date, selectionEnd: Date }
   type DragEvent = { x: number, dx: number, sourceEvent: HTMLMouseEvent }
   type HTMLMouseEvent = MouseEvent & { target: HTMLElement }
 
@@ -104,7 +103,7 @@
 
   const emit = defineEmits<{
     (event: 'update:selectionStart' | 'update:selectionEnd', value: Date | undefined): void,
-    (event: 'selection', value: Selection): void,
+    (event: 'selection', value: HistogramSelection): void,
   }>()
 
   const options = computed<Required<HistogramChartOptions>>(() => ({
@@ -316,7 +315,7 @@
     return format(value, 'hh:mm a')
   }
 
-  function keepSelectionInRange({ selectionStart, selectionEnd }: Selection): Selection {
+  function keepSelectionInRange({ selectionStart, selectionEnd }: HistogramSelection): HistogramSelection {
     const min = startDate.value
     const max = endDate.value
     const difference = differenceInSeconds(selectionEnd, selectionStart)
@@ -441,7 +440,7 @@
     return false
   }
 
-  function updateSelection({ selectionStart, selectionEnd }: Partial<Selection>): void {
+  function updateSelection({ selectionStart, selectionEnd }: Partial<HistogramSelection>): void {
     if (selectionStart) {
       emit('update:selectionStart', selectionStart)
     }
