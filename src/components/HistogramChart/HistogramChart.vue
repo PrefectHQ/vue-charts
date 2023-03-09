@@ -12,7 +12,14 @@
         <svg class="histogram-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
           <defs>
             <slot name="defs">
-              <linearGradient id="histogram-path-gradient" x1="50%" y1="100%" x2="50%" y2="0%">
+              <linearGradient
+                :id="pathGradientId"
+                x1="0"
+                :y1="chartHeight"
+                x2="0"
+                y2="0"
+                gradientUnits="userSpaceOnUse"
+              >
                 <stop offset="0%" class="histogram-chart__path--0" />
                 <stop offset="85%" class="histogram-chart__path--85" />
                 <stop offset="100%" class="histogram-chart__path--100" />
@@ -75,13 +82,12 @@
   import * as d3 from 'd3'
   import { addSeconds, differenceInSeconds, format, isAfter, isBefore, subSeconds } from 'date-fns'
   import { computed, onMounted, ref, watch, watchEffect } from 'vue'
-  import { defaultHistogramChartOptions, HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
+  import { defaultHistogramChartOptions, HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint, HistogramSelection } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
   import { sortByDateProperty } from '@/utilities/sortByDate'
 
   type PointPosition = [x: number, y: number]
   type SelectionStyles = { left: Pixels, right: Pixels }
-  type Selection = { selectionStart: Date, selectionEnd: Date }
   type DragEvent = { x: number, dx: number, sourceEvent: HTMLMouseEvent }
   type HTMLMouseEvent = MouseEvent & { target: HTMLElement }
 
@@ -97,7 +103,7 @@
 
   const emit = defineEmits<{
     (event: 'update:selectionStart' | 'update:selectionEnd', value: Date | undefined): void,
-    (event: 'selection', value: Selection): void,
+    (event: 'selection', value: HistogramSelection): void,
   }>()
 
   const options = computed<Required<HistogramChartOptions>>(() => ({
@@ -112,6 +118,8 @@
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const movingSelection = ref(false)
   const loading = ref(true)
+  const pathGradientId = computed(() => `histogram-path-gradient-${crypto.randomUUID()}`)
+  const pathGradientIdUrl = computed(() => `url(#${pathGradientId.value})`)
 
   const unwatchShowSelection = watch(showSelection, show => {
     if (show) {
@@ -307,7 +315,7 @@
     return format(value, 'hh:mm a')
   }
 
-  function keepSelectionInRange({ selectionStart, selectionEnd }: Selection): Selection {
+  function keepSelectionInRange({ selectionStart, selectionEnd }: HistogramSelection): HistogramSelection {
     const min = startDate.value
     const max = endDate.value
     const difference = differenceInSeconds(selectionEnd, selectionStart)
@@ -432,7 +440,7 @@
     return false
   }
 
-  function updateSelection({ selectionStart, selectionEnd }: Partial<Selection>): void {
+  function updateSelection({ selectionStart, selectionEnd }: Partial<HistogramSelection>): void {
     if (selectionStart) {
       emit('update:selectionStart', selectionStart)
     }
@@ -626,14 +634,19 @@
   right-0
 }
 
+.dark .histogram-chart__gradient-start {
+  stop-color: #000;
+  stop-opacity: 0;
+}
+
 .histogram-chart__gradient-start {
-  stop-color:rgb(0,0,0);
+  stop-color: #fff;
   stop-opacity: 0;
 }
 
 .histogram-chart__gradient-stop {
   stop-opacity: 0.3;
-  stop-color: theme('colors.prefect.500')
+  stop-color: theme('colors.prefect.500');
 }
 
 .histogram-chart__smooth { @apply
@@ -648,7 +661,7 @@
   fill-transparent
   opacity-0;
   stroke-width: 2px;
-  stroke: url(#histogram-path-gradient)
+  stroke: v-bind(pathGradientIdUrl);
 }
 
 .histogram-chart__path--0 {
