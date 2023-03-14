@@ -14,6 +14,7 @@
     <p-context-nav-item title="Timeline" to="/timeline" />
     <p-context-nav-item title="Scatter Plot" to="/scatter-plot" />
     <p-context-nav-item title="Histogram Chart" to="/histogram-chart" />
+    <p-context-nav-item title="Mini Histogram" to="/mini-histogram" />
 
     <template #footer>
       <div class="context-sidebar__footer">

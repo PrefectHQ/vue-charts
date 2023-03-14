@@ -35,7 +35,6 @@
   import { BooleanRouteParam, NumberRouteParam, useRouteQueryParam } from '@prefecthq/vue-compositions'
   import { endOfWeek, hoursToSeconds, startOfWeek, subDays } from 'date-fns'
   import { ref, watch } from 'vue'
-  import ComponentPage from '../components/ComponentPage.vue'
   import { generateBarChartData } from '../data'
   import { HistogramChart, HistogramData } from '@/components/HistogramChart'
 

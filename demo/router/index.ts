@@ -27,6 +27,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('../views/HistogramChartSection.vue'),
   },
   {
+    path: '/mini-histogram',
+    name: 'Mini Histogram',
+    component: () => import('../views/MiniHistogramSection.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart',
   },
