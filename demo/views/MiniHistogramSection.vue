@@ -27,7 +27,3 @@
     return items
   })
 </script>
-
-<style>
-
-</style>

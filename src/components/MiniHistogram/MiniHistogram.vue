@@ -9,25 +9,20 @@
 </template>
 
 <script lang="ts" setup>
-  import { Pixels, toPixels } from '@prefecthq/prefect-design'
+  import { toPixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
   import { scaleTime, scaleLinear } from 'd3'
   import { computed, ref } from 'vue'
   import { HistogramData, HistogramDataPoint } from '@/components/HistogramChart'
-  import { MiniHistogramOptions } from '@/components/MiniHistogram/types'
+  import { MiniHistogramBar, MiniHistogramOptions } from '@/components/MiniHistogram/types'
   import { sortByDateProperty } from '@/utilities/sortByDate'
+
+  type OptionsWithDefaultValues = Required<Pick<MiniHistogramOptions, 'colorStart' | 'colorEnd'>>
 
   const props = defineProps<{
     data: HistogramData,
     options?: MiniHistogramOptions,
   }>()
-
-  type MiniHistogramBar = HistogramDataPoint & {
-    styles: {
-      left: Pixels,
-      width: Pixels,
-    },
-  }
 
   const chart = ref<Element>()
   const { width: chartWidth } = useElementRect(chart)
@@ -35,14 +30,20 @@
   const data = computed(() => sortByDateProperty(props.data, 'intervalStart'))
   const bars = computed(() => data.value.map(point => getBar(point)))
 
+  const options = computed<OptionsWithDefaultValues>(() => ({
+    colorStart: '#034efc',
+    colorEnd: '#7dd3fc',
+    ...props.options,
+  }))
+
   const minDate = computed<Date>(() => {
     if (props.options?.minDate) {
       return props.options.minDate
     }
 
-    const firstDataPoint = data.value.at(0)!
+    const firstDataPoint = data.value.at(0)
 
-    return firstDataPoint.intervalStart
+    return firstDataPoint?.intervalStart ?? new Date()
   })
 
   const endDate = computed<Date>(() => {
@@ -50,9 +51,9 @@
       return props.options.maxDate
     }
 
-    const lastDataPoint = data.value.at(-1)!
+    const lastDataPoint = data.value.at(-1)
 
-    return lastDataPoint.intervalEnd
+    return lastDataPoint?.intervalEnd ?? new Date()
   })
 
   const xScale = computed(() => {
@@ -84,14 +85,10 @@
 
   const yScale = computed(() => {
     const scale = scaleLinear()
-    const defaultColorStart = '#034efc'
-    const defaultColorStop = '#7dd3fc'
-    const colorStart = props.options?.colorStart ?? defaultColorStart
-    const colorEnd = props.options?.colorEnd ?? defaultColorStop
 
     scale.domain([minValue.value, maxValue.value])
     // @ts-expect-error @types/d3 has an incorrect type for scale. It only accepts numbers but it should also accept strings
-    scale.range([colorStart, colorEnd])
+    scale.range([options.value.colorStart, options.value.colorEnd])
 
     return scale
   })
