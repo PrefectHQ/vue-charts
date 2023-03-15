@@ -32,6 +32,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('../views/MiniHistogramSection.vue'),
   },
   {
+    path: '/line-chart',
+    name: 'Line Chart',
+    component: () => import('../views/LineChartSection.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart',
   },
