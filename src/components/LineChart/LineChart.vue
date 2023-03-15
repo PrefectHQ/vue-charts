@@ -30,6 +30,7 @@
 <script lang="ts" setup>
   import { useElementRect } from '@prefecthq/vue-compositions'
   import { scaleLinear, scaleTime, line as d3Line } from 'd3'
+  import { endOfToday, startOfToday } from 'date-fns'
   import { computed, ref } from 'vue'
   import ChartLabels from '@/components/ChartLabels/ChartLabels.vue'
   import { ChartLabelsProp } from '@/components/ChartLabels/types'
@@ -61,7 +62,7 @@
 
     const [x] = data.value.at(0) ?? []
 
-    return x ?? new Date()
+    return x ?? startOfToday()
   })
 
   const endDate = computed<Date>(() => {
@@ -71,7 +72,7 @@
 
     const [x] = data.value.at(-1) ?? []
 
-    return x ?? new Date()
+    return x ?? endOfToday()
   })
 
   const xScale = computed(() => {
