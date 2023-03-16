@@ -27,6 +27,7 @@
   const { width: chartWidth } = useElementRect(chart)
   const label = ref<Element>()
   const { width: labelWidth } = useElementRect(label)
+
   const cursor = ref<Date | null>(null)
 
   const cursorStyles = computed(() => {

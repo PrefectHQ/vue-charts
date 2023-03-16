@@ -1,5 +1,5 @@
 <template>
-  <div ref="chart" class="chart-selection">
+  <div ref="chart" class="chart-selection" @pointermove="onPointerMove">
     <slot />
     <div class="chart-selection__selection" :style="selectionStyles" />
     <div ref="label" class="chart-selection__label" :style="labelStyles">
@@ -45,6 +45,8 @@
 
   const selectionStart = computed(() => props.selectionStart ?? null)
   const selectionEnd = computed(() => props.selectionEnd ?? null)
+
+  const dragging = ref(false)
   const dragStart = ref<Date | null>(null)
   const dragStop = ref<Date | null>(null)
 
@@ -106,13 +108,13 @@
 
     const dragSelection = drag()
       .on('start', onDragStart)
-      .on('drag', onDrag)
       .on('end', onDragEnd)
 
     select(chart.value).call(dragSelection)
   }
 
   function onDragStart(event: DragEvent): void {
+    dragging.value = true
     dragStart.value = null
     dragStop.value = null
 
@@ -122,7 +124,16 @@
     update()
   }
 
-  function onDrag(event: DragEvent): void {
+  // using the PointerEvent here rather than the DragEvent from d3 is important
+  // PointerEvent and DragEvent return slightly different values for cursor positioning
+  // This meant that using DragEvent here and PointerEvent in ChartCursor.vue would get
+  // slightly different values. Using PointerEvent for both ensures they are the same
+  // and is also probably slightly more efficient (the same event is bubbling and being reused)
+  function onPointerMove(event: PointerEvent): void {
+    if (!dragging.value) {
+      return
+    }
+
     const [mouseX] = pointer(event, chart.value)
     const value = xScale.value.clamp(true).invert(mouseX)
 
@@ -132,6 +143,8 @@
   }
 
   function onDragEnd(): void {
+    dragging.value = false
+
     if (!selection.value) {
       return
     }
