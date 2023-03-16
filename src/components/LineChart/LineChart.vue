@@ -1,29 +1,33 @@
 <template>
-  <ChartLabels class="line-chart" :labels="labels">
-    <div ref="chart" class="line-chart__chart">
-      <svg class="line-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
-        <defs>
-          <linearGradient
-            :id="pathGradientId"
-            x1="0"
-            :y1="chartHeight"
-            x2="0"
-            y2="0"
-            gradientUnits="userSpaceOnUse"
-          >
-            <stop offset="0%" class="line-chart__path--0" />
-            <stop offset="85%" class="line-chart__path--85" />
-            <stop offset="100%" class="line-chart__path--100" />
-          </linearGradient>
-          <linearGradient :id="fillGradientId" x1="50%" y1="100%" x2="50%" y2="0%">
-            <stop offset="0%" class="line-chart__gradient-start" />
-            <stop offset="100%" class="line-chart__gradient-stop" />
-          </linearGradient>
-        </defs>
-        <path class="line-chart__path" :d="strokePath" />
-        <path class="line-chart__fill" :d="fillPath" />
-      </svg>
-    </div>
+  <ChartLabels class="line-chart" :scales="scales">
+    <ChartCursor :x-scale="xScale">
+      <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" :x-scale="xScale">
+        <div ref="chart" class="line-chart__chart">
+          <svg class="line-chart__svg" :width="chartWidth" :height="chartHeight" :viewbox="`0 0 ${chartWidth} ${chartHeight}`">
+            <defs>
+              <linearGradient
+                :id="pathGradientId"
+                x1="0"
+                :y1="chartHeight"
+                x2="0"
+                y2="0"
+                gradientUnits="userSpaceOnUse"
+              >
+                <stop offset="0%" class="line-chart__path--0" />
+                <stop offset="85%" class="line-chart__path--85" />
+                <stop offset="100%" class="line-chart__path--100" />
+              </linearGradient>
+              <linearGradient :id="fillGradientId" x1="50%" y1="100%" x2="50%" y2="0%">
+                <stop offset="0%" class="line-chart__gradient-start" />
+                <stop offset="100%" class="line-chart__gradient-stop" />
+              </linearGradient>
+            </defs>
+            <path class="line-chart__path" :d="strokePath" />
+            <path class="line-chart__fill" :d="fillPath" />
+          </svg>
+        </div>
+      </ChartSelection>
+    </ChartCursor>
   </ChartLabels>
 </template>
 
@@ -32,8 +36,10 @@
   import { scaleLinear, scaleTime, line as d3Line } from 'd3'
   import { endOfToday, startOfToday } from 'date-fns'
   import { computed, ref } from 'vue'
+  import ChartCursor from '@/components/ChartCursor/ChartCursor.vue'
   import ChartLabels from '@/components/ChartLabels/ChartLabels.vue'
-  import { ChartLabelsProp } from '@/components/ChartLabels/types'
+  import { ChartLabelScales } from '@/components/ChartLabels/types'
+  import ChartSelection from '@/components/ChartSelection/ChartSelection.vue'
   import { LineChartData, LineChartOptions, PointPosition } from '@/components/LineChart/types'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
 
@@ -49,11 +55,8 @@
   const fillGradientId = computed(() => `line-chart-fill-gradient-${crypto.randomUUID()}`)
   const pathGradientIdUrl = computed(() => `url(#${pathGradientId.value})`)
   const fillGradientIdUrl = computed(() => `url(#${fillGradientId.value})`)
-  const options = computed<LineChartOptions>(() => ({
-    showXAxis: true,
-    showYAxis: true,
-    ...props.options,
-  }))
+  const selectionStart = ref<Date | null>(null)
+  const selectionEnd = ref<Date | null>(null)
 
   const minDate = computed<Date>(() => {
     if (props.options?.minDate) {
@@ -113,19 +116,10 @@
     return scale
   })
 
-  const labels = computed<ChartLabelsProp>(() => {
-    const labels: ChartLabelsProp = {}
-
-    if (options.value.showXAxis) {
-      labels.x = xScale.value
-    }
-
-    if (options.value.showYAxis) {
-      labels.y = yScale.value
-    }
-
-    return labels
-  })
+  const scales = computed<ChartLabelScales>(() => ({
+    x: xScale.value,
+    y: yScale.value,
+  }))
 
   const positions = computed<PointPosition[]>(() => data.value.map(([x, y]) => [xScale.value(x), yScale.value(y)]))
 
@@ -149,6 +143,10 @@
 </script>
 
 <style>
+.line-chart {
+  min-height: 100px;
+}
+
 .line-chart__path { @apply
   fill-transparent;
   stroke-width: 2px;

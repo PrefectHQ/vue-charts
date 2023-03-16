@@ -1,7 +1,7 @@
 <template>
-  <ComponentPage title="Line Chart">
-    <LineChart :data="data" />
-  </ComponentPage>
+  <div>
+    <LineChart :data="data" style="height: 400px" />
+  </div>
 </template>
 
 <script lang="ts" setup>
