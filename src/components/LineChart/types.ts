@@ -1,13 +1,12 @@
 import { CurveFactory } from 'd3'
+import { Curve } from '@/utilities/getCurveFunction'
 
 export type LineChartOptions = {
-  minDate?: Date,
-  maxDate?: Date,
+  startDate?: Date,
+  endDate?: Date,
   minValue?: number,
   maxValue?: number,
-  curve?: CurveFactory,
-  showXAxis?: boolean,
-  showYAxis?: boolean,
+  curve?: Curve | CurveFactory,
 }
 
 export type LineChartDataPoint = [x: Date, y: number]
