@@ -3,12 +3,12 @@
     <slot />
     <div class="chart-cursor__cursor" :style="cursorStyles" />
     <div ref="label" class="chart-cursor__label" :style="labelStyle">
-      <slot name="label" :value="cursor">
-        <template v-if="cursor">
+      <template v-if="cursor">
+        <slot name="label" :value="cursor">
           <span class="chart-cursor__date">{{ formatDateLabel(cursor) }}</span>
           <span class="chart-cursor__time">{{ formatTimeLabel(cursor) }}</span>
-        </template>
-      </slot>
+        </slot>
+      </template>
     </div>
   </div>
 </template>

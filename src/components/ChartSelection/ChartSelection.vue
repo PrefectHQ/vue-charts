@@ -4,7 +4,9 @@
     <div class="chart-selection__selection" :style="selectionStyles" />
     <div ref="label" class="chart-selection__label" :style="labelStyles">
       <template v-if="selectionStart && selectionEnd">
-        {{ formatDate(selectionStart) }} - {{ formatDate(selectionEnd) }}
+        <slot name="label" :start="selectionStart" :end="selectionEnd">
+          {{ formatDate(selectionStart) }} - {{ formatDate(selectionEnd) }}
+        </slot>
       </template>
     </div>
   </div>
