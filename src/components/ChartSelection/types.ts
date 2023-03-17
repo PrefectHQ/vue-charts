@@ -1,1 +1,1 @@
-export type ChartSelection = [Date, Date]
+export type Selection = [Date, Date] | null

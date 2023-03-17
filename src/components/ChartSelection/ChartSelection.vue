@@ -16,7 +16,7 @@
   import { select, drag, pointer, scaleTime } from 'd3'
   import { format } from 'date-fns'
   import { computed, onMounted, onUnmounted, ref } from 'vue'
-  import { ChartSelection } from '@/components/ChartSelection/types'
+  import { Selection } from '@/components/ChartSelection/types'
   import { sortByDate } from '@/utilities/sortByDate'
 
   type HTMLMouseEvent = MouseEvent & { target: HTMLElement }
@@ -29,7 +29,7 @@
   }>()
 
   const emit = defineEmits<{
-    (event: 'selection', value: ChartSelection): void,
+    (event: 'selection', value: Selection): void,
     (event: 'update:selectionStart' | 'update:selectionEnd', value: Date | null): void,
   }>()
 
@@ -64,12 +64,12 @@
   const dragStart = ref<Date | null>(null)
   const dragStop = ref<Date | null>(null)
 
-  const selection = computed<ChartSelection | null>(() => {
+  const selection = computed<Selection | null>(() => {
     if (!selectionStart.value || !selectionEnd.value) {
       return null
     }
 
-    return sortByDate([selectionStart.value, selectionEnd.value]) as ChartSelection
+    return sortByDate([selectionStart.value, selectionEnd.value]) as Selection
   })
 
   const selectionStyles = computed(() => {
@@ -158,10 +158,6 @@
 
   function onDragEnd(): void {
     dragging.value = false
-
-    if (!selection.value) {
-      return
-    }
 
     emit('selection', selection.value)
   }
