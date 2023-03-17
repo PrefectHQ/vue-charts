@@ -15,7 +15,7 @@
   import { useElementRect } from '@prefecthq/vue-compositions'
   import { select, drag, pointer, scaleTime } from 'd3'
   import { format } from 'date-fns'
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, onMounted, onUnmounted, ref } from 'vue'
   import { ChartSelection } from '@/components/ChartSelection/types'
   import { sortByDate } from '@/utilities/sortByDate'
 
@@ -35,6 +35,12 @@
 
   onMounted(() => {
     init()
+
+    document.addEventListener('pointermove', onPointerMove)
+  })
+
+  onUnmounted(() => {
+    document.removeEventListener('pointermove', onPointerMove)
   })
 
   const xScale = computed(() => {
@@ -200,7 +206,8 @@
 .chart-selection__label { @apply
   absolute
   top-0
-  whitespace-nowrap;
+  whitespace-nowrap
+  text-sm;
   transform: translateY(calc(-100% - theme('spacing.2')))
 }
 </style>
