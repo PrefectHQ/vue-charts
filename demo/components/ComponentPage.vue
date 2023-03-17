@@ -2,7 +2,9 @@
   <div class="component-page">
     <!-- make sticky header -->
     <div class="component-page__heading">
-      <HashLink>{{ title }}</HashLink>
+      <HashLink>
+        <p-heading>{{ title }}</p-heading>
+      </HashLink>
     </div>
 
     <template v-if="description || slots.description">
@@ -20,7 +22,9 @@
             <template v-if="demo.title !== 'default'">
               <div class="component-page__hash-link">
                 <HashLink :hash="demo.slotKey">
-                  {{ demo.title }}
+                  <p-heading heading="2">
+                    {{ demo.title }}
+                  </p-heading>
                 </HashLink>
               </div>
             </template>
@@ -121,5 +125,9 @@
   text-foreground-300
   my-2
   text-sm
+}
+
+.component-page__hash-link { @apply
+  mb-2
 }
 </style>
