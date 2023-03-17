@@ -207,7 +207,9 @@
   absolute
   top-0
   whitespace-nowrap
-  text-sm;
+  text-sm
+  text-sky-700
+  dark:text-sky-300;
   transform: translateY(calc(-100% - theme('spacing.2')))
 }
 </style>
