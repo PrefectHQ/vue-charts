@@ -13,9 +13,9 @@
 <script lang="ts" setup>
   import { toPixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
-  import { select, drag, pointer, ScaleTime } from 'd3'
+  import { select, drag, pointer, scaleTime } from 'd3'
   import { format } from 'date-fns'
-  import { computed, onMounted, ref, toRefs } from 'vue'
+  import { computed, onMounted, ref } from 'vue'
   import { ChartSelection } from '@/components/ChartSelection/types'
   import { sortByDate } from '@/utilities/sortByDate'
 
@@ -23,7 +23,7 @@
   type DragEvent = { x: number, dx: number, sourceEvent: HTMLMouseEvent }
 
   const props = defineProps<{
-    xScale: ScaleTime<number, number>,
+    xAxis: Date[],
     selectionStart: Date | null,
     selectionEnd: Date | null,
   }>()
@@ -37,7 +37,15 @@
     init()
   })
 
-  const { xScale } = toRefs(props)
+  const xScale = computed(() => {
+    const scale = scaleTime()
+
+    scale.domain(props.xAxis)
+    scale.range([0, chartWidth.value])
+
+    return scale
+  })
+
   const chart = ref<Element>()
   const { width: chartWidth } = useElementRect(chart)
   const label = ref<Element>()
@@ -59,13 +67,13 @@
   })
 
   const selectionStyles = computed(() => {
-    if (!dragStart.value || !dragStop.value) {
+    if (!selectionStart.value || !selectionEnd.value) {
       return {
         display: 'none',
       }
     }
 
-    const [start, stop] = sortByDate([dragStart.value, dragStop.value])
+    const [start, stop] = sortByDate([selectionStart.value, selectionEnd.value])
     const left = xScale.value(start)
     const right = chartWidth.value - xScale.value(stop)
 
@@ -76,14 +84,14 @@
   })
 
   const labelStyles = computed(() => {
-    if (!dragStart.value || !dragStop.value) {
+    if (!selectionStart.value || !selectionEnd.value) {
       return {
         display: 'none',
       }
     }
 
-    const startValue = xScale.value(dragStart.value)
-    const stopValue = xScale.value(dragStop.value)
+    const startValue = xScale.value(selectionStart.value)
+    const stopValue = xScale.value(selectionEnd.value)
     const middle = (startValue + stopValue) / 2
     const halfOfLabel = labelWidth.value / 2
     let left = middle - halfOfLabel

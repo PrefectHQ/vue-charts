@@ -14,13 +14,13 @@
 <script lang="ts" setup>
   import { toPixels } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
-  import { pointer, ScaleTime } from 'd3'
+  import { pointer, scaleTime } from 'd3'
   import { computed, ref } from 'vue'
   import { formatDateLabel } from '@/utilities/formatDateLabel'
   import { formatTimeLabel } from '@/utilities/formatTimeLabel'
 
   const props = defineProps<{
-    xScale: ScaleTime<number, number>,
+    xAxis: Date[],
   }>()
 
   const chart = ref<Element>()
@@ -30,6 +30,15 @@
 
   const cursor = ref<Date | null>(null)
 
+  const xScale = computed(() => {
+    const scale = scaleTime()
+
+    scale.domain(props.xAxis)
+    scale.range([0, chartWidth.value])
+
+    return scale
+  })
+
   const cursorStyles = computed(() => {
     if (!cursor.value) {
       return {
@@ -37,7 +46,7 @@
       }
     }
 
-    const left = props.xScale(cursor.value)
+    const left = xScale.value(cursor.value)
 
     return {
       left: toPixels(left),
@@ -51,7 +60,7 @@
       }
     }
 
-    const value = props.xScale(cursor.value)
+    const value = xScale.value(cursor.value)
     const halfOfLabel = labelWidth.value / 2
     let left = value - halfOfLabel
 
@@ -70,7 +79,7 @@
 
   function onPointerMove(event: MouseEvent): void {
     const [mouseX] = pointer(event, chart.value)
-    cursor.value = props.xScale.clamp(true).invert(mouseX)
+    cursor.value = xScale.value.clamp(true).invert(mouseX)
   }
 
   function onPointerLeave(): void {

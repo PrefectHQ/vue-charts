@@ -4,7 +4,7 @@
       <slot />
     </div>
 
-    <template v-if="scales?.y">
+    <template v-if="yAxis">
       <div class="chart-labels__y">
         <div class="chart-labels__label chart-labels__label-y chart-labels__label-y--min">
           <slot name="label-y" :value="maxValue">
@@ -19,7 +19,7 @@
       </div>
     </template>
 
-    <template v-if="scales?.x">
+    <template v-if="xAxis">
       <div class="chart-labels__x">
         <div class="chart-labels__label chart-labels__label-x chart-labels__label-x--start">
           <slot name="label-x" :value="startDate">
@@ -44,27 +44,25 @@
 
 <script lang="ts" setup>
   import { computed } from 'vue'
-  import { ChartLabelScales } from '@/components/ChartLabels/types'
   import { formatDateLabel } from '@/utilities/formatDateLabel'
   import { formatTimeLabel } from '@/utilities/formatTimeLabel'
 
   const props = defineProps<{
-    scales?: ChartLabelScales,
+    xAxis?: Date[],
+    yAxis?: number[],
   }>()
 
   const classes = computed(() => ({
     root: {
-      'chart-labels--x': props.scales?.x,
-      'chart-labels--y': props.scales?.y,
+      'chart-labels--x': props.xAxis,
+      'chart-labels--y': props.yAxis,
     },
   }))
 
-  const x = computed(() => props.scales?.x)
-  const y = computed(() => props.scales?.y)
-  const startDate = computed(() => x.value?.domain().at(0))
-  const endDate = computed(() => x.value?.domain().at(-1))
-  const minValue = computed(() => y.value?.domain().at(0))
-  const maxValue = computed(() => y.value?.domain().at(-1))
+  const startDate = computed(() => props.xAxis?.at(0))
+  const endDate = computed(() => props.xAxis?.at(-1))
+  const minValue = computed(() => props.yAxis?.at(0))
+  const maxValue = computed(() => props.yAxis?.at(-1))
 </script>
 
 <style>
