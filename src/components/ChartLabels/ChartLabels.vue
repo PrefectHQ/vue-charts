@@ -22,20 +22,20 @@
     <template v-if="xAxis">
       <div class="chart-labels__x">
         <div class="chart-labels__label chart-labels__label-x chart-labels__label-x--start">
-          <slot name="label-x" :value="startDate">
-            <template v-if="startDate">
+          <template v-if="startDate">
+            <slot name="label-x" :value="startDate">
               <span class="chart-labels__date-label">{{ formatDateLabel(startDate) }}</span>
               <span class="chart-labels__time-label">{{ formatTimeLabel(startDate) }}</span>
-            </template>
-          </slot>
+            </slot>
+          </template>
         </div>
         <div class="chart-labels__label chart-labels__label-x chart-labels__label-x--end">
-          <slot name="label-x" :value="endDate">
-            <template v-if="endDate">
+          <template v-if="endDate">
+            <slot name="label-x" :value="endDate">
               <span class="chart-labels__date-label">{{ formatDateLabel(endDate) }}</span>
               <span class="chart-labels__time-label">{{ formatTimeLabel(endDate) }}</span>
-            </template>
-          </slot>
+            </slot>
+          </template>
         </div>
       </div>
     </template>
