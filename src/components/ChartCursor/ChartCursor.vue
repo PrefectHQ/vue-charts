@@ -1,7 +1,9 @@
 <template>
   <div ref="chart" class="chart-cursor" @pointerenter="onPointerEnter" @pointermove="onPointerMove" @pointerleave="onPointerLeave">
     <slot />
-    <div class="chart-cursor__cursor" :style="cursorStyles" />
+    <template v-if="showCursor">
+      <div class="chart-cursor__cursor" :style="cursorStyles" />
+    </template>
     <template v-if="cursor && hover">
       <div ref="label" class="chart-cursor__label" :style="labelStyle">
         <slot name="label" :value="cursor">
@@ -49,6 +51,21 @@
     },
   })
 
+  const showCursor = computed(() => {
+    if (cursor.value === null) {
+      return false
+    }
+
+    const clamped = xScaleClamped.value(cursor.value)
+    const original = xScale.value(cursor.value)
+
+    if (clamped === original) {
+      return true
+    }
+
+    return false
+  })
+
   const xScale = computed(() => {
     const scale = scaleTime()
 
@@ -57,6 +74,8 @@
 
     return scale
   })
+
+  const xScaleClamped = computed(() => xScale.value.copy().clamp(true))
 
   const cursorStyles = computed(() => {
     if (!cursor.value) {
@@ -102,7 +121,7 @@
 
   function onPointerMove(event: MouseEvent): void {
     const [mouseX] = pointer(event, chart.value)
-    cursor.value = xScale.value.clamp(true).invert(mouseX)
+    cursor.value = xScaleClamped.value.invert(mouseX)
   }
 
   function onPointerLeave(): void {
@@ -137,7 +156,8 @@
   whitespace-nowrap
   bg-slate-800
   p-2
-  rounded;
+  rounded
+  z-10;
   top: calc(100% + theme('spacing.2'));
 }
 
