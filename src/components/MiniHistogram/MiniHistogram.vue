@@ -114,7 +114,7 @@
   min-h-[theme('spacing.5')];
 }
 
-.mini-histogram::after {
+.mini-histogram::before {
   content: '';
   position: absolute;
   left: 0;
@@ -128,6 +128,5 @@
   top-0
   bottom-0
   absolute
-  z-10
 }
 </style>
