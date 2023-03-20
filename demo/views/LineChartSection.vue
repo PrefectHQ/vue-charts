@@ -27,12 +27,14 @@
     </template>
 
     <template #everything>
-      <ChartLabels v-bind="{ xAxis, yAxis }" class="mb-12">
-        <ChartCursor v-model:cursor="cursor" v-bind="{ xAxis }">
-          <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ xAxis }" class="mt-6">
-            <LineChart :options="{ curve }" :data="data" />
-          </ChartSelection>
-        </ChartCursor>
+      <ChartLabels v-bind="{ xAxis, yAxis }" class="mb-12 mt-8">
+        <ChartPlayHead v-bind="{ xAxis }">
+          <ChartCursor v-model:cursor="cursor" v-bind="{ xAxis }">
+            <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ xAxis }">
+              <LineChart :options="{ curve }" :data="data" />
+            </ChartSelection>
+          </ChartCursor>
+        </ChartPlayHead>
       </ChartLabels>
     </template>
   </ComponentPage>
@@ -47,6 +49,7 @@
   import { DemoBarChartItem, generateBarChartData } from '../data'
   import ChartCursor from '@/components/ChartCursor/ChartCursor.vue'
   import ChartLabels from '@/components/ChartLabels/ChartLabels.vue'
+  import ChartPlayHead from '@/components/ChartPlayHead/ChartPlayHead.vue'
   import ChartSelection from '@/components/ChartSelection/ChartSelection.vue'
   import LineChart from '@/components/LineChart/LineChart.vue'
   import { LineChartDataPoint } from '@/components/LineChart/types'
