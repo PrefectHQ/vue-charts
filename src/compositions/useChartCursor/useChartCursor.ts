@@ -16,7 +16,6 @@ export function useNamedCursorFactory(): (name?: string) => UseChartCursor {
   const cursors = new Map<string, UseChartCursor>()
 
   function getCursorByName(name: string): UseChartCursor {
-    console.log('cursor', name)
     if (cursors.has(name)) {
       return cursors.get(name)!
     }
