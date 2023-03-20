@@ -1,15 +1,15 @@
 <template>
-  <div ref="chart" class="chart-cursor" @pointermove="onPointerMove" @pointerleave="onPointerLeave">
+  <div ref="chart" class="chart-cursor" @pointerenter="onPointerEnter" @pointermove="onPointerMove" @pointerleave="onPointerLeave">
     <slot />
     <div class="chart-cursor__cursor" :style="cursorStyles" />
-    <div ref="label" class="chart-cursor__label" :style="labelStyle">
-      <template v-if="cursor">
+    <template v-if="cursor && hover">
+      <div ref="label" class="chart-cursor__label" :style="labelStyle">
         <slot name="label" :value="cursor">
           <span class="chart-cursor__date">{{ formatDateLabel(cursor) }}</span>
           <span class="chart-cursor__time">{{ formatTimeLabel(cursor) }}</span>
         </slot>
-      </template>
-    </div>
+      </div>
+    </template>
   </div>
 </template>
 
@@ -23,6 +23,11 @@
 
   const props = defineProps<{
     xAxis: Date[],
+    cursor?: Date | null,
+  }>()
+
+  const emit = defineEmits<{
+    (event: 'update:cursor', value: Date | null): void,
   }>()
 
   const chart = ref<Element>()
@@ -30,7 +35,19 @@
   const label = ref<Element>()
   const { width: labelWidth } = useElementRect(label)
 
-  const cursor = ref<Date | null>(null)
+  const internalCursor = ref<Date | null>(null)
+  const hover = ref(false)
+
+  const cursor = computed({
+    get() {
+      return props.cursor ?? internalCursor.value
+    },
+    set(value: Date | null) {
+      internalCursor.value = value
+
+      emit('update:cursor', value)
+    },
+  })
 
   const xScale = computed(() => {
     const scale = scaleTime()
@@ -79,6 +96,10 @@
     }
   })
 
+  function onPointerEnter(): void {
+    hover.value = true
+  }
+
   function onPointerMove(event: MouseEvent): void {
     const [mouseX] = pointer(event, chart.value)
     cursor.value = xScale.value.clamp(true).invert(mouseX)
@@ -86,6 +107,7 @@
 
   function onPointerLeave(): void {
     cursor.value = null
+    hover.value = false
   }
 </script>
 

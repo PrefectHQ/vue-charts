@@ -15,7 +15,7 @@
     </template>
 
     <template #with-cursor>
-      <ChartCursor v-bind="{ xAxis }" class="mb-12">
+      <ChartCursor v-model:cursor="cursor" v-bind="{ xAxis }" class="mb-12">
         <LineChart :options="{ curve }" :data="data" />
       </ChartCursor>
     </template>
@@ -27,8 +27,8 @@
     </template>
 
     <template #everything>
-      <ChartLabels v-bind="{ xAxis, yAxis }">
-        <ChartCursor v-bind="{ xAxis }" class="mb-12">
+      <ChartLabels v-bind="{ xAxis, yAxis }" class="mb-12">
+        <ChartCursor v-model:cursor="cursor" v-bind="{ xAxis }">
           <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ xAxis }" class="mt-6">
             <LineChart :options="{ curve }" :data="data" />
           </ChartSelection>
@@ -58,6 +58,7 @@
     { title: 'Everything' },
   ]
 
+  const cursor = ref<Date | null>(null)
   const curve = ref()
   const curves: SelectOption[] = [{ label: 'None', value: null }, 'bumpX', 'bumpY', 'cardinal', 'catmullRom']
 
