@@ -163,11 +163,11 @@
 
 .chart-cursor__date { @apply
   text-sm
-  text-foreground
+  text-slate-100
 }
 
 .chart-cursor__time { @apply
   text-xs
-  text-foreground-200
+  text-slate-400
 }
 </style>
