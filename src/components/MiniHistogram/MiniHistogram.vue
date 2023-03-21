@@ -128,5 +128,6 @@
   top-0
   bottom-0
   absolute
+  rounded-sm
 }
 </style>
