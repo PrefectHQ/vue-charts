@@ -4,7 +4,7 @@ export type UseChartCursor = {
   cursor: Ref<Date | null>,
 }
 
-export function cursorFactory(): UseChartCursor {
+function cursorFactory(): UseChartCursor {
   const cursor = ref<Date | null>(null)
 
   return {
@@ -12,7 +12,7 @@ export function cursorFactory(): UseChartCursor {
   }
 }
 
-export function useNamedCursorFactory(): (name?: string) => UseChartCursor {
+function namedCursorFactory(): (name?: string) => UseChartCursor {
   const cursors = new Map<string, UseChartCursor>()
 
   function getCursorByName(name: string): UseChartCursor {
@@ -29,4 +29,4 @@ export function useNamedCursorFactory(): (name?: string) => UseChartCursor {
   return (name: string = 'default') => getCursorByName(name)
 }
 
-export const useChartCursor = useNamedCursorFactory()
+export const useChartCursor = namedCursorFactory()
