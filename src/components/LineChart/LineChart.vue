@@ -121,8 +121,10 @@
 
   const fillPath = computed<string>(() => {
     const [min, max] = xScale.value.range()
-    const bottomRight = `L ${max},${chartHeight.value}`
-    const bottomLeft = `L ${min},${chartHeight.value}`
+    const [first] = positions.value.at(0) ?? [min]
+    const [last] = positions.value.at(-1) ?? [max]
+    const bottomRight = `L ${last},${chartHeight.value}`
+    const bottomLeft = `L ${first},${chartHeight.value}`
 
     return `${strokePath.value}${bottomRight}${bottomLeft}Z`
   })
