@@ -31,7 +31,7 @@
         <ChartPlayHead v-bind="{ xAxis }">
           <ChartCursor v-model:cursor="cursor" v-bind="{ xAxis }">
             <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ xAxis }">
-              <LineChart :options="{ curve }" :data="data" />
+              <LineChart :options="{ curve, startDate, endDate }" :data="data" />
             </ChartSelection>
           </ChartCursor>
         </ChartPlayHead>
@@ -66,8 +66,8 @@
   const curves: SelectOption[] = [{ label: 'None', value: null }, 'bumpX', 'bumpY', 'cardinal', 'catmullRom']
 
   const today = new Date()
-  const start = ref(startOfWeek(today))
-  const end = ref(endOfWeek(today))
+  const startDate = ref(startOfWeek(today))
+  const endDate = ref(endOfWeek(today))
   const buckets = useRouteQueryParam('buckets', NumberRouteParam, 100)
   const selectionStart = ref<Date | null>(null)
   const selectionEnd = ref<Date | null>(null)
@@ -75,11 +75,12 @@
   const data = computed(() => {
     const { items } = generateBarChartData({
       buckets: buckets.value,
-      intervalEnd: end.value,
-      intervalStart: start.value,
+      intervalEnd: endDate.value,
+      intervalStart: startDate.value,
     })
 
-    return items.map(point => getPointPosition(point))
+    const now = new Date()
+    return items.map(point => getPointPosition(point)).filter(([x]) => x.getTime() < now.getTime())
   })
 
   function getPointPosition(point: DemoBarChartItem): LineChartDataPoint {
@@ -89,13 +90,7 @@
     return [x, y]
   }
 
-  const xAxis = computed<Date[]>(() => {
-    const dates = data.value.map(([x]) => x.getTime())
-    const min = new Date(Math.min(...dates))
-    const max = new Date(Math.max(...dates))
-
-    return [min, max]
-  })
+  const xAxis = computed<Date[]>(() => [startDate.value, endDate.value])
 
   const yAxis = computed<number[]>(() => {
     const values = data.value.map(([, y]) => y)
