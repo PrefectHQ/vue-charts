@@ -142,14 +142,26 @@
 }
 
 .line-chart__path--0 {
-  stop-color: theme('colors.prefect.700')
+  stop-color: theme('colors.sky.300')
 }
 
 .line-chart__path--85 {
-  stop-color: theme('colors.prefect.400')
+  stop-color: theme('colors.sky.600')
 }
 
 .line-chart__path--100 {
+  stop-color: theme('colors.prefect.700')
+}
+
+.dark .line-chart__path--0 {
+  stop-color: theme('colors.prefect.700')
+}
+
+.dark .line-chart__path--85 {
+  stop-color: theme('colors.prefect.400')
+}
+
+.dark .line-chart__path--100 {
   stop-color: theme('colors.sky.300')
 }
 
