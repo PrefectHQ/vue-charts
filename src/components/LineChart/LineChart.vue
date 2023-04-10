@@ -133,6 +133,9 @@
 <style>
 .line-chart {
   min-height: 100px;
+  --darkest: var(--vc-line-chart-color-darkest, theme('colors.prefect.700'));
+  --dark: var(--vc-line-chart-color-dark, theme('colors.prefect.400'));
+  --light: var(--vc-line-chart-color-dark, theme('colors.sky.300'));
 }
 
 .line-chart__path { @apply
@@ -174,6 +177,11 @@
   stop-opacity: 0;
 }
 
+.dark .line-chart__gradient-stop {
+  stop-opacity: 0.3;
+  stop-color: theme('colors.prefect.500');
+}
+
 .line-chart__gradient-start {
   stop-color: #fff;
   stop-opacity: 0;
@@ -181,6 +189,6 @@
 
 .line-chart__gradient-stop {
   stop-opacity: 0.3;
-  stop-color: theme('colors.prefect.500');
+  stop-color: theme('colors.prefect.300');
 }
 </style>
