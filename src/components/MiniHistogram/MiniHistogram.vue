@@ -9,7 +9,7 @@
 </template>
 
 <script lang="ts" setup>
-  import { toPixels } from '@prefecthq/prefect-design'
+  import { toPixels, useColorTheme } from '@prefecthq/prefect-design'
   import { useElementRect } from '@prefecthq/vue-compositions'
   import { scaleTime, scaleLinear } from 'd3'
   import { computed, ref } from 'vue'
@@ -24,6 +24,8 @@
     options?: MiniHistogramOptions,
   }>()
 
+  const { value: theme } = useColorTheme()
+
   const chart = ref<Element>()
   const { width: chartWidth } = useElementRect(chart)
 
@@ -31,8 +33,8 @@
   const bars = computed(() => data.value.map(point => getBar(point)))
 
   const options = computed<OptionsWithDefaultValues>(() => ({
-    colorStart: '#034efc',
-    colorEnd: '#7dd3fc',
+    colorStart: '#7dd3fc',
+    colorEnd: '#034efc',
     ...props.options,
   }))
 
@@ -85,10 +87,15 @@
 
   const yScale = computed(() => {
     const scale = scaleLinear()
+    const range = [options.value.colorStart, options.value.colorEnd]
+
+    if (theme.value === 'dark') {
+      range.reverse()
+    }
 
     scale.domain([minValue.value, maxValue.value])
     // @ts-expect-error @types/d3 has an incorrect type for scale. It only accepts numbers but it should also accept strings
-    scale.range([options.value.colorStart, options.value.colorEnd])
+    scale.range(range)
 
     return scale
   })
