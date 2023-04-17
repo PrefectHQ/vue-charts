@@ -37,6 +37,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('../views/LineChartSection.vue'),
   },
   {
+    path: '/chart-date-range',
+    name: 'Chart Date Range',
+    component: () => import('../views/ChartDateRange.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart',
   },
