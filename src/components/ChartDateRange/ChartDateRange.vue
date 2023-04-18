@@ -1,15 +1,13 @@
 <template>
   <div ref="chart" class="chart-date-range">
     <slot v-bind="{ startDate, endDate }" />
-    <p-key-value label="Start date" :value="startDate" />
-    <p-key-value label="End date" :value="endDate" />
   </div>
 </template>
 
 <script lang="ts" setup>
   import { useElementRect } from '@prefecthq/vue-compositions'
-  import { select, scaleTime, zoom, D3ZoomEvent } from 'd3'
-  import { onMounted, ref, toRefs, watch } from 'vue'
+  import { select, scaleTime, zoom, D3ZoomEvent, zoomIdentity } from 'd3'
+  import { computed, onMounted, ref, toRefs, watch } from 'vue'
   import { ChartDateRangeOptions, DateRange } from '@/components/ChartDateRange/types'
 
   const props = defineProps<{
@@ -27,18 +25,27 @@
   const chart = ref<Element>()
   const { width: chartWidth } = useElementRect(chart)
 
-  const xScale = scaleTime().domain([])
+  const zoomed = zoom()
+    .on('zoom', onZoom)
+    .on('end', onZoomEnd)
 
-  watch([startDate, endDate, chartWidth], ([start, end, width]) => {
-    xScale.range([0, width])
+  const xScale = computed(() => {
+    const scale = scaleTime()
 
-    const domainUnset = xScale.domain().length === 0
+    scale.domain([startDate.value!, endDate.value!])
+    scale.range([0, chartWidth.value])
 
-    if (domainUnset && start && end) {
-      xScale.domain([start, end])
+    return scale
+  })
+
+  let zoomChanged = false
+
+  watch(xScale, () => {
+    if (chart.value && zoomChanged) {
+      select(chart.value).call(zoomed.transform, zoomIdentity)
+      zoomChanged = false
     }
-
-  }, { immediate: true })
+  })
 
   onMounted(() => {
     init()
@@ -49,25 +56,25 @@
       return
     }
 
-    const zoomed = zoom()
-      .on('zoom', onZoom)
-      .on('end', onZoomEnd)
-
     select(chart.value).call(zoomed)
   }
 
   function onZoom(event: D3ZoomEvent<Element, Date>): void {
-    const scale = event.transform.rescaleX(xScale)
+    const scale = event.transform.rescaleX(xScale.value)
     const [startDate, endDate] = scale.domain()
 
     emit('update:startDate', startDate)
     emit('update:endDate', endDate)
+
+    zoomChanged = true
   }
 
   function onZoomEnd(event: D3ZoomEvent<Element, Date>): void {
-    const scale = event.transform.rescaleX(xScale)
+    const scale = event.transform.rescaleX(xScale.value)
     const [startDate, endDate] = scale.domain()
 
     emit('updated', { startDate, endDate })
+
+    zoomChanged = true
   }
 </script>

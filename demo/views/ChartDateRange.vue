@@ -7,6 +7,13 @@
     <ChartDateRange v-model:start-date="startDate" v-model:end-date="endDate">
       <LineChart :data="data" :options="{ startDate, endDate }" />
     </ChartDateRange>
+
+    <ChartDateRange v-model:start-date="secondStartDate" v-model:end-date="secondEndDate">
+      <LineChart :data="data" :options="{ startDate: secondStartDate, endDate: secondEndDate }" />
+    </ChartDateRange>
+
+    <p-key-value label="Start date" :value="startDate" />
+    <p-key-value label="End date" :value="endDate" />
   </ComponentPage>
 </template>
 
@@ -24,6 +31,7 @@
   const today = new Date()
   const buckets = useRouteQueryParam('buckets', NumberRouteParam, 100)
   const { startDate, endDate } = useChartDateRange()
+  const { startDate: secondStartDate, endDate: secondEndDate } = useChartDateRange()
 
   startDate.value = startOfWeek(today)
   endDate.value = endOfWeek(today)
