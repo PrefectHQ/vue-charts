@@ -2,15 +2,15 @@
   <ComponentPage title="Chart Range">
     <p-content>
       <template v-if="startDate && endDate">
-        <ChartDateRange v-model:start-date="startDate" v-model:end-date="endDate" :options="options">
+        <ChartZoom v-model:start-date="startDate" v-model:end-date="endDate" :options="options">
           <LineChart :data="lineChartData" :options="{ startDate, endDate }" />
-        </ChartDateRange>
+        </ChartZoom>
       </template>
 
       <template v-if="secondStartDate && secondEndDate">
-        <ChartDateRange v-model:start-date="secondStartDate" v-model:end-date="secondEndDate" :options="options">
+        <ChartZoom v-model:start-date="secondStartDate" v-model:end-date="secondEndDate" :options="options">
           <MiniHistogram :data="histogramData" :options="{ startDate: secondStartDate, endDate: secondEndDate }" />
-        </ChartDateRange>
+        </ChartZoom>
       </template>
 
       <p-key-value label="Start date" :value="startDate" />
@@ -25,22 +25,22 @@
   import ComponentPage from '../components/ComponentPage.vue'
   import { DemoBarChartItem, generateBarChartData } from '../data'
   import { HistogramData } from '@/components'
-  import ChartDateRange from '@/components/ChartDateRange/ChartDateRange.vue'
-  import { ChartDateRangeOptions } from '@/components/ChartDateRange/types'
+  import ChartZoom from '@/components/ChartZoom/ChartZoom.vue'
+  import { ChartZoomOptions } from '@/components/ChartZoom/types'
   import LineChart from '@/components/LineChart/LineChart.vue'
   import { LineChartData, LineChartDataPoint } from '@/components/LineChart/types'
   import MiniHistogram from '@/components/MiniHistogram/MiniHistogram.vue'
-  import { useChartDateRange } from '@/compositions'
+  import { useChartZoom } from '@/compositions'
 
-  const { startDate, endDate } = useChartDateRange()
-  const { startDate: secondStartDate, endDate: secondEndDate } = useChartDateRange()
+  const { startDate, endDate } = useChartZoom()
+  const { startDate: secondStartDate, endDate: secondEndDate } = useChartZoom()
 
   startDate.value = startOfToday()
   endDate.value = endOfToday()
 
   const now = new Date()
 
-  const options: ChartDateRangeOptions = {
+  const options: ChartZoomOptions = {
     minDate: startOfWeek(now),
     maxDate: endOfWeek(now),
     maxRangeInSeconds: secondsInDay,

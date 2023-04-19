@@ -1,3 +1,3 @@
 export * from './useChartCursor'
-export * from './useChartDateRange'
+export * from './useChartZoom'
 export * from './useChartSelection'

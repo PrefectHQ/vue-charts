@@ -8,12 +8,12 @@
   import { useElementRect } from '@prefecthq/vue-compositions'
   import { select, scaleTime, zoom, D3ZoomEvent, zoomIdentity } from 'd3'
   import { computed, onMounted, ref, toRefs, watch } from 'vue'
-  import { ChartDateRangeOptions, DateRange } from '@/components/ChartDateRange/types'
+  import { ChartZoomOptions, DateRange } from '@/components/ChartZoom/types'
 
   const props = defineProps<{
     startDate: Date,
     endDate: Date,
-    options?: ChartDateRangeOptions,
+    options?: ChartZoomOptions,
   }>()
 
   const emit = defineEmits<{

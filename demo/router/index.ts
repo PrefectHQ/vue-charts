@@ -39,7 +39,7 @@ export const routes: RouteRecordRaw[] = [
   {
     path: '/chart-date-range',
     name: 'Chart Date Range',
-    component: () => import('../views/ChartDateRange.vue'),
+    component: () => import('../views/ChartZoom.vue'),
   },
   {
     path: '/',

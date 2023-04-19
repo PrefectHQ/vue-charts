@@ -3,7 +3,7 @@ export type DateRange = {
   endDate: Date,
 }
 
-export type ChartDateRangeOptions = {
+export type ChartZoomOptions = {
   minDate?: Date,
   maxDate?: Date,
   minRangeInSeconds?: number,
