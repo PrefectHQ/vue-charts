@@ -1,15 +1,21 @@
 <template>
   <ComponentPage title="Chart Range">
-    <ChartDateRange v-model:start-date="startDate" v-model:end-date="endDate" :options="options">
-      <LineChart :data="lineChartData" :options="{ startDate, endDate }" />
-    </ChartDateRange>
+    <p-content>
+      <template v-if="startDate && endDate">
+        <ChartDateRange v-model:start-date="startDate" v-model:end-date="endDate" :options="options">
+          <LineChart :data="lineChartData" :options="{ startDate, endDate }" />
+        </ChartDateRange>
+      </template>
 
-    <ChartDateRange v-model:start-date="secondStartDate" v-model:end-date="secondEndDate" :options="options">
-      <MiniHistogram :data="histogramData" :options="{ startDate: secondStartDate!, endDate: secondEndDate! }" />
-    </ChartDateRange>
+      <template v-if="secondStartDate && secondEndDate">
+        <ChartDateRange v-model:start-date="secondStartDate" v-model:end-date="secondEndDate" :options="options">
+          <MiniHistogram :data="histogramData" :options="{ startDate: secondStartDate, endDate: secondEndDate }" />
+        </ChartDateRange>
+      </template>
 
-    <p-key-value label="Start date" :value="startDate" />
-    <p-key-value label="End date" :value="endDate" />
+      <p-key-value label="Start date" :value="startDate" />
+      <p-key-value label="End date" :value="endDate" />
+    </p-content>
   </ComponentPage>
 </template>
 

@@ -11,8 +11,8 @@
   import { ChartDateRangeOptions, DateRange } from '@/components/ChartDateRange/types'
 
   const props = defineProps<{
-    startDate: Date | null,
-    endDate: Date | null,
+    startDate: Date,
+    endDate: Date,
     options?: ChartDateRangeOptions,
   }>()
 
@@ -32,7 +32,7 @@
   const xScale = computed(() => {
     const scale = scaleTime()
 
-    scale.domain([startDate.value!, endDate.value!])
+    scale.domain([startDate.value, endDate.value])
     scale.range([0, chartWidth.value])
 
     return scale
@@ -83,8 +83,8 @@
 
   function onZoomEnd(): void {
     emit('updated', {
-      startDate: props.startDate!,
-      endDate: props.endDate!,
+      startDate: props.startDate,
+      endDate: props.endDate,
     })
   }
 
@@ -110,7 +110,7 @@
     let endDateInMilliseconds = requestedEndDate.getTime()
 
     const requestedRange = endDateInMilliseconds - startDateInMilliseconds
-    const currentRange = props.endDate!.getTime() - props.startDate!.getTime()
+    const currentRange = props.endDate.getTime() - props.startDate.getTime()
     const minDateInMilliseconds = minDate.getTime()
     const maxDateInMilliseconds = maxDate.getTime()
     const minRangeInMilliseconds = minRangeInSeconds * 1000
