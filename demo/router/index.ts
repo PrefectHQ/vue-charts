@@ -37,8 +37,8 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('../views/LineChartSection.vue'),
   },
   {
-    path: '/chart-date-range',
-    name: 'Chart Date Range',
+    path: '/chart-zoom',
+    name: 'Chart Zoom',
     component: () => import('../views/ChartZoom.vue'),
   },
   {

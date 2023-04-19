@@ -1,5 +1,5 @@
 <template>
-  <div ref="chart" class="chart-date-range">
+  <div ref="chart" class="chart-zoom">
     <slot v-bind="{ startDate, endDate }" />
   </div>
 </template>

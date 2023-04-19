@@ -1,5 +1,5 @@
 <template>
-  <ComponentPage title="Chart Range">
+  <ComponentPage title="Chart Zoom">
     <p-content>
       <template v-if="startDate && endDate">
         <ChartZoom v-model:start-date="startDate" v-model:end-date="endDate" :options="options">
