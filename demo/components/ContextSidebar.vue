@@ -16,8 +16,8 @@
     <p-context-nav-item title="Histogram Chart" to="/histogram-chart" />
     <p-context-nav-item title="Mini Histogram" to="/mini-histogram" />
     <p-context-nav-item title="Line Chart" to="/line-chart" />
-    <p-divider />
-    <p-heading :heading="3">
+
+    <p-heading :heading="5">
       Utilities
     </p-heading>
     <p-context-nav-item title="Chart Date Range" to="/chart-date-range" />
