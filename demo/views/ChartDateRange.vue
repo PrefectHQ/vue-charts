@@ -20,7 +20,6 @@
 </template>
 
 <script lang="ts" setup>
-  import { NumberRouteParam, useRouteQueryParam } from '@prefecthq/vue-compositions'
   import { endOfToday, endOfWeek, secondsInDay, secondsInHour, startOfToday, startOfWeek } from 'date-fns'
   import { ref } from 'vue'
   import ComponentPage from '../components/ComponentPage.vue'
@@ -33,9 +32,11 @@
   import MiniHistogram from '@/components/MiniHistogram/MiniHistogram.vue'
   import { useChartDateRange } from '@/compositions'
 
-  const buckets = useRouteQueryParam('buckets', NumberRouteParam, 500)
   const { startDate, endDate } = useChartDateRange()
   const { startDate: secondStartDate, endDate: secondEndDate } = useChartDateRange()
+
+  startDate.value = startOfToday()
+  endDate.value = endOfToday()
 
   const now = new Date()
 
@@ -45,9 +46,6 @@
     maxRangeInSeconds: secondsInDay,
     minRangeInSeconds: secondsInHour,
   }
-
-  startDate.value = startOfToday()
-  endDate.value = endOfToday()
 
   const histogramData = ref<HistogramData>([])
   const lineChartData = ref<LineChartData>([])
@@ -61,7 +59,7 @@
 
   function getData(): void {
     const { items } = generateBarChartData({
-      buckets: buckets.value,
+      buckets: 500,
       intervalEnd: endOfWeek(now),
       intervalStart: startOfWeek(now),
     })
