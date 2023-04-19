@@ -39,10 +39,11 @@
   })
 
   let zoomChanged = false
+  let identityChanged = false
 
   watch(xScale, () => {
     if (chart.value && zoomChanged) {
-      select(chart.value).call(zoomed.transform, zoomIdentity)
+      resetZoomIdentity()
       zoomChanged = false
     }
   })
@@ -60,21 +61,100 @@
   }
 
   function onZoom(event: D3ZoomEvent<Element, Date>): void {
+    if (identityChanged) {
+      identityChanged = false
+      return
+    }
+
     const scale = event.transform.rescaleX(xScale.value)
     const [startDate, endDate] = scale.domain()
+    const range = restrictRange({ startDate, endDate })
 
-    emit('update:startDate', startDate)
-    emit('update:endDate', endDate)
+    if (range === null) {
+      resetZoomIdentity()
+      return
+    }
+
+    emit('update:startDate', range.startDate)
+    emit('update:endDate', range.endDate)
 
     zoomChanged = true
   }
 
-  function onZoomEnd(event: D3ZoomEvent<Element, Date>): void {
-    const scale = event.transform.rescaleX(xScale.value)
-    const [startDate, endDate] = scale.domain()
+  function onZoomEnd(): void {
+    emit('updated', {
+      startDate: props.startDate!,
+      endDate: props.endDate!,
+    })
+  }
 
-    emit('updated', { startDate, endDate })
+  function resetZoomIdentity(): void {
+    if (chart.value) {
+      select(chart.value).call(zoomed.transform, zoomIdentity)
+      identityChanged = true
+    }
+  }
 
-    zoomChanged = true
+  const maxPossibleDate = new Date(8640000000000000)
+  const minPossibleDate = new Date(-8640000000000000)
+
+  function restrictRange({ startDate: requestedStartDate, endDate: requestedEndDate }: DateRange): DateRange | null {
+    const {
+      minDate = minPossibleDate,
+      maxDate = maxPossibleDate,
+      minRangeInSeconds = -Infinity,
+      maxRangeInSeconds = Infinity,
+    } = props.options ?? {}
+
+    let startDateInMilliseconds = requestedStartDate.getTime()
+    let endDateInMilliseconds = requestedEndDate.getTime()
+
+    const requestedRange = endDateInMilliseconds - startDateInMilliseconds
+    const currentRange = props.endDate!.getTime() - props.startDate!.getTime()
+    const minDateInMilliseconds = minDate.getTime()
+    const maxDateInMilliseconds = maxDate.getTime()
+    const minRangeInMilliseconds = minRangeInSeconds * 1000
+    const maxRangeInMilliseconds = maxRangeInSeconds * 1000
+    const alreadyZoomedToMin = requestedRange < currentRange && currentRange <= minRangeInMilliseconds
+    const alreadyZoomedToMax = requestedRange > currentRange && currentRange >= maxRangeInMilliseconds
+
+    if (alreadyZoomedToMin || alreadyZoomedToMax) {
+      return null
+    }
+
+    if (requestedRange > maxRangeInMilliseconds) {
+      const difference = requestedRange - maxRangeInMilliseconds
+      const millisecondsToMove = difference / 2
+
+      startDateInMilliseconds = startDateInMilliseconds + millisecondsToMove
+      endDateInMilliseconds = endDateInMilliseconds - millisecondsToMove
+    }
+
+    if (requestedRange < minRangeInMilliseconds) {
+      const difference = minRangeInMilliseconds - requestedRange
+      const secondsToMove = difference / 2
+
+      startDateInMilliseconds = startDateInMilliseconds - secondsToMove
+      endDateInMilliseconds = endDateInMilliseconds + secondsToMove
+    }
+
+    if (startDateInMilliseconds < minDateInMilliseconds) {
+      const difference = minDateInMilliseconds - startDateInMilliseconds
+
+      startDateInMilliseconds = startDateInMilliseconds + difference
+      endDateInMilliseconds = endDateInMilliseconds + difference
+    }
+
+    if (endDateInMilliseconds > maxDateInMilliseconds) {
+      const difference = endDateInMilliseconds - maxDateInMilliseconds
+
+      startDateInMilliseconds = startDateInMilliseconds - difference
+      endDateInMilliseconds = endDateInMilliseconds - difference
+    }
+
+    return {
+      startDate: new Date(startDateInMilliseconds),
+      endDate: new Date(endDateInMilliseconds),
+    }
   }
 </script>
