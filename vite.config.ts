@@ -7,26 +7,22 @@ import svgLoader from 'vite-svg-loader'
 // https://vitejs.dev/config/
 // eslint-disable-next-line import/no-default-export
 export default defineConfig(({ mode }) => {
-  const baseConfig = {
-    resolve: {
-      alias: [
-        {
-          find: '@/demo',
-          replacement: resolve(__dirname, './demo'),
-        },
-        {
-          find: '@',
-          replacement: resolve(__dirname, 'src'),
-        },
-      ],
-    },
-    plugins: [vue(), svgLoader(), dts()],
-  }
-
   if (mode == 'demo') {
     return {
       root: './demo',
-      ...baseConfig,
+      resolve: {
+        alias: [
+          {
+            find: '@/demo',
+            replacement: resolve(__dirname, './demo'),
+          },
+          {
+            find: '@',
+            replacement: resolve(__dirname, 'src'),
+          },
+        ],
+      },
+      plugins: [vue(), svgLoader()],
       build: {
         cssCodeSplit: false,
       },
@@ -34,7 +30,15 @@ export default defineConfig(({ mode }) => {
   }
 
   return {
-    ...baseConfig,
+    resolve: {
+      alias: [
+        {
+          find: '@',
+          replacement: resolve(__dirname, 'src'),
+        },
+      ],
+    },
+    plugins: [vue(), svgLoader(), dts()],
     build: {
       sourcemap: true,
       lib: {
