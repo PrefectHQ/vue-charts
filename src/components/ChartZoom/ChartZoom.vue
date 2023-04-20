@@ -78,7 +78,7 @@
     emit('update:startDate', range.startDate)
     emit('update:endDate', range.endDate)
 
-    zoomChanged = true
+    zoomChanged = ''
   }
 
   function onZoomEnd(): void {
