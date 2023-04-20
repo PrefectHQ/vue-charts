@@ -17,6 +17,11 @@
     <p-context-nav-item title="Mini Histogram" to="/mini-histogram" />
     <p-context-nav-item title="Line Chart" to="/line-chart" />
 
+    <p-heading :heading="5">
+      Utilities
+    </p-heading>
+    <p-context-nav-item title="Chart Zoom" to="/chart-zoom" />
+
     <template #footer>
       <div class="context-sidebar__footer">
         <p-theme-toggle />

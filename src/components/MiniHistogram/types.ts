@@ -4,8 +4,8 @@ import { HistogramDataPoint } from '@/components/HistogramChart'
 export type MiniHistogramOptions = {
   colorStart?: string,
   colorEnd?: string,
-  minDate?: Date,
-  maxDate?: Date,
+  startDate?: Date,
+  endDate?: Date,
   minValue?: number,
   maxValue?: number,
 }

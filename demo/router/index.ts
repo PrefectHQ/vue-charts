@@ -37,6 +37,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('../views/LineChartSection.vue'),
   },
   {
+    path: '/chart-zoom',
+    name: 'Chart Zoom',
+    component: () => import('../views/ChartZoom.vue'),
+  },
+  {
     path: '/',
     redirect: '/bar-chart',
   },

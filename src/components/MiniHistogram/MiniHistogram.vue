@@ -39,8 +39,8 @@
   }))
 
   const minDate = computed<Date>(() => {
-    if (props.options?.minDate) {
-      return props.options.minDate
+    if (props.options?.startDate) {
+      return props.options.startDate
     }
 
     const firstDataPoint = data.value.at(0)
@@ -49,8 +49,8 @@
   })
 
   const endDate = computed<Date>(() => {
-    if (props.options?.maxDate) {
-      return props.options.maxDate
+    if (props.options?.endDate) {
+      return props.options.endDate
     }
 
     const lastDataPoint = data.value.at(-1)
@@ -118,7 +118,8 @@
 <style>
 .mini-histogram { @apply
   relative
-  min-h-[theme('spacing.5')];
+  min-h-[theme('spacing.5')]
+  overflow-hidden
 }
 
 .mini-histogram::before {
