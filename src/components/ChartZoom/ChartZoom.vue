@@ -95,13 +95,8 @@
     }
   }
 
-  const maxPossibleDate = new Date(8640000000000000)
-  const minPossibleDate = new Date(-8640000000000000)
-
   function restrictRange({ startDate: requestedStartDate, endDate: requestedEndDate }: DateRange): DateRange | null {
     const {
-      minDate = minPossibleDate,
-      maxDate = maxPossibleDate,
       minRangeInSeconds = -Infinity,
       maxRangeInSeconds = Infinity,
     } = props.options ?? {}
@@ -111,8 +106,8 @@
 
     const requestedRange = endDateInMilliseconds - startDateInMilliseconds
     const currentRange = props.endDate.getTime() - props.startDate.getTime()
-    const minDateInMilliseconds = minDate.getTime()
-    const maxDateInMilliseconds = maxDate.getTime()
+    const minDateInMilliseconds = props.options?.minDate?.getTime() ?? -Infinity
+    const maxDateInMilliseconds = props.options?.maxDate?.getTime() ?? Infinity
     const minRangeInMilliseconds = minRangeInSeconds * 1000
     const maxRangeInMilliseconds = maxRangeInSeconds * 1000
     const alreadyZoomedToMin = requestedRange < currentRange && currentRange <= minRangeInMilliseconds
