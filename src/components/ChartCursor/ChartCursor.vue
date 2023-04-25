@@ -24,7 +24,8 @@
   import { formatTimeLabel } from '@/utilities/formatTimeLabel'
 
   const props = defineProps<{
-    xAxis: Date[],
+    startDate: Date,
+    endDate: Date,
     cursor?: Date | null,
   }>()
 
@@ -39,7 +40,7 @@
 
   const internalCursor = ref<Date | null>(null)
   const hover = ref(false)
-  const { down: shift } = useKeyDown('Shift', event => console.log('here'))
+  const { down: shift } = useKeyDown('Shift')
 
   const cursor = computed({
     get() {
@@ -70,7 +71,7 @@
   const xScale = computed(() => {
     const scale = scaleTime()
 
-    scale.domain(props.xAxis)
+    scale.domain([props.startDate, props.endDate])
     scale.range([0, chartWidth.value])
 
     return scale

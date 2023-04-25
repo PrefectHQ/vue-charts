@@ -20,6 +20,8 @@
     <p-heading :heading="5">
       Utilities
     </p-heading>
+    <p-context-nav-item title="Chart Cursor" to="/chart-cursor" />
+    <p-context-nav-item title="Chart Selection" to="/chart-selection" />
     <p-context-nav-item title="Chart Zoom" to="/chart-zoom" />
 
     <template #footer>
