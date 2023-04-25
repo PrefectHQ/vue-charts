@@ -1,5 +1,5 @@
 <template>
-  <div ref="chart" class="chart-cursor" @pointerenter="onPointerEnter" @pointermove="onPointerMove" @pointerleave="onPointerLeave">
+  <div ref="chart" class="chart-cursor" v-bind="{ onPointerenter, onPointermove, onPointerleave }">
     <slot />
     <template v-if="showCursor">
       <div class="chart-cursor__cursor" :style="cursorStyles" />
@@ -17,7 +17,7 @@
 
 <script lang="ts" setup>
   import { toPixels } from '@prefecthq/prefect-design'
-  import { useElementRect } from '@prefecthq/vue-compositions'
+  import { useElementRect, useKeyDown } from '@prefecthq/vue-compositions'
   import { pointer, scaleTime } from 'd3'
   import { computed, ref } from 'vue'
   import { formatDateLabel } from '@/utilities/formatDateLabel'
@@ -39,6 +39,7 @@
 
   const internalCursor = ref<Date | null>(null)
   const hover = ref(false)
+  const { down: shift } = useKeyDown('Shift', event => console.log('here'))
 
   const cursor = computed({
     get() {
@@ -78,7 +79,7 @@
   const xScaleClamped = computed(() => xScale.value.copy().clamp(true))
 
   const cursorStyles = computed(() => {
-    if (!cursor.value) {
+    if (!cursor.value || !shift.value) {
       return {
         display: 'none',
       }
@@ -92,7 +93,7 @@
   })
 
   const labelStyle = computed(() => {
-    if (!cursor.value) {
+    if (!cursor.value || !shift.value) {
       return {
         display: 'none',
       }
@@ -115,18 +116,24 @@
     }
   })
 
-  function onPointerEnter(): void {
+  function onPointerenter(event: MouseEvent): void {
     hover.value = true
+    setCursor(event)
   }
 
-  function onPointerMove(event: MouseEvent): void {
-    const [mouseX] = pointer(event, chart.value)
-    cursor.value = xScaleClamped.value.invert(mouseX)
+  function onPointermove(event: MouseEvent): void {
+    setCursor(event)
   }
 
-  function onPointerLeave(): void {
+  function onPointerleave(): void {
     cursor.value = null
     hover.value = false
+  }
+
+  function setCursor(event: MouseEvent): void {
+    const [mouseX] = pointer(event, chart.value)
+
+    cursor.value = xScaleClamped.value.invert(mouseX)
   }
 </script>
 

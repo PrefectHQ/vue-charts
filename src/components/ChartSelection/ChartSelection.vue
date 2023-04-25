@@ -125,6 +125,7 @@
     const dragSelection = drag()
       .on('start', onDragStart)
       .on('end', onDragEnd)
+      .filter((event: MouseEvent) => event.shiftKey)
 
     select(chart.value).call(dragSelection)
   }
