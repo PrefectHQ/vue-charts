@@ -1,8 +1,13 @@
 <template>
-  <div ref="chart" class="mini-histogram">
+  <div ref="chart" class="mini-histogram" :class="classes.root">
     <template v-for="bar in bars" :key="bar.intervalStart.getTime()">
       <slot name="bar" v-bind="bar">
-        <div class="mini-histogram__bar" :style="bar.styles" />
+        <div
+          class="mini-histogram__bar"
+          :class="classes.bar"
+          :style="bar.styles"
+          @click="() => onBarClick(bar)"
+        />
       </slot>
     </template>
   </div>
@@ -24,6 +29,10 @@
     options?: MiniHistogramOptions,
   }>()
 
+  const emit = defineEmits<{
+    (event: 'barClick', value: MiniHistogramBar): void,
+  }>()
+
   const { value: theme } = useColorTheme()
 
   const chart = ref<Element>()
@@ -37,6 +46,17 @@
     colorEnd: '#034efc',
     ...props.options,
   }))
+
+  const classes = computed(() => {
+    return {
+      root: {
+        'mini-histogram--clickable-bars': props.options?.clickable,
+      },
+      bar: {
+        'mini-histogram__bar--clickable': props.options?.clickable,
+      },
+    }
+  })
 
   const minDate = computed<Date>(() => {
     if (props.options?.startDate) {
@@ -113,6 +133,12 @@
 
     return { ...point, styles }
   }
+
+  function onBarClick(bar: MiniHistogramBar): void {
+    if (props.options?.clickable) {
+      emit('barClick', bar)
+    }
+  }
 </script>
 
 <style>
@@ -120,6 +146,10 @@
   relative
   min-h-[theme('spacing.5')]
   overflow-hidden
+}
+
+.mini-histogram--clickable-bars { @apply
+  py-4
 }
 
 .mini-histogram::before {
@@ -137,5 +167,18 @@
   bottom-0
   absolute
   rounded-sm
+}
+
+.mini-histogram__bar--clickable { @apply
+  top-1
+  bottom-1
+  cursor-pointer
+}
+.mini-histogram__bar--clickable:hover { @apply
+  shadow-lg
+  scale-125
+  origin-center
+  outline-8
+  z-10
 }
 </style>

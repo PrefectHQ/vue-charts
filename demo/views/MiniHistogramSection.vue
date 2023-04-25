@@ -1,6 +1,11 @@
 <template>
-  <ComponentPage title="Mini Histogram">
-    <MiniHistogram :data="data" />
+  <ComponentPage title="Mini Histogram" :demos="demos">
+    <template #basic>
+      <MiniHistogram :data="data" />
+    </template>
+    <template #with-clickable-bars>
+      <MiniHistogram :data="data" :options="{ clickable: true }" @bar-click="onBarClick" />
+    </template>
   </ComponentPage>
 </template>
 
@@ -10,6 +15,7 @@
   import { computed, ref } from 'vue'
   import ComponentPage from '../components/ComponentPage.vue'
   import { generateBarChartData } from '../data'
+  import { MiniHistogramBar } from '@/components'
   import MiniHistogram from '@/components/MiniHistogram/MiniHistogram.vue'
 
   const today = new Date()
@@ -26,4 +32,13 @@
 
     return items
   })
+
+  const demos = [
+    { title: 'Basic' },
+    { title: 'With clickable bars' },
+  ]
+
+  function onBarClick(bar: MiniHistogramBar): void {
+    console.log('Clicked bar:', bar)
+  }
 </script>

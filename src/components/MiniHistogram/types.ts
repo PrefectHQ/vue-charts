@@ -8,6 +8,7 @@ export type MiniHistogramOptions = {
   endDate?: Date,
   minValue?: number,
   maxValue?: number,
+  clickable?: boolean,
 }
 
 export type MiniHistogramBar = HistogramDataPoint & {
