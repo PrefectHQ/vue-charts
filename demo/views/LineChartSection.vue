@@ -15,22 +15,22 @@
     </template>
 
     <template #with-cursor>
-      <ChartCursor v-model:cursor="cursor" v-bind="{ xAxis }" class="mb-12">
+      <ChartCursor v-model:cursor="cursor" v-bind="{ startDate, endDate }" class="mb-12">
         <LineChart :options="{ curve }" :data="data" />
       </ChartCursor>
     </template>
 
     <template #with-selection>
-      <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ xAxis }" class="mt-6">
+      <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ startDate, endDate }" class="mt-6">
         <LineChart :options="{ curve }" :data="data" />
       </ChartSelection>
     </template>
 
     <template #everything>
       <ChartLabels v-bind="{ xAxis, yAxis }" class="mb-12 mt-8">
-        <ChartPlayHead v-bind="{ xAxis }">
-          <ChartCursor v-model:cursor="cursor" v-bind="{ xAxis }">
-            <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ xAxis }">
+        <ChartPlayHead v-bind="{ startDate, endDate }">
+          <ChartCursor v-model:cursor="cursor" v-bind="{ startDate, endDate }">
+            <ChartSelection v-model:selection-start="selectionStart" v-model:selection-end="selectionEnd" v-bind="{ startDate, endDate }">
               <LineChart :options="{ curve, startDate, endDate }" :data="data" />
             </ChartSelection>
           </ChartCursor>
