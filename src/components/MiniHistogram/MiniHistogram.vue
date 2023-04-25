@@ -163,8 +163,8 @@
 }
 
 .mini-histogram__bar { @apply
-  top-0
-  bottom-0
+  top-[10%]
+  bottom-[10%]
   absolute
   rounded-sm
 }
@@ -176,7 +176,7 @@
 }
 .mini-histogram__bar--clickable:hover { @apply
   shadow-lg
-  scale-125
+  scale-[1.2]
   origin-center
   outline-8
   z-10
