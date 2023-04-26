@@ -37,6 +37,16 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('../views/LineChartSection.vue'),
   },
   {
+    path: '/chart-cursor',
+    name: 'Chart Cursor',
+    component: () => import('../views/ChartCursor.vue'),
+  },
+  {
+    path: '/chart-selection',
+    name: 'Chart Selection',
+    component: () => import('../views/ChartSelection.vue'),
+  },
+  {
     path: '/chart-zoom',
     name: 'Chart Zoom',
     component: () => import('../views/ChartZoom.vue'),

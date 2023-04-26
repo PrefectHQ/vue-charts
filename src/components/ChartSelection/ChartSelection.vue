@@ -25,7 +25,8 @@
   type DragEvent = { x: number, dx: number, sourceEvent: HTMLMouseEvent }
 
   const props = defineProps<{
-    xAxis: Date[],
+    startDate: Date,
+    endDate: Date,
     selectionStart: Date | null,
     selectionEnd: Date | null,
   }>()
@@ -48,7 +49,7 @@
   const xScale = computed(() => {
     const scale = scaleTime()
 
-    scale.domain(props.xAxis)
+    scale.domain([props.startDate, props.endDate])
     scale.range([0, chartWidth.value])
 
     return scale
@@ -125,6 +126,7 @@
     const dragSelection = drag()
       .on('start', onDragStart)
       .on('end', onDragEnd)
+      .filter((event: MouseEvent) => event.shiftKey)
 
     select(chart.value).call(dragSelection)
   }

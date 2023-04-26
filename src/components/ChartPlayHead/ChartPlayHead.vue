@@ -12,7 +12,8 @@
   import { computed, ref } from 'vue'
 
   const props = defineProps<{
-    xAxis: Date[],
+    startDate: Date,
+    endDate: Date,
   }>()
 
   const chart = ref<Element>()
@@ -25,7 +26,7 @@
   const xScale = computed(() => {
     const scale = scaleTime()
 
-    scale.domain(props.xAxis)
+    scale.domain([props.startDate, props.endDate])
     scale.range([0, chartWidth.value])
 
     return scale

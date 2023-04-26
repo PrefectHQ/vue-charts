@@ -1,14 +1,16 @@
 <template>
-  <div ref="chart" class="chart-zoom">
+  <div ref="chart" class="chart-zoom" :class="classes">
     <slot v-bind="{ startDate, endDate }" />
   </div>
 </template>
 
 <script lang="ts" setup>
-  import { useElementRect } from '@prefecthq/vue-compositions'
+  import { useElementRect, useKeyDown } from '@prefecthq/vue-compositions'
   import { select, scaleTime, zoom, D3ZoomEvent, zoomIdentity } from 'd3'
   import { computed, onMounted, ref, toRefs, watch } from 'vue'
   import { ChartZoomOptions, DateRange } from '@/components/ChartZoom/types'
+
+  type ZoomEvent = { sourceEvent: MouseEvent | WheelEvent }
 
   const props = defineProps<{
     startDate: Date,
@@ -24,10 +26,13 @@
   const { startDate, endDate } = toRefs(props)
   const chart = ref<Element>()
   const { width: chartWidth } = useElementRect(chart)
+  const { down: shift } = useKeyDown('Shift')
 
   const zoomed = zoom()
+    .on('start', onZoomStart)
     .on('zoom', onZoom)
     .on('end', onZoomEnd)
+    .filter((event: MouseEvent) => !event.shiftKey)
 
   const xScale = computed(() => {
     const scale = scaleTime()
@@ -37,6 +42,13 @@
 
     return scale
   })
+
+  const dragging = ref(false)
+
+  const classes = computed(() => ({
+    'chart-zoom--enabled': !shift.value,
+    'chart-zoom--dragging': dragging.value,
+  }))
 
   let zoomChanged = false
   let identityChanged = false
@@ -58,6 +70,12 @@
     }
 
     select(chart.value).call(zoomed)
+  }
+
+  function onZoomStart({ sourceEvent }: ZoomEvent): void {
+    if (sourceEvent.type === 'mousedown') {
+      dragging.value = true
+    }
   }
 
   function onZoom(event: D3ZoomEvent<Element, Date>): void {
@@ -82,6 +100,8 @@
   }
 
   function onZoomEnd(): void {
+    dragging.value = false
+
     emit('updated', {
       startDate: props.startDate,
       endDate: props.endDate,
@@ -153,3 +173,13 @@
     }
   }
 </script>
+
+<style>
+.chart-zoom--enabled { @apply
+  cursor-grab
+}
+
+.chart-zoom--dragging { @apply
+  cursor-grabbing
+}
+</style>
