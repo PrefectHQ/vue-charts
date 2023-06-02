@@ -19,8 +19,8 @@
           <stop offset="100%" class="line-chart__gradient-stop" />
         </linearGradient>
       </defs>
-      <path class="line-chart__path" :d="strokePath" />
-      <path class="line-chart__fill" :d="fillPath" />
+      <path v-if="strokePath" class="line-chart__path" :d="strokePath" />
+      <path v-if="fillPath" class="line-chart__fill" :d="fillPath" />
     </svg>
   </div>
 </template>
