@@ -7,6 +7,7 @@ export type LineChartOptions = {
   minValue?: number,
   maxValue?: number,
   curve?: Curve | CurveFactory,
+  roundUpMaxValue?: boolean,
 }
 
 export type LineChartDataPoint = [x: Date, y: number]

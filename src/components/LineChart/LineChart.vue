@@ -19,8 +19,8 @@
           <stop offset="100%" class="line-chart__gradient-stop" />
         </linearGradient>
       </defs>
-      <path class="line-chart__path" :d="strokePath" />
-      <path class="line-chart__fill" :d="fillPath" />
+      <path v-if="strokePath" class="line-chart__path" :d="strokePath" />
+      <path v-if="fillPath" class="line-chart__fill" :d="fillPath" />
     </svg>
   </div>
 </template>
@@ -93,7 +93,11 @@
 
     const max = Math.max(...values.value, 0)
 
-    return roundUpToIncrement(max)
+    if (props.options?.roundUpMaxValue) {
+      return roundUpToIncrement(max)
+    }
+
+    return max
   })
 
   const yScale = computed(() => {
@@ -107,7 +111,7 @@
 
   const positions = computed<PointPosition[]>(() => data.value.map(([x, y]) => [xScale.value(x), yScale.value(y)]))
 
-  const strokePath = computed<string>(() => {
+  const strokePath = computed<string | null>(() => {
     const line = d3Line()
 
     if (props.options?.curve) {
@@ -116,10 +120,14 @@
       line.curve(curve)
     }
 
-    return line(positions.value) ?? ''
+    return line(positions.value)
   })
 
-  const fillPath = computed<string>(() => {
+  const fillPath = computed<string | null>(() => {
+    if (!strokePath.value) {
+      return null
+    }
+
     const [min, max] = xScale.value.range()
     const [first] = positions.value.at(0) ?? [min]
     const [last] = positions.value.at(-1) ?? [max]
