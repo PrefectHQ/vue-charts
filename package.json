@@ -35,7 +35,7 @@
     "@types/lodash.debounce": "4.0.7",
     "@types/node": "20.5.0",
     "@vitejs/plugin-vue": "4.2.3",
-    "autoprefixer": "^10.4.14",
+    "autoprefixer": "^10.4.15",
     "eslint": "8.47.0",
     "tailwindcss": "3.3.3",
     "tsc-alias": "1.8.7",
