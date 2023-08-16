@@ -43,7 +43,6 @@
 }
 
 .scatter-plot__dot { @apply
-  bg-background-200
-  dark:bg-background-800
+  bg-blue-500
 }
 </style>

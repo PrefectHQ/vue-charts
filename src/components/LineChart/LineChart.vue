@@ -141,9 +141,9 @@
 <style>
 .line-chart {
   min-height: 100px;
-  --darkest: var(--vc-line-chart-color-darkest, theme('colors.prefect.700'));
-  --dark: var(--vc-line-chart-color-dark, theme('colors.prefect.400'));
-  --light: var(--vc-line-chart-color-dark, theme('colors.sky.300'));
+  --vc-line-chart-gradient-start: #7210EF;
+  --vc-line-chart-gradient-middle: #7210EF;
+  --vc-line-chart-gradient-end: #A564F9;
 }
 
 .line-chart__path { @apply
@@ -153,50 +153,33 @@
 }
 
 .line-chart__path--0 {
-  stop-color: theme('colors.sky.300')
+  stop-color: var(--vc-line-chart-gradient-start)
 }
 
 .line-chart__path--85 {
-  stop-color: theme('colors.sky.600')
+  stop-color: var(--vc-line-chart-gradient-middle)
 }
 
 .line-chart__path--100 {
-  stop-color: theme('colors.prefect.700')
-}
-
-.dark .line-chart__path--0 {
-  stop-color: theme('colors.prefect.700')
-}
-
-.dark .line-chart__path--85 {
-  stop-color: theme('colors.prefect.400')
-}
-
-.dark .line-chart__path--100 {
-  stop-color: theme('colors.sky.300')
+  stop-color: var(--vc-line-chart-gradient-end)
 }
 
 .line-chart__fill {
   fill: v-bind(fillGradientIdUrl);
 }
 
-.dark .line-chart__gradient-start {
-  stop-color: #000;
+.line-chart__gradient-start {
+  stop-color: var(--p-color-bg-2);
   stop-opacity: 0;
 }
 
-.dark .line-chart__gradient-stop {
-  stop-opacity: 0.3;
-  stop-color: theme('colors.prefect.500');
-}
-
-.line-chart__gradient-start {
-  stop-color: #fff;
+.dark .line-chart__gradient-start {
+  stop-color: transparent;
   stop-opacity: 0;
 }
 
 .line-chart__gradient-stop {
   stop-opacity: 0.3;
-  stop-color: theme('colors.prefect.300');
+  stop-color: var(--vc-line-chart-gradient-start);
 }
 </style>

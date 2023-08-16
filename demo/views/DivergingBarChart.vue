@@ -103,6 +103,7 @@
   import { computed, ref } from 'vue'
   import { generateSentimentData } from '../data'
   import DivergingBarChart from '@/components/DivergingBarChart.vue'
+  import { DivergingBarChartItem } from '@/types'
 
   const start = ref(new Date())
 
@@ -130,7 +131,8 @@
 
   const getColumnKey = (key: string): string => `${key.replace(' ', '-').toLowerCase()}`
 
-  const columns = computed<TableColumn[]>(() => {
+  type DivergingBarChartColumns = DivergingBarChartItem & DivergingBarChartItem['data']
+  const columns = computed<TableColumn<DivergingBarChartColumns>[]>(() => {
     return [
       { label: 'Start', property: 'start' },
       { label: 'End', property: 'end' },
@@ -147,7 +149,6 @@
 }
 
 .diverging-bar-chart-view__chart {
-  background-color: #f7f8fa;
   height: 800px;
   max-height: 100vh;
   min-height: 200px;
@@ -192,13 +193,10 @@
   p-3
   grid
   gap-1
-  bg-background
-  border
-  dark:border-background-600
-  rounded
+  bg-floating
+  rounded-default
   max-w-xs
   w-screen
   shadow-md
-  text-foreground
 }
 </style>

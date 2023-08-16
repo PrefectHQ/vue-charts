@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
 const prefectDesignPlugin = require('@prefecthq/prefect-design/dist/tailwindPlugin.js')
-const plugins = [prefectDesignPlugin]
 
 module.exports = {
   content: [
@@ -10,5 +9,5 @@ module.exports = {
     './demo/index.html',
     './demo/**/*.vue',
   ],
-  plugins,
+  plugins: [prefectDesignPlugin],
 }

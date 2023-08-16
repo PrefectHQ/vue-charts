@@ -42,8 +42,8 @@
   const bars = computed(() => data.value.map(point => getBar(point)))
 
   const options = computed<OptionsWithDefaultValues>(() => ({
-    colorStart: '#7dd3fc',
-    colorEnd: '#034efc',
+    colorStart: '#7210EF',
+    colorEnd: '#A564F9',
     ...props.options,
   }))
 
@@ -152,14 +152,14 @@
   py-4
 }
 
-.mini-histogram::before {
+.mini-histogram::before { @apply
+  absolute
+  top-1/2
+  left-0
+  right-0
+  h-[1px]
+  bg-divider;
   content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 1px;
-  top: 50%;
-  background-color: theme('colors.slate.700');
 }
 
 .mini-histogram__bar { @apply

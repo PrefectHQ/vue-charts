@@ -19,7 +19,7 @@
 
 <script lang="ts" setup>
   import * as d3 from 'd3'
-  import { ref, computed, onMounted, watch, CSSProperties, withDefaults } from 'vue'
+  import { ref, computed, onMounted, watch, CSSProperties } from 'vue'
   import { useBaseChart } from '@/components/Base'
   import { GroupSelection, TransitionSelection, ScatterPlotItem } from '@/types'
   import { extentUndefined } from '@/utilities/extent'

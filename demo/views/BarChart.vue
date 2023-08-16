@@ -58,11 +58,13 @@
   import { computed, ref } from 'vue'
   import { generateBarChartData } from '../data'
   import BarChart from '@/components/BarChart.vue'
+  import { BarChartItem } from '@/types'
 
   const start = ref(new Date())
   const data = computed(() => generateBarChartData({ intervalStart: start.value, buckets: 50 }))
 
-  const columns: TableColumn[] = [
+  type BarChartColumns = BarChartItem & BarChartItem['data']
+  const columns: TableColumn<BarChartColumns>[] = [
     { label: 'Start', property: 'start' },
     { label: 'End', property: 'end' },
     { label: 'Color', property: 'color' },
@@ -102,13 +104,10 @@
   p-3
   grid
   gap-1
-  bg-background
-  border
-  dark:border-background-600
-  rounded
+  bg-floating
+  rounded-default
   max-w-xs
   w-screen
   shadow-md
-  text-foreground
 }
 </style>

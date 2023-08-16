@@ -149,10 +149,9 @@
   absolute
   top-0
   bottom-0
-  bg-black
-  dark:bg-white
-  pointer-events-none;
-  width: 1px;
+  pointer-events-none
+  w-[1px];
+  background-color: var(--p-color-text-default);
 }
 
 .chart-cursor__label { @apply
@@ -162,20 +161,20 @@
   items-center
   gap-1
   whitespace-nowrap
-  bg-slate-800
+  bg-floating
+  shadow-lg
   p-2
-  rounded
+  rounded-default
   z-10;
   top: calc(100% + theme('spacing.2'));
 }
 
 .chart-cursor__date { @apply
   text-sm
-  text-slate-100
 }
 
 .chart-cursor__time { @apply
   text-xs
-  text-slate-400
+  text-subdued
 }
 </style>

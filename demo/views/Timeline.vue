@@ -4,10 +4,10 @@
       <div class="flex items-center gap-2">
         <p-checkbox v-model="live" label="Live" />
         <p-checkbox v-model="hideAxis" label="Hide Axis" />
-        <p-button size="sm" primary @click="reset">
+        <p-button small @click="reset">
           Reset
         </p-button>
-        <p-button size="sm" primary @click="generateFull">
+        <p-button small @click="generateFull">
           Generate Full Dataset
         </p-button>
       </div>
@@ -26,7 +26,7 @@
 
     <p-tabs :tabs="['Chart', 'Data']">
       <template #chart>
-        <div class="timeline-view__chart">
+        <div class="timeline-view__chart p-background">
           <Timeline
             :items="data?.data ?? []"
             :start="data?.start"
@@ -69,7 +69,7 @@
             {{ row.start.toLocaleTimeString() }}
           </template>
           <template #end="{ row }">
-            {{ row.end.toLocaleTimeString() }}
+            {{ row.end?.toLocaleTimeString() }}
           </template>
         </p-table>
       </template>
@@ -78,9 +78,11 @@
 </template>
 
 <script lang="ts" setup>
+  import { TableColumn } from '@prefecthq/prefect-design'
   import { ref, watch } from 'vue'
   import { generateRandomTimelineData, generateInitialTimelineData, updateTimelineData, TimelineData } from '../data'
   import Timeline from '@/components/Timeline.vue'
+  import { TimelineChartItem } from '@/types'
 
   let liveInterval: ReturnType<typeof setInterval> | undefined
 
@@ -98,7 +100,8 @@
     }
   }
 
-  const columns = [
+  type TimelineColumns = TimelineChartItem & TimelineChartItem['data']
+  const columns: TableColumn<TimelineColumns>[] = [
     { label: 'Start', property: 'start' },
     { label: 'End', property: 'end' },
     { label: 'Color', property: 'color' },
@@ -151,9 +154,6 @@
   min-width: 400px;
   overflow: auto;
   resize: both;
-
-  @apply
-  bg-background
 }
 
 .timeline-view__node {
@@ -172,13 +172,10 @@
   p-3
   grid
   gap-1
-  bg-background
-  border
-  dark:border-background-600
-  rounded
+  bg-floating
+  rounded-default
   max-w-xs
   w-screen
   shadow-md
-  text-foreground
 }
 </style>
