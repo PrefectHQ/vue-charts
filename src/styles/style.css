@@ -1,12 +1,2 @@
 @tailwind components;
 @tailwind utilities;
-
-.dark {
-  --p-color-event: #7210EF;
-  --p-color-event-dense: #A564F9;
-}
-
-.light {
-  --p-color-event: #B073FF;
-  --p-color-event-dense: #CDA7FE;
-}

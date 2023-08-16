@@ -141,9 +141,9 @@
 <style>
 .line-chart {
   min-height: 100px;
-  --darkest: var(--vc-line-chart-color-darkest, theme('colors.blue.700'));
-  --dark: var(--vc-line-chart-color-dark, theme('colors.blue.400'));
-  --light: var(--vc-line-chart-color-dark, theme('colors.sky.300'));
+  --vc-line-chart-gradient-start: #7210EF;
+  --vc-line-chart-gradient-middle: #7210EF;
+  --vc-line-chart-gradient-end: #A564F9;
 }
 
 .line-chart__path { @apply
@@ -153,15 +153,15 @@
 }
 
 .line-chart__path--0 {
-  stop-color: theme('colors.event')
+  stop-color: var(--vc-line-chart-gradient-start)
 }
 
 .line-chart__path--85 {
-  stop-color: theme('colors.event')
+  stop-color: var(--vc-line-chart-gradient-middle)
 }
 
 .line-chart__path--100 {
-  stop-color: theme('colors.event-dense')
+  stop-color: var(--vc-line-chart-gradient-end)
 }
 
 .line-chart__fill {
@@ -180,6 +180,6 @@
 
 .line-chart__gradient-stop {
   stop-opacity: 0.3;
-  stop-color: theme('colors.event');
+  stop-color: var(--vc-line-chart-gradient-start);
 }
 </style>

@@ -519,16 +519,23 @@
 </script>
 
 <style>
-.histogram-chart--dragging { @apply
-  !cursor-move
-  !select-none
-}
-
 .histogram-chart { @apply
   grid
   gap-2;
   grid-template-rows: minmax(56px, 1fr);
   grid-template-areas: "viewport";
+
+  --vc-histogram-chart-bar-bg: #7210EF;
+  --vc-histogram-chart-bar-border: #A564F9;
+
+  --vc-histogram-chart-gradient-start: #7210EF;
+  --vc-histogram-chart-gradient-middle: #7210EF;
+  --vc-histogram-chart-gradient-stop: #A564F9;
+}
+
+.histogram-chart--dragging { @apply
+  !cursor-move
+  !select-none
 }
 
 .histogram-chart--loading * {
@@ -639,10 +646,10 @@
 .histogram-chart__bar { @apply
   absolute
   block
-  bg-event
   border
-  border-event-dense
-  opacity-0
+  opacity-0;
+  background-color: var(--vc-histogram-chart-bar-bg);
+  border-color: var(--vc-histogram-chart-bar-border)
 }
 
 .histogram-chart__bar--transitioned { @apply
@@ -676,7 +683,7 @@
 
 .histogram-chart__gradient-stop {
   stop-opacity: 0.3;
-  stop-color: theme('colors.event');
+  stop-color: var(--vc-histogram-chart-gradient-start);
 }
 
 .histogram-chart__smooth { @apply
@@ -695,15 +702,15 @@
 }
 
 .histogram-chart__path--0 {
-  stop-color: theme('colors.event')
+  stop-color: var(--vc-histogram-chart-gradient-start)
 }
 
 .histogram-chart__path--85 {
-  stop-color: theme('colors.event')
+  stop-color: var(--vc-histogram-chart-gradient-middle)
 }
 
 .histogram-chart__path--100 {
-  stop-color: theme('colors.event-dense')
+  stop-color: var(--vc-histogram-chart-gradient-stop)
 }
 
 .histogram-chart__fill { @apply

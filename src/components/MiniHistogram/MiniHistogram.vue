@@ -34,9 +34,6 @@
   }>()
 
   const { value: theme } = useColorTheme()
-  const documentStyles = getComputedStyle(document.documentElement)
-  const colorStart = documentStyles.getPropertyValue('--p-color-event').trim()
-  const colorEnd = documentStyles.getPropertyValue('--p-color-event-dense').trim()
 
   const chart = ref<Element>()
   const { width: chartWidth } = useElementRect(chart)
@@ -45,8 +42,8 @@
   const bars = computed(() => data.value.map(point => getBar(point)))
 
   const options = computed<OptionsWithDefaultValues>(() => ({
-    colorStart,
-    colorEnd,
+    colorStart: '#7210EF',
+    colorEnd: '#A564F9',
     ...props.options,
   }))
 
