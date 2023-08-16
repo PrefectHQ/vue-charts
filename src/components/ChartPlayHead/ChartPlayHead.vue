@@ -52,19 +52,19 @@
   absolute
   top-0
   bottom-0
-  bg-prefect-400
-  bg-opacity-20
+  bg-live
   pointer-events-none
-  w-4;
+  w-[2px]
 }
 
 .chart-play-head__now::before { @apply
   absolute
   top-0
   bottom-0
-  bg-prefect-400;
+  bg-live
+  opacity-20
+  w-4;
   content: '';
-  width: 2px;
   left: 50%;
   transform: translateX(-50%);
 }

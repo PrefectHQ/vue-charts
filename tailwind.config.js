@@ -1,8 +1,22 @@
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 /* eslint-disable @typescript-eslint/no-require-imports */
 /* eslint-disable @typescript-eslint/no-var-requires */
-const prefectDesignPlugin = require('@prefecthq/prefect-design/dist/tailwindPlugin.js')
-const plugins = [prefectDesignPlugin]
+const prefectDesignTheme = require('@prefecthq/prefect-design/dist/tailwindTheme.js')
+const prefectDesignUtilities = require('@prefecthq/prefect-design/dist/tailwindUtilities.js')
+
+const colors = {
+  event: 'var(--p-color-event)',
+  'event-dense': 'var(--p-color-event-dense)',
+}
+
+const extend = {
+  colors,
+}
+
+const plugins = [
+  prefectDesignTheme,
+  prefectDesignUtilities
+]
 
 module.exports = {
   content: [
@@ -10,5 +24,8 @@ module.exports = {
     './demo/index.html',
     './demo/**/*.vue',
   ],
+  theme: {
+    extend,
+  },
   plugins,
 }

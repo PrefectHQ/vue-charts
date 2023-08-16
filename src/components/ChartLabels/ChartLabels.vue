@@ -114,16 +114,15 @@
 
 .chart-labels__date-label { @apply
   text-sm
-  text-foreground
 }
 
 .chart-labels__time-label { @apply
   text-xs
-  text-foreground-200
+  text-subdued
 }
 
 .chart-labels__value-label { @apply
-  text-foreground-200
+  text-subdued
 }
 
 .chart-labels__y { @apply
@@ -132,7 +131,7 @@
   items-end
   justify-between
   border-r
-  border-foreground-100
+  border-divider
   pr-2;
 
   grid-area: yAxis;

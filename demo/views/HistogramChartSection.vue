@@ -5,7 +5,7 @@
         <p-label label="Buckets">
           <div class="flex gap-2">
             <p-number-input v-model="buckets" />
-            <p-button primary icon="RefreshIcon" @click="getData" />
+            <p-button icon="ArrowPathIcon" @click="getData" />
           </div>
         </p-label>
       </div>

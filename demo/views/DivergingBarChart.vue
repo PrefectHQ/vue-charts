@@ -147,7 +147,6 @@
 }
 
 .diverging-bar-chart-view__chart {
-  background-color: #f7f8fa;
   height: 800px;
   max-height: 100vh;
   min-height: 200px;
@@ -192,13 +191,10 @@
   p-3
   grid
   gap-1
-  bg-background
-  border
-  dark:border-background-600
-  rounded
+  bg-floating
+  rounded-default
   max-w-xs
   w-screen
   shadow-md
-  text-foreground
 }
 </style>

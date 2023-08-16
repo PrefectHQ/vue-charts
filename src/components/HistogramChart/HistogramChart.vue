@@ -572,18 +572,27 @@
   block
   absolute
   border
-  border-sky-200
-  bg-sky-500
+  border-selected
   -top-1
   -bottom-1
   rounded-sm
   z-10
-  bg-opacity-10
-  border-opacity-20
-  hover:border-opacity-40
+  opacity-60
+  hover:opacity-100
   transition-all;
 
   transition-property: border;
+}
+
+.histogram-chart__selection::before { @apply
+  bg-selected
+  opacity-20
+  absolute
+  top-0
+  right-0
+  bottom-0
+  left-0;
+  content: '';
 }
 
 .histogram-chart__selection--moving .histogram-chart__selection-resize,
@@ -609,10 +618,8 @@
   absolute
   w-2
   h-8
-  border
-  border-sky-200
-  bg-slate-500
-  rounded-sm;
+  bg-selected
+  rounded-default;
   top: 50%;
   transform: translate(50%, -50%);
   content: '';
@@ -629,16 +636,11 @@
   transform: translateX(50%)
 }
 
-.histogram-chart__selection--moving { @apply
-  !border-opacity-50
-}
-
 .histogram-chart__bar { @apply
   absolute
   block
-  bg-prefect-500
+  bg-event
   border
-  border-prefect-300
   opacity-0
 }
 
@@ -662,18 +664,18 @@
 }
 
 .dark .histogram-chart__gradient-start {
-  stop-color: #000;
+  stop-color: transparent;
   stop-opacity: 0;
 }
 
 .histogram-chart__gradient-start {
-  stop-color: #fff;
+  stop-color: var(--p-color-bg-1);
   stop-opacity: 0;
 }
 
 .histogram-chart__gradient-stop {
   stop-opacity: 0.3;
-  stop-color: theme('colors.prefect.500');
+  stop-color: theme('colors.event');
 }
 
 .histogram-chart__smooth { @apply
@@ -692,15 +694,15 @@
 }
 
 .histogram-chart__path--0 {
-  stop-color: theme('colors.prefect.700')
+  stop-color: theme('colors.event')
 }
 
 .histogram-chart__path--85 {
-  stop-color: theme('colors.prefect.400')
+  stop-color: theme('colors.event')
 }
 
 .histogram-chart__path--100 {
-  stop-color: theme('colors.sky.300')
+  stop-color: theme('colors.event-dense')
 }
 
 .histogram-chart__fill { @apply
@@ -730,7 +732,7 @@
   items-end
   justify-between
   border-r
-  border-foreground-100
+  border-divider
   pr-2;
 
   grid-area: yAxis;
@@ -748,15 +750,14 @@
 
 .histogram-chart__date-label { @apply
   text-sm
-  text-foreground
 }
 
 .histogram-chart__time-label { @apply
   text-xs
-  text-foreground-200
+  text-subdued
 }
 
 .histogram-chart__value-label { @apply
-  text-foreground-200
+  text-subdued
 }
 </style>

@@ -102,13 +102,10 @@
   p-3
   grid
   gap-1
-  bg-background
-  border
-  dark:border-background-600
-  rounded
+  bg-floating
+  rounded-default
   max-w-xs
   w-screen
   shadow-md
-  text-foreground
 }
 </style>

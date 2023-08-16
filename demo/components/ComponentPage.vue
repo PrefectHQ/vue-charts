@@ -122,7 +122,7 @@
 
 .component-page__description,
 .component-page__demo-description { @apply
-  text-foreground-300
+  text-subdued
   my-2
   text-sm
 }

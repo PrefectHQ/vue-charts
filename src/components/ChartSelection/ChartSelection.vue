@@ -195,12 +195,21 @@
   absolute
   top-0
   bottom-0
-  border-sky-500
-  bg-sky-500
+  border-selected
   border-l-[1px]
   border-r-[1px]
-  bg-opacity-25
   pointer-events-none
+}
+
+.chart-selection__selection::before { @apply
+  bg-selected
+  opacity-20
+  absolute
+  top-0
+  right-0
+  bottom-0
+  left-0;
+  content: ' ';
 }
 
 .chart-selection__label { @apply
@@ -208,8 +217,7 @@
   top-0
   whitespace-nowrap
   text-sm
-  text-sky-700
-  dark:text-sky-300;
+  text-selected;
   transform: translateY(calc(-100% - theme('spacing.2')))
 }
 </style>
