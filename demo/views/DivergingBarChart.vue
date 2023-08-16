@@ -103,6 +103,7 @@
   import { computed, ref } from 'vue'
   import { generateSentimentData } from '../data'
   import DivergingBarChart from '@/components/DivergingBarChart.vue'
+  import { DivergingBarChartItem } from '@/types'
 
   const start = ref(new Date())
 
@@ -130,7 +131,8 @@
 
   const getColumnKey = (key: string): string => `${key.replace(' ', '-').toLowerCase()}`
 
-  const columns = computed<TableColumn[]>(() => {
+  type DivergingBarChartColumns = DivergingBarChartItem & DivergingBarChartItem['data']
+  const columns = computed<TableColumn<DivergingBarChartColumns>[]>(() => {
     return [
       { label: 'Start', property: 'start' },
       { label: 'End', property: 'end' },

@@ -69,7 +69,7 @@
             {{ row.start.toLocaleTimeString() }}
           </template>
           <template #end="{ row }">
-            {{ row.end.toLocaleTimeString() }}
+            {{ row.end?.toLocaleTimeString() }}
           </template>
         </p-table>
       </template>
@@ -78,9 +78,11 @@
 </template>
 
 <script lang="ts" setup>
+  import { TableColumn } from '@prefecthq/prefect-design'
   import { ref, watch } from 'vue'
   import { generateRandomTimelineData, generateInitialTimelineData, updateTimelineData, TimelineData } from '../data'
   import Timeline from '@/components/Timeline.vue'
+  import { TimelineChartItem } from '@/types'
 
   let liveInterval: ReturnType<typeof setInterval> | undefined
 
@@ -98,7 +100,8 @@
     }
   }
 
-  const columns = [
+  type TimelineColumns = TimelineChartItem & { color: string }
+  const columns: TableColumn<TimelineColumns>[] = [
     { label: 'Start', property: 'start' },
     { label: 'End', property: 'end' },
     { label: 'Color', property: 'color' },
