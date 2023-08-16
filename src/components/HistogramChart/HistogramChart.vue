@@ -641,6 +641,7 @@
   block
   bg-event
   border
+  border-event-dense
   opacity-0
 }
 

@@ -1,5 +1,7 @@
-import '@prefecthq/prefect-design/dist/style.css'
 import '@/styles/style.css'
+// Prefect styles need to be imported after the demo styles so the
+// tailwind base styles don't override prefect component CSS selectors.
+import '@prefecthq/prefect-design/dist/style.css'
 
 import { plugin as PrefectDesign } from '@prefecthq/prefect-design'
 import { createApp } from 'vue'

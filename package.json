@@ -52,7 +52,7 @@
     "lodash.debounce": "4.0.8"
   },
   "peerDependencies": {
-    "@prefecthq/prefect-design": "^1.4.3",
+    "@prefecthq/prefect-design": "^2.0.0-beta.3",
     "vue": "^3.2.47"
   }
 }
