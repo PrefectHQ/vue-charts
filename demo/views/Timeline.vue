@@ -100,7 +100,7 @@
     }
   }
 
-  type TimelineColumns = TimelineChartItem & { color: string }
+  type TimelineColumns = TimelineChartItem & TimelineChartItem['data']
   const columns: TableColumn<TimelineColumns>[] = [
     { label: 'Start', property: 'start' },
     { label: 'End', property: 'end' },
