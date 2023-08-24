@@ -46,13 +46,13 @@
     "vue-tsc": "1.8.8"
   },
   "dependencies": {
-    "@prefecthq/vue-compositions": "1.5.7",
+    "@prefecthq/vue-compositions": "1.5.8",
     "d3": "7.8.5",
     "date-fns": "^2.30.0",
     "lodash.debounce": "4.0.8"
   },
   "peerDependencies": {
-    "@prefecthq/prefect-design": "^2.0.0-beta.3",
+    "@prefecthq/prefect-design": "^2.0.0-beta.5",
     "vue": "^3.2.47"
   }
 }

@@ -39,7 +39,6 @@
     content: {
       'dark': colorTheme.value === 'dark',
       'light': colorTheme.value === 'light',
-      'p-background': true,
     },
     iframe: {
       'pointer-events-none': dragging.value,
@@ -108,13 +107,14 @@
 }
 
 .resizable-section__handle { @apply
+  bg-floating
+  shadow-md
   w-[v-bind(handleWidthPx)]
   h-full
   flex
   justify-center
   items-center
-  cursor-ew-resize;
-  filter: drop-shadow(0 0 0.15rem rgba(0, 0, 0, 0.2));
+  cursor-ew-resize
 }
 
 .resizable-section__px { @apply
