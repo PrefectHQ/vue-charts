@@ -42,7 +42,11 @@ export default defineConfig(({ mode }) => {
         name: 'vue-charts',
       },
       rollupOptions: {
-        external: ['vue', '@prefecthq/prefect-design'],
+        external: [
+          'vue',
+          '@prefecthq/prefect-design',
+          '@prefecthq/vue-compositions',
+        ],
         output: {
           exports: 'named',
           // Provide vue as a global variable to use in the UMD build
