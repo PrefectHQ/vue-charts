@@ -43,7 +43,7 @@
     "vite": "4.4.9",
     "vite-svg-loader": "^4.0.0",
     "vue-router": "^4.2.4",
-    "vue-tsc": "1.8.8"
+    "vue-tsc": "1.8.10"
   },
   "dependencies": {
     "d3": "7.8.5",
