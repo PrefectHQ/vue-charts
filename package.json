@@ -52,7 +52,7 @@
   },
   "peerDependencies": {
     "@prefecthq/prefect-design": "^2.0.1",
-    "@prefecthq/vue-compositions": "1.5.9",
+    "@prefecthq/vue-compositions": "^1.5.9",
     "vue": "^3.2.47"
   }
 }
