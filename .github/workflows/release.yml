@@ -20,7 +20,7 @@ jobs:
       - name: Verify Release
         id: verify-release
         run: |
-          if [ $(jq .version ./package.json | tr -d '"') != $(git tag --sort=committerdate | grep -E '[0-9]' | tail -1) ]; then
+          if [ "$(jq .version ./package.json | tr -d '"')" != "$(git tag --sort=committerdate | grep -E '[0-9]' | tail -1)" ]; then
             echo "Release version does not match latest tag. Proceeding with release."
             echo "release=true" >> "$GITHUB_OUTPUT"
           else
