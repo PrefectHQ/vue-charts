@@ -2,10 +2,10 @@ name: Release
 
 on:
   push:
-    paths: 
-      - package.json
+    # paths: 
+    #   - package.json
     branches:
-      - main
+      - chore/verify-release-job
 
 jobs:
   # This job is used to verify that the version in package.json does not match the latest tag.
@@ -13,7 +13,6 @@ jobs:
   verify-release:
     name: Verify Release
     runs-on: ubuntu-latest
-    environment: 'prod'
     outputs:
       release: ${{ steps.verify-release.outputs.release }}
     steps:
