@@ -8,15 +8,32 @@ on:
       - main
       
 jobs:
+  verify-release:
+    name: Verify Release
+    runs-on: ubuntu-latest
+    environment: 'prod'
+    outputs:
+      release: ${{ steps.verify-release.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: Verify Release
+        id: verify-release
+        run: |
+          if [ $(jq .version ./package.json | tr -d '"') != $(git tag --sort=committerdate | grep -E '[0-9]' | tail -1) ]; then
+            echo "Release version does not match latest tag. Proceeding with release."
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "Release version matches latest tag. Not going to proceed with release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          fi
   build-and-publish:
     name: Build & Publish Release
     runs-on: ubuntu-latest
     environment: 'prod'
-
+    needs: verify-release
+    if: needs.verify-release.outputs.release == 'true'
     steps:
-      - uses: actions/checkout@v4
-
       - uses: prefecthq/actions-release-ui-components@main
         with:
           NPM_TOKEN: ${{ secrets.PREFECT_UI_COMPONENTS_NPM_TOKEN }}
