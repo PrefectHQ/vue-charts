@@ -2,10 +2,10 @@ name: Release
 
 on:
   push:
-    paths: 
-      - package.json
+    # paths: 
+    #   - package.json
     branches:
-      - main
+      - chore/verify-release-job
 
 jobs:
   # This job is used to verify that the version in package.json does not match the latest tag.
@@ -21,16 +21,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Verify Release
-        id: verify-release
-        run: |
-          if [ "$(jq .version ./package.json | tr -d '"')" != "$(git tag --sort=committerdate | grep -E '[0-9]' | tail -1)" ]; then
-            echo "Release version does not match latest tag. Proceeding with release."
-            echo "release=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "Release version matches latest tag. Not going to proceed with release."
-            echo "release=false" >> "$GITHUB_OUTPUT"
-          fi
+      - uses: prefecthq/actions-verify-npm-package-bump@chore/create-job
   # This job is used to build and publish the release if the verify-release job passes.
   build-and-publish:
     name: Build & Publish Release
@@ -40,10 +31,9 @@ jobs:
     if: needs.verify-release.outputs.release == 'true'
     steps:
       - uses: actions/checkout@v4
-
-      - uses: prefecthq/actions-release-ui-components@main
-        with:
-          NPM_TOKEN: ${{ secrets.PREFECT_UI_COMPONENTS_NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NEBULA_UI_ACTIONS_RW_TOKEN: ${{ secrets.NEBULA_UI_ACTIONS_RW }}
-          PREFECT_OSS_ACTIONS_RW_TOKEN: ${{ secrets.PREFECT_ACTIONS_RW }}
+      # - uses: prefecthq/actions-release-ui-components@main
+      #   with:
+      #     NPM_TOKEN: ${{ secrets.PREFECT_UI_COMPONENTS_NPM_TOKEN }}
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     NEBULA_UI_ACTIONS_RW_TOKEN: ${{ secrets.NEBULA_UI_ACTIONS_RW }}
+      #     PREFECT_OSS_ACTIONS_RW_TOKEN: ${{ secrets.PREFECT_ACTIONS_RW }}
