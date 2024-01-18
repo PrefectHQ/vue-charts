@@ -2,10 +2,10 @@ name: Release
 
 on:
   push:
-    # paths: 
-    #   - package.json
+    paths: 
+      - package.json
     branches:
-      - chore/verify-release-job
+      - main
 
 jobs:
   # This job is used to verify that the version in package.json does not match the latest tag.
@@ -23,7 +23,7 @@ jobs:
 
       - name: Verify Release
         id: verify-release
-        uses: prefecthq/actions-verify-npm-package-bump@chore/create-job
+        uses: prefecthq/actions-verify-npm-package-bump@main
   # This job is used to build and publish the release if the verify-release job passes.
   build-and-publish:
     name: Build & Publish Release
@@ -33,9 +33,10 @@ jobs:
     if: needs.verify-release.outputs.release == 'true'
     steps:
       - uses: actions/checkout@v4
-      # - uses: prefecthq/actions-release-ui-components@main
-      #   with:
-      #     NPM_TOKEN: ${{ secrets.PREFECT_UI_COMPONENTS_NPM_TOKEN }}
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     NEBULA_UI_ACTIONS_RW_TOKEN: ${{ secrets.NEBULA_UI_ACTIONS_RW }}
-      #     PREFECT_OSS_ACTIONS_RW_TOKEN: ${{ secrets.PREFECT_ACTIONS_RW }}
+
+      - uses: prefecthq/actions-release-ui-components@main
+        with:
+          NPM_TOKEN: ${{ secrets.PREFECT_UI_COMPONENTS_NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NEBULA_UI_ACTIONS_RW_TOKEN: ${{ secrets.NEBULA_UI_ACTIONS_RW }}
+          PREFECT_OSS_ACTIONS_RW_TOKEN: ${{ secrets.PREFECT_ACTIONS_RW }}
