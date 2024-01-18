@@ -21,7 +21,9 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: prefecthq/actions-verify-npm-package-bump@chore/create-job
+      - name: Verify Release
+        id: verify-release
+        uses: prefecthq/actions-verify-npm-package-bump@chore/create-job
   # This job is used to build and publish the release if the verify-release job passes.
   build-and-publish:
     name: Build & Publish Release
