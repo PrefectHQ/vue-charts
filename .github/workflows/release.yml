@@ -5,7 +5,7 @@ on:
     paths: 
       - package.json
     branches:
-      - main
+      - chore/verify-release-job
       
 jobs:
   verify-release:
