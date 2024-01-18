@@ -2,8 +2,8 @@ name: Release
 
 on:
   push:
-    paths: 
-      - package.json
+    # paths: 
+    #   - package.json
     branches:
       - chore/verify-release-job
       
