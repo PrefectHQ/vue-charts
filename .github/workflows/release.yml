@@ -11,16 +11,16 @@ jobs:
   verify-release:
     name: Verify Release
     runs-on: ubuntu-latest
+    permissions:
+      # required to clone repository
+      contents: read
     environment: 'prod'
     outputs:
       release: ${{ steps.verify-release.outputs.release }}
     steps:
       - uses: actions/checkout@v4
-
-      - name: Configure Git
-        run: |
-          git config user.name "$GITHUB_ACTOR"
-          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+        with:
+          fetch-depth: 0
 
       - name: Verify Release
         id: verify-release
