@@ -33,6 +33,8 @@
   import { LineChartData, LineChartOptions, PointPosition } from '@/components/LineChart/types'
   import { getCurve } from '@/utilities/getCurveFunction'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
+  
+  import { roundUpToIncrement } from '@/components/Base'
 
   const props = defineProps<{
     data: LineChartData,
@@ -42,8 +44,8 @@
   const chart = ref<Element>()
   const { width: chartWidth, height: chartHeight } = useElementRect(chart)
   const data = computed(() => props.data.slice().sort(([x1], [x2]) => x1.getTime() - x2.getTime()))
-  const pathGradientId = computed(() => `histogram-path-gradient-${crypto.randomUUID()}`)
-  const fillGradientId = computed(() => `line-chart-fill-gradient-${crypto.randomUUID()}`)
+  const pathGradientId = computed(() => `histogram-path-gradient-${randomId()}`)
+  const fillGradientId = computed(() => `line-chart-fill-gradient-${randomId()}`)
   const pathGradientIdUrl = computed(() => `url(#${pathGradientId.value})`)
   const fillGradientIdUrl = computed(() => `url(#${fillGradientId.value})`)
 
