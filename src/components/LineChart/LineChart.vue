@@ -34,8 +34,8 @@
   import { getCurve } from '@/utilities/getCurveFunction'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
   
-  import { roundUpToIncrement } from '@/components/Base'
-
+  import { randomId } from '@/components/Base'
+  import { randomId } from '@/components/Base'
   const props = defineProps<{
     data: LineChartData,
     options?: LineChartOptions,
