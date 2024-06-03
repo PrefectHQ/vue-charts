@@ -85,6 +85,7 @@
   import { defaultHistogramChartOptions, HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint, HistogramSelection } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
   import { sortByDateProperty } from '@/utilities/sortByDate'
+  import { randomId } from '@/components/Base.ts'
 
   type PointPosition = [x: number, y: number]
   type SelectionStyles = { left: Pixels, right: Pixels }
@@ -118,7 +119,7 @@
   const showSelection = computed(() => props.selectionEnd && props.selectionStart)
   const movingSelection = ref(false)
   const loading = ref(true)
-  const pathGradientId = computed(() => `histogram-path-gradient-${crypto.randomUUID()}`)
+  const pathGradientId = computed(() => `histogram-path-gradient-${randomId()}`)
   const pathGradientIdUrl = computed(() => `url(#${pathGradientId.value})`)
 
   const unwatchShowSelection = watch(showSelection, show => {
