@@ -85,7 +85,7 @@
   import { defaultHistogramChartOptions, HistogramBar, HistogramBarStyles, HistogramChartOptions, HistogramData, HistogramDataPoint, HistogramSelection } from '@/components/HistogramChart'
   import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
   import { sortByDateProperty } from '@/utilities/sortByDate'
-  import { randomId } from '@/components/Base.ts'
+  import { randomId } from '@/components/Base'
 
   type PointPosition = [x: number, y: number]
   type SelectionStyles = { left: Pixels, right: Pixels }
