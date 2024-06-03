@@ -32,10 +32,9 @@
   import { computed, ref } from 'vue'
   import { LineChartData, LineChartOptions, PointPosition } from '@/components/LineChart/types'
   import { getCurve } from '@/utilities/getCurveFunction'
-  import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'
-  
+  import { roundUpToIncrement } from '@/utilities/roundUpToIncrement'  
   import { randomId } from '@/components/Base'
-  import { randomId } from '@/components/Base'
+
   const props = defineProps<{
     data: LineChartData,
     options?: LineChartOptions,
