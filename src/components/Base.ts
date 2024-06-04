@@ -35,7 +35,7 @@ export interface IBaseOptions {
   },
 }
 
-function randomId(): string {
+export function randomId(): string {
   // typescript says crypto will be defined but it might not be
   // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (!crypto) {
