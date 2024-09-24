@@ -2,9 +2,7 @@
   <div ref="chart" class="chart-cursor" v-bind="{ onPointerenter, onPointermove, onPointerleave }">
     <slot />
     <template v-if="showCursor">
-      <slot name="cursor" v-bind="{ cursor }">
-        <div class="chart-cursor__cursor" :style="cursorStyles" />
-      </slot>
+      <div class="chart-cursor__cursor" :style="cursorStyles" />
     </template>
     <template v-if="cursor && hover">
       <div ref="label" class="chart-cursor__label-wrapper" :style="labelStyle">
@@ -165,7 +163,6 @@
 }
 
 .chart-cursor__label { @apply
-  absolute
   flex
   flex-col
   items-center
