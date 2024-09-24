@@ -2,13 +2,17 @@
   <div ref="chart" class="chart-cursor" v-bind="{ onPointerenter, onPointermove, onPointerleave }">
     <slot />
     <template v-if="showCursor">
-      <div class="chart-cursor__cursor" :style="cursorStyles" />
+      <slot name="cursor" v-bind="{ cursor }">
+        <div class="chart-cursor__cursor" :style="cursorStyles" />
+      </slot>
     </template>
     <template v-if="cursor && hover">
-      <div ref="label" class="chart-cursor__label" :style="labelStyle">
+      <div ref="label" class="chart-cursor__label-wrapper" :style="labelStyle">
         <slot name="label" :value="cursor">
-          <span class="chart-cursor__date">{{ formatDateLabel(cursor) }}</span>
-          <span class="chart-cursor__time">{{ formatTimeLabel(cursor) }}</span>
+          <div class="chart-cursor__label">
+            <span class="chart-cursor__date">{{ formatDateLabel(cursor) }}</span>
+            <span class="chart-cursor__time">{{ formatTimeLabel(cursor) }}</span>
+          </div>
         </slot>
       </div>
     </template>
@@ -154,6 +158,12 @@
   background-color: var(--p-color-text-default);
 }
 
+.chart-cursor__label-wrapper { @apply
+  absolute
+  z-10;
+  top: calc(100% + theme('spacing.2'));
+}
+
 .chart-cursor__label { @apply
   absolute
   flex
@@ -165,8 +175,6 @@
   shadow-lg
   p-2
   rounded-default
-  z-10;
-  top: calc(100% + theme('spacing.2'));
 }
 
 .chart-cursor__date { @apply
