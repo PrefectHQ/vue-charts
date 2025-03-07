@@ -1,13 +1,6 @@
-/* eslint-disable @typescript-eslint/explicit-function-return-type */
-/* eslint-disable @typescript-eslint/no-require-imports */
-/* eslint-disable @typescript-eslint/no-var-requires */
-const prefectDesignPlugin = require('@prefecthq/prefect-design/dist/tailwindPlugin.js')
+import prefectDesignConfig from '@prefecthq/prefect-design/src/tailwind.config'
 
 module.exports = {
-  content: [
-    './src/**/*.vue',
-    './demo/index.html',
-    './demo/**/*.vue',
-  ],
-  plugins: [prefectDesignPlugin],
+  content: ['./src/**/*.{vue,js,ts}'],
+  presets: [prefectDesignConfig],
 }
