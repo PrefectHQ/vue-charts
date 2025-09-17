@@ -19,16 +19,17 @@
     "release": "./vue-charts-release",
     "changelog": "auto-changelog --package --commit-limit 0"
   },
-  "main": "./dist/vue-charts.umd.js",
-  "module": "./dist/vue-charts.mjs",
-  "exports": {
-    ".": {
-      "import": "./dist/vue-charts.mjs",
-      "require": "./dist/vue-charts.umd.js"
-    },
-    "./dist/style.css": "./dist/style.css"
-  },
+  "type": "module",
+  "main": "./dist/vue-charts.umd.cjs",
+  "module": "./dist/vue-charts.js",
   "types": "./dist/types/src/index.d.ts",
+  "exports": {
+    "./dist/style.css": "./dist/style.css",
+    ".": {
+      "types": "./dist/types/src/index.d.ts",
+      "import": "./dist/vue-charts.js"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -36,18 +37,18 @@
     "@prefecthq/eslint-config": "1.0.32",
     "@types/d3": "7.4.3",
     "@types/lodash.debounce": "4.0.9",
-    "@types/node": "20.12.2",
-    "@vitejs/plugin-vue": "4.5.1",
+    "@types/node": "^24.5.1",
+    "@vitejs/plugin-vue": "^6.0.1",
     "auto-changelog": "2.4.0",
     "autoprefixer": "^10.4.20",
     "eslint": "8.57.0",
     "tailwindcss": "3.4.11",
-    "tsc-alias": "1.8.8",
-    "typescript": "5.3.3",
-    "vite": "5.4.7",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.9.2",
+    "vite": "^7.1.5",
     "vite-svg-loader": "^5.1.0",
     "vue-router": "^4.3.0",
-    "vue-tsc": "1.8.27"
+    "vue-tsc": "^3.0.7"
   },
   "dependencies": {
     "d3": "7.9.0",
@@ -55,8 +56,8 @@
     "lodash.debounce": "4.0.8"
   },
   "peerDependencies": {
-    "@prefecthq/prefect-design": "^2.14.18",
-    "@prefecthq/vue-compositions": "^1.11.0",
-    "vue": "^3.2.47"
+    "@prefecthq/prefect-design": "^2.16.2",
+    "@prefecthq/vue-compositions": "^1.12.1",
+    "vue": "^3.5.21"
   }
 }

@@ -1,16 +1,16 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
     "strict": true,
     "declaration": true,
     "esModuleInterop": true,
     "jsx": "preserve",
-    "moduleResolution": "node",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "emitDeclarationOnly": true,
     "sourceMap": true,
     "resolveJsonModule": true,
-    "outDir": "./dist/types/",
+    "outDir": "dist",
     "baseUrl": ".",
     "skipLibCheck": true,
     "types": ["vite-svg-loader", "vite/client"],
@@ -39,7 +39,9 @@
     "./*.d.ts",
     "./**/postcss.config.js",
     "./**/tailwind.config.js",
-    "src/tailwindPlugin.js"
+    "src/tailwindPlugin.js",
+    "vite.config.mts", 
+    "postcss.config.cjs"
   ],
   "exclude": [
     "node_modules",

@@ -1,4 +1,4 @@
-import '@prefecthq/prefect-design/dist/prefect-design.css'
+import '@prefecthq/prefect-design/prefect-design.css'
 import '@/styles/style.css'
 
 import { plugin as PrefectDesign } from '@prefecthq/prefect-design'
