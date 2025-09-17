@@ -37,7 +37,6 @@
   ],
   "files.exclude": {
       "node_modules": true,
-      "dist": true
   },
   "css.customData": [
       "./.vscode/css-data.json"
