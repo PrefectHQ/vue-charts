@@ -11,7 +11,7 @@
     "serve": "vite --host --mode=demo",
     "dev": "vue-tsc -w & tsc-alias -w & vite build -w",
     "build:demo": "vite build --mode=demo",
-    "build": "vue-tsc && tsc-alias && vite build",
+    "build": "vite build && vue-tsc && tsc-alias",
     "lint": "eslint src && eslint demo",
     "lint:fix": "eslint src --fix && eslint demo --fix",
     "validate:types": "vue-tsc",
@@ -20,13 +20,13 @@
     "changelog": "auto-changelog --package --commit-limit 0"
   },
   "type": "module",
-  "main": "./dist/vue-charts.umd.cjs",
-  "module": "./dist/vue-charts.js",
-  "types": "./dist/types/src/index.d.ts",
+  "main": "dist/vue-charts.js",
+  "module": "dist/vue-charts.js",
+  "types": "dist/src/index.d.ts",
   "exports": {
-    "./dist/style.css": "./dist/style.css",
+    "./vue-charts.css": "./dist/vue-charts.css",
     ".": {
-      "types": "./dist/types/src/index.d.ts",
+      "types": "./dist/src/index.d.ts",
       "import": "./dist/vue-charts.js"
     }
   },

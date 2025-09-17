@@ -35,10 +35,11 @@ export default defineConfig(({ mode }) => {
   return {
     ...baseConfig,
     build: {
-      emptyOutDir: false,
+      outDir: 'dist',
+      emptyOutDir: true,
       sourcemap: true,
       lib: {
-        entry: resolve(__dirname, 'src/index.ts'),
+        entry: 'src/index.ts',
         name: 'vue-charts',
       },
       rollupOptions: {
